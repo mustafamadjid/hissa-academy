@@ -11,13 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->uuid('public_uuid')->unique();
+            $table->foreignId('role_id')->constrained('roles');
+            $table->string('google_id')->unique()->nullable();
+            $table->string('username')->unique();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->string('phone')->nullable();
+            $table->string('full_name');
+            $table->date('birth_date')->nullable();
+            $table->string('avatar_url')->nullable();
+            $table->timestamp('last_login_at')->nullable();
+            $table->string('password')->nullable();
             $table->timestamps();
         });
 
@@ -42,8 +54,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('roles');
     }
 };
