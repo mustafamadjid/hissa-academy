@@ -23,6 +23,7 @@ use Illuminate\Support\Str;
     'last_login_at',
     'role_id',
     'password',
+    'email_verified_at',
 ])]
 #[Hidden([
     'password',
