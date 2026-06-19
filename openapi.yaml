@@ -1,0 +1,1908 @@
+openapi: 3.0.3
+info:
+  title: HISSA Academy API
+  version: "1.0"
+  description: |
+    OpenAPI documentation generated from api.md.
+
+    Semua endpoint privat menggunakan public UUID. Numeric primary key tidak diekspos ke client.
+servers:
+  - url: /
+    description: Application root
+tags:
+  - name: Authentication
+  - name: Student Courses
+  - name: Student Lessons
+  - name: Student Quiz
+  - name: Student Certificates
+  - name: Public Verification
+  - name: Admin Courses
+  - name: Admin Lessons
+  - name: Admin Quiz
+  - name: Admin Certificates
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login berhasil.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          $ref: "#/components/responses/InvalidCredentials"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout
+      responses:
+        "204":
+          description: Logout berhasil tanpa response body.
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+
+  /api/v1/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      responses:
+        "200":
+          description: Profil user berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+
+  /auth/google/redirect:
+    get:
+      tags: [Authentication]
+      summary: Google OAuth redirect
+      security: []
+      responses:
+        "302":
+          description: Redirect ke halaman autentikasi Google.
+
+  /auth/google/callback:
+    get:
+      tags: [Authentication]
+      summary: Google OAuth callback
+      security: []
+      responses:
+        "302":
+          description: Redirect ke frontend setelah autentikasi berhasil atau gagal.
+
+  /api/v1/courses:
+    get:
+      tags: [Student Courses]
+      summary: Get published courses
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Pencarian nama course.
+      responses:
+        "200":
+          description: Daftar course berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/CourseSummary"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/courses/{course_uuid}:
+    get:
+      tags: [Student Courses]
+      summary: Get course detail
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      responses:
+        "200":
+          description: Detail course berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CourseDetail"
+        "404":
+          $ref: "#/components/responses/CourseNotFound"
+
+  /api/v1/courses/{course_uuid}/progress:
+    get:
+      tags: [Student Courses]
+      summary: Get course progress
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      responses:
+        "200":
+          description: Progress course berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CourseProgressDetail"
+
+  /api/v1/lessons/{lesson_uuid}:
+    get:
+      tags: [Student Lessons]
+      summary: Get lesson detail
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      responses:
+        "200":
+          description: Detail lesson berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LessonDetail"
+        "403":
+          $ref: "#/components/responses/LessonLocked"
+        "404":
+          $ref: "#/components/responses/LessonNotFound"
+
+  /api/v1/lessons/{lesson_uuid}/progress:
+    get:
+      tags: [Student Lessons]
+      summary: Get lesson progress
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      responses:
+        "200":
+          description: Progress lesson berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LessonProgress"
+    post:
+      tags: [Student Lessons]
+      summary: Submit progress heartbeat
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgressHeartbeatRequest"
+      responses:
+        "200":
+          description: Progress berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LessonProgressUpdate"
+        "422":
+          $ref: "#/components/responses/InvalidProgressHeartbeat"
+        "429":
+          $ref: "#/components/responses/ProgressRateLimited"
+
+  /api/v1/courses/{course_uuid}/quiz:
+    get:
+      tags: [Student Quiz]
+      summary: Get course quiz
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      responses:
+        "200":
+          description: Quiz berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/StudentQuiz"
+        "403":
+          $ref: "#/components/responses/QuizLocked"
+
+  /api/v1/quizzes/{quiz_uuid}/attempts:
+    post:
+      tags: [Student Quiz]
+      summary: Create quiz attempt
+      parameters:
+        - $ref: "#/components/parameters/QuizUuid"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        "201":
+          description: Quiz attempt berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/QuizAttempt"
+        "409":
+          $ref: "#/components/responses/ActiveAttemptExists"
+
+  /api/v1/quiz-attempts/{attempt_uuid}:
+    get:
+      tags: [Student Quiz]
+      summary: Get quiz attempt
+      parameters:
+        - $ref: "#/components/parameters/AttemptUuid"
+      responses:
+        "200":
+          description: Quiz attempt berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/QuizAttemptWithAnswers"
+
+  /api/v1/quiz-attempts/{attempt_uuid}/submit:
+    post:
+      tags: [Student Quiz]
+      summary: Submit quiz attempt
+      parameters:
+        - $ref: "#/components/parameters/AttemptUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitQuizAttemptRequest"
+      responses:
+        "200":
+          description: Quiz berhasil disubmit.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/QuizSubmitResult"
+        "409":
+          $ref: "#/components/responses/AttemptAlreadySubmitted"
+
+  /api/v1/certificates:
+    get:
+      tags: [Student Certificates]
+      summary: Get user certificates
+      responses:
+        "200":
+          description: Daftar sertifikat berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/CertificateSummary"
+
+  /api/v1/certificates/{certificate_uuid}:
+    get:
+      tags: [Student Certificates]
+      summary: Get certificate detail
+      parameters:
+        - $ref: "#/components/parameters/CertificateUuid"
+      responses:
+        "200":
+          description: Detail sertifikat berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CertificateDetail"
+
+  /api/v1/certificates/{certificate_uuid}/download:
+    get:
+      tags: [Student Certificates]
+      summary: Download certificate PDF
+      parameters:
+        - $ref: "#/components/parameters/CertificateUuid"
+      responses:
+        "200":
+          description: Binary PDF certificate.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: attachment; filename="HISSA-2026-X7KD9Q2M.pdf"
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          $ref: "#/components/responses/CertificateFileNotFound"
+
+  /verify/{certificate_number}:
+    get:
+      tags: [Public Verification]
+      summary: Verification page
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CertificateNumber"
+      responses:
+        "200":
+          description: Halaman web publik hasil verifikasi sertifikat.
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /api/v1/public/certificates/{certificate_number}:
+    get:
+      tags: [Public Verification]
+      summary: Verify certificate API
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CertificateNumber"
+      responses:
+        "200":
+          description: Sertifikat valid atau revoked.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PublicCertificateVerification"
+        "404":
+          $ref: "#/components/responses/CertificateNotFound"
+
+  /api/v1/admin/courses:
+    get:
+      tags: [Admin Courses]
+      summary: Get admin courses
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Daftar course admin berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/AdminCourse"
+    post:
+      tags: [Admin Courses]
+      summary: Create course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCourseRequest"
+      responses:
+        "201":
+          description: Course berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminCourse"
+
+  /api/v1/admin/courses/{course_uuid}:
+    get:
+      tags: [Admin Courses]
+      summary: Get admin course detail
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      responses:
+        "200":
+          description: Detail course admin berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminCourse"
+    patch:
+      tags: [Admin Courses]
+      summary: Update course
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCourseRequest"
+      responses:
+        "200":
+          description: Course berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminCourse"
+
+  /api/v1/admin/courses/{course_uuid}/lessons:
+    post:
+      tags: [Admin Lessons]
+      summary: Create lesson
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLessonRequest"
+      responses:
+        "201":
+          description: Lesson berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminLesson"
+        "409":
+          $ref: "#/components/responses/LessonPositionConflict"
+
+  /api/v1/admin/lessons/{lesson_uuid}:
+    patch:
+      tags: [Admin Lessons]
+      summary: Update lesson
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLessonRequest"
+      responses:
+        "200":
+          description: Lesson berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminLesson"
+    delete:
+      tags: [Admin Lessons]
+      summary: Delete lesson
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      responses:
+        "204":
+          description: Lesson berhasil dihapus tanpa response body.
+        "409":
+          $ref: "#/components/responses/LessonHasDependencies"
+
+  /api/v1/admin/lessons/{lesson_uuid}/video:
+    put:
+      tags: [Admin Lessons]
+      summary: Create or update lesson video
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertLessonVideoRequest"
+      responses:
+        "200":
+          description: Video lesson berhasil disimpan.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LessonVideo"
+        "422":
+          $ref: "#/components/responses/InvalidYoutubeVideo"
+
+  /api/v1/admin/courses/{course_uuid}/quiz:
+    put:
+      tags: [Admin Quiz]
+      summary: Create or update course quiz
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertQuizRequest"
+      responses:
+        "200":
+          description: Quiz berhasil disimpan.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminQuiz"
+
+  /api/v1/admin/quizzes/{quiz_uuid}/questions:
+    post:
+      tags: [Admin Quiz]
+      summary: Create quiz question
+      parameters:
+        - $ref: "#/components/parameters/QuizUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQuizQuestionRequest"
+      responses:
+        "201":
+          description: Pertanyaan quiz berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminQuizQuestion"
+
+  /api/v1/admin/quiz-questions/{question_uuid}:
+    patch:
+      tags: [Admin Quiz]
+      summary: Update quiz question
+      parameters:
+        - $ref: "#/components/parameters/QuestionUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateQuizQuestionRequest"
+      responses:
+        "200":
+          description: Pertanyaan quiz berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminQuizQuestion"
+    delete:
+      tags: [Admin Quiz]
+      summary: Delete quiz question
+      parameters:
+        - $ref: "#/components/parameters/QuestionUuid"
+      responses:
+        "204":
+          description: Pertanyaan quiz berhasil dihapus tanpa response body.
+
+  /api/v1/admin/certificates:
+    get:
+      tags: [Admin Certificates]
+      summary: Get certificates
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [valid, revoked]
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Nama user atau certificate number.
+        - name: course_uuid
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Daftar sertifikat berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/AdminCertificateSummary"
+
+  /api/v1/admin/certificates/{certificate_uuid}/revoke:
+    patch:
+      tags: [Admin Certificates]
+      summary: Revoke certificate
+      parameters:
+        - $ref: "#/components/parameters/CertificateUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RevokeCertificateRequest"
+      responses:
+        "200":
+          description: Sertifikat berhasil dicabut.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/RevokedCertificate"
+        "409":
+          $ref: "#/components/responses/CertificateAlreadyRevoked"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      description: Halaman data.
+    PerPage:
+      name: per_page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      description: Jumlah data per halaman.
+    CourseUuid:
+      name: course_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    LessonUuid:
+      name: lesson_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    QuizUuid:
+      name: quiz_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AttemptUuid:
+      name: attempt_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CertificateUuid:
+      name: certificate_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CertificateNumber:
+      name: certificate_number
+      in: path
+      required: true
+      schema:
+        type: string
+      example: HISSA-2026-X7KD9Q2M
+    QuestionUuid:
+      name: question_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    Unauthenticated:
+      description: User belum terautentikasi.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: User belum login.
+            error:
+              code: UNAUTHENTICATED
+              details: {}
+    Forbidden:
+      description: User tidak memiliki izin.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: User tidak memiliki izin.
+            error:
+              code: FORBIDDEN
+              details: {}
+    InvalidCredentials:
+      description: Email atau password tidak valid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Email atau password tidak valid.
+            error:
+              code: INVALID_CREDENTIALS
+              details: {}
+    ValidationError:
+      description: Data yang diberikan tidak valid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Data yang diberikan tidak valid.
+            error:
+              code: VALIDATION_ERROR
+              details:
+                email:
+                  - Email wajib diisi.
+    CourseNotFound:
+      description: Course tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Course tidak ditemukan.
+            error:
+              code: COURSE_NOT_FOUND
+              details: {}
+    LessonNotFound:
+      description: Lesson tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Lesson tidak ditemukan.
+            error:
+              code: LESSON_NOT_FOUND
+              details: {}
+    LessonLocked:
+      description: Lesson masih terkunci.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Lesson masih terkunci.
+            error:
+              code: LESSON_LOCKED
+              details:
+                required_previous_lesson_uuid: debc0bbb-c826-4f1d-aed2-6a09f083cb25
+    QuizLocked:
+      description: Quiz belum dapat diakses.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Quiz belum dapat diakses.
+            error:
+              code: QUIZ_LOCKED
+              details:
+                reason: REQUIRED_LESSONS_NOT_COMPLETED
+    ActiveAttemptExists:
+      description: Masih terdapat quiz attempt yang aktif.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Masih terdapat quiz attempt yang aktif.
+            error:
+              code: ACTIVE_ATTEMPT_EXISTS
+              details:
+                attempt_uuid: 09e20716-852f-4dd0-860a-b59900aa3849
+    AttemptAlreadySubmitted:
+      description: Quiz attempt sudah pernah disubmit.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Quiz attempt sudah pernah disubmit.
+            error:
+              code: ATTEMPT_ALREADY_SUBMITTED
+              details: {}
+    CertificateNotFound:
+      description: Sertifikat tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Sertifikat tidak ditemukan.
+            error:
+              code: CERTIFICATE_NOT_FOUND
+              details:
+                verification_status: not_found
+    CertificateFileNotFound:
+      description: File sertifikat tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: File sertifikat tidak ditemukan.
+            error:
+              code: CERTIFICATE_FILE_NOT_FOUND
+              details: {}
+    CertificateAlreadyRevoked:
+      description: Sertifikat sudah dicabut sebelumnya.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Sertifikat sudah dicabut sebelumnya.
+            error:
+              code: CERTIFICATE_ALREADY_REVOKED
+              details: {}
+    LessonPositionConflict:
+      description: Position lesson sudah digunakan pada course ini.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Position lesson sudah digunakan pada course ini.
+            error:
+              code: LESSON_POSITION_CONFLICT
+              details:
+                position: 1
+    LessonHasDependencies:
+      description: Lesson tidak dapat dihapus karena sudah memiliki data progress.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Lesson tidak dapat dihapus karena sudah memiliki data progress.
+            error:
+              code: LESSON_HAS_DEPENDENCIES
+              details:
+                dependencies:
+                  - user_progress
+    InvalidProgressHeartbeat:
+      description: Data heartbeat tidak valid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Data heartbeat tidak valid.
+            error:
+              code: INVALID_PROGRESS_HEARTBEAT
+              details:
+                current_position_seconds:
+                  - Posisi video tidak boleh melebihi durasi video.
+    ProgressRateLimited:
+      description: Heartbeat dikirim terlalu sering.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Heartbeat dikirim terlalu sering.
+            error:
+              code: PROGRESS_RATE_LIMITED
+              details:
+                retry_after_seconds: 3
+    InvalidYoutubeVideo:
+      description: Video YouTube tidak valid atau tidak dapat diakses.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            message: Video YouTube tidak valid atau tidak dapat diakses.
+            error:
+              code: INVALID_YOUTUBE_VIDEO
+              details:
+                youtube_video_id:
+                  - Video tidak ditemukan, bersifat private, atau tidak dapat di-embed.
+
+  schemas:
+    SuccessResponse:
+      type: object
+      required: [success, message, data]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request berhasil diproses.
+        data: {}
+    PaginatedResponse:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          required: [meta, links]
+          properties:
+            data:
+              type: array
+              items: {}
+            meta:
+              $ref: "#/components/schemas/PaginationMeta"
+            links:
+              $ref: "#/components/schemas/PaginationLinks"
+    ErrorResponse:
+      type: object
+      required: [success, message, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        error:
+          type: object
+          required: [code, details]
+          properties:
+            code:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+    PaginationMeta:
+      type: object
+      required: [current_page, per_page, total, last_page]
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 15
+        total:
+          type: integer
+          example: 100
+        last_page:
+          type: integer
+          example: 7
+    PaginationLinks:
+      type: object
+      required: [first, last, prev, next]
+      properties:
+        first:
+          type: string
+          nullable: true
+        last:
+          type: string
+          nullable: true
+        prev:
+          type: string
+          nullable: true
+        next:
+          type: string
+          nullable: true
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@example.com
+        password:
+          type: string
+          format: password
+          example: secret123
+    LoginResponse:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [user]
+              properties:
+                user:
+                  $ref: "#/components/schemas/User"
+                token:
+                  type: string
+                  nullable: true
+                  description: Dapat dihilangkan untuk Sanctum SPA berbasis cookie.
+                  example: 1|example-sanctum-token
+    User:
+      type: object
+      required: [uuid, username, email, phone, full_name, birth_date, avatar_url, role]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        username:
+          type: string
+          example: student01
+        email:
+          type: string
+          format: email
+          example: student@example.com
+        phone:
+          type: string
+          nullable: true
+          example: "081234567890"
+        full_name:
+          type: string
+          example: Student HISSA
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          example: "2002-04-10"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+              example: student
+        last_login_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    CourseStatus:
+      type: string
+      enum: [draft, published, archived]
+    ProgressStatus:
+      type: string
+      enum: [not_started, in_progress, completed]
+    CourseProgress:
+      type: object
+      required: [completed_lessons, required_lessons, percentage, status]
+      properties:
+        completed_lessons:
+          type: integer
+        required_lessons:
+          type: integer
+        percentage:
+          type: number
+          format: float
+        status:
+          $ref: "#/components/schemas/ProgressStatus"
+    CourseSummary:
+      type: object
+      required: [uuid, name, description, minimum_score, status, progress]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        minimum_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        status:
+          $ref: "#/components/schemas/CourseStatus"
+        progress:
+          $ref: "#/components/schemas/CourseProgress"
+    CourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/CourseSummary"
+        - type: object
+          required: [lessons, quiz]
+          properties:
+            lessons:
+              type: array
+              items:
+                $ref: "#/components/schemas/CourseLesson"
+            quiz:
+              type: object
+              required: [available]
+              properties:
+                available:
+                  type: boolean
+                reason:
+                  type: string
+                  nullable: true
+                  example: REQUIRED_LESSONS_NOT_COMPLETED
+    CourseLesson:
+      type: object
+      required: [uuid, title, position, is_required, state, is_locked]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        title:
+          type: string
+        position:
+          type: integer
+        is_required:
+          type: boolean
+        state:
+          type: string
+          enum: [locked, available, in_progress, completed]
+        is_locked:
+          type: boolean
+    CourseProgressDetail:
+      allOf:
+        - $ref: "#/components/schemas/CourseProgress"
+        - type: object
+          required: [course_uuid, quiz_unlocked, lessons]
+          properties:
+            course_uuid:
+              type: string
+              format: uuid
+            quiz_unlocked:
+              type: boolean
+            lessons:
+              type: array
+              items:
+                $ref: "#/components/schemas/CourseLessonProgress"
+    CourseLessonProgress:
+      type: object
+      required: [lesson_uuid, position, status, percentage]
+      properties:
+        lesson_uuid:
+          type: string
+          format: uuid
+        position:
+          type: integer
+        status:
+          $ref: "#/components/schemas/ProgressStatus"
+        percentage:
+          type: number
+          format: float
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    LessonDetail:
+      type: object
+      required: [uuid, course, title, position, is_required, state, video, progress, navigation]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        course:
+          $ref: "#/components/schemas/EmbeddedCourse"
+        title:
+          type: string
+        position:
+          type: integer
+        is_required:
+          type: boolean
+        state:
+          type: string
+          enum: [locked, available, in_progress, completed]
+        video:
+          type: object
+          required: [youtube_video_id, duration_seconds]
+          properties:
+            youtube_video_id:
+              type: string
+              example: dQw4w9WgXcQ
+            duration_seconds:
+              type: integer
+              example: 600
+        progress:
+          $ref: "#/components/schemas/LessonProgress"
+        navigation:
+          type: object
+          required: [previous_lesson_uuid, next_lesson_uuid, can_continue]
+          properties:
+            previous_lesson_uuid:
+              type: string
+              format: uuid
+              nullable: true
+            next_lesson_uuid:
+              type: string
+              format: uuid
+              nullable: true
+            can_continue:
+              type: boolean
+    LessonProgress:
+      type: object
+      required: [lesson_uuid, last_position_seconds, total_watched_seconds, duration_seconds, percentage, status, can_continue]
+      properties:
+        lesson_uuid:
+          type: string
+          format: uuid
+        last_position_seconds:
+          type: integer
+        total_watched_seconds:
+          type: integer
+        duration_seconds:
+          type: integer
+        percentage:
+          type: number
+          format: float
+        status:
+          $ref: "#/components/schemas/ProgressStatus"
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        can_continue:
+          type: boolean
+    ProgressHeartbeatRequest:
+      type: object
+      required: [current_position_seconds, player_state, client_event_at]
+      additionalProperties: false
+      properties:
+        current_position_seconds:
+          type: integer
+          minimum: 0
+          example: 215
+        player_state:
+          type: string
+          enum: [playing, paused, ended, buffering]
+        client_event_at:
+          type: string
+          format: date-time
+    LessonProgressUpdate:
+      allOf:
+        - $ref: "#/components/schemas/LessonProgress"
+        - type: object
+          properties:
+            next_lesson:
+              type: object
+              nullable: true
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                is_unlocked:
+                  type: boolean
+
+    StudentQuiz:
+      type: object
+      required: [uuid, name, is_active, minimum_score, total_questions, attempt_policy]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        is_active:
+          type: boolean
+        minimum_score:
+          type: integer
+        total_questions:
+          type: integer
+        attempt_policy:
+          type: object
+          required: [maximum_attempts, attempts_used, attempts_remaining]
+          properties:
+            maximum_attempts:
+              type: integer
+              nullable: true
+            attempts_used:
+              type: integer
+            attempts_remaining:
+              type: integer
+              nullable: true
+    QuizAttempt:
+      type: object
+      required: [uuid, quiz, status, started_at, submitted_at, questions]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        quiz:
+          $ref: "#/components/schemas/EmbeddedQuiz"
+        status:
+          type: string
+          enum: [in_progress, submitted, passed, failed]
+        started_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizQuestionForStudent"
+    QuizAttemptWithAnswers:
+      allOf:
+        - $ref: "#/components/schemas/QuizAttempt"
+        - type: object
+          properties:
+            score:
+              type: number
+              nullable: true
+    QuizQuestionForStudent:
+      type: object
+      required: [uuid, question_text, points, position, options]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        question_text:
+          type: string
+        points:
+          type: integer
+        position:
+          type: integer
+        selected_option_uuid:
+          type: string
+          format: uuid
+          nullable: true
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizOptionForStudent"
+    QuizOptionForStudent:
+      type: object
+      required: [uuid, option_text, position]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        option_text:
+          type: string
+        position:
+          type: integer
+    SubmitQuizAttemptRequest:
+      type: object
+      required: [answers]
+      additionalProperties: false
+      properties:
+        answers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [question_uuid, selected_option_uuid]
+            properties:
+              question_uuid:
+                type: string
+                format: uuid
+              selected_option_uuid:
+                type: string
+                format: uuid
+    QuizSubmitResult:
+      type: object
+      required: [attempt_uuid, score, minimum_score, status, started_at, submitted_at, result, certificate]
+      properties:
+        attempt_uuid:
+          type: string
+          format: uuid
+        score:
+          type: number
+        minimum_score:
+          type: integer
+        status:
+          type: string
+          enum: [passed, failed]
+        started_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+        result:
+          type: object
+          required: [correct_answers, incorrect_answers, total_questions]
+          properties:
+            correct_answers:
+              type: integer
+            incorrect_answers:
+              type: integer
+            total_questions:
+              type: integer
+        certificate:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/CertificateIssued"
+
+    CertificateStatus:
+      type: string
+      enum: [valid, revoked]
+    CertificateSummary:
+      type: object
+      required: [uuid, certificate_number, course, issued_at, status]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        certificate_number:
+          type: string
+        course:
+          $ref: "#/components/schemas/EmbeddedCourse"
+        issued_at:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/CertificateStatus"
+    CertificateDetail:
+      allOf:
+        - $ref: "#/components/schemas/CertificateSummary"
+        - type: object
+          required: [participant_name, verification_url, download_url]
+          properties:
+            participant_name:
+              type: string
+            verification_url:
+              type: string
+              format: uri
+            download_url:
+              type: string
+    CertificateIssued:
+      type: object
+      required: [uuid, certificate_number, status, issued_at]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        certificate_number:
+          type: string
+        status:
+          $ref: "#/components/schemas/CertificateStatus"
+        issued_at:
+          type: string
+          format: date-time
+    PublicCertificateVerification:
+      type: object
+      required: [verification_status, certificate_number, participant_name, course_name, issued_at]
+      properties:
+        verification_status:
+          type: string
+          enum: [valid, revoked]
+        certificate_number:
+          type: string
+        participant_name:
+          type: string
+        course_name:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+
+    AdminCourse:
+      type: object
+      required: [uuid, course_name, description, minimum_score, status]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        course_name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        minimum_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        status:
+          $ref: "#/components/schemas/CourseStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CreateCourseRequest:
+      type: object
+      required: [course_name, description, minimum_score, status]
+      additionalProperties: false
+      properties:
+        course_name:
+          type: string
+        description:
+          type: string
+        minimum_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        status:
+          $ref: "#/components/schemas/CourseStatus"
+    UpdateCourseRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        course_name:
+          type: string
+        description:
+          type: string
+        minimum_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        status:
+          $ref: "#/components/schemas/CourseStatus"
+    CreateLessonRequest:
+      type: object
+      required: [title, position, is_required]
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+        position:
+          type: integer
+          minimum: 1
+        is_required:
+          type: boolean
+    UpdateLessonRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+        position:
+          type: integer
+          minimum: 1
+        is_required:
+          type: boolean
+    AdminLesson:
+      type: object
+      required: [uuid, title, position, is_required]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        course_uuid:
+          type: string
+          format: uuid
+        title:
+          type: string
+        position:
+          type: integer
+        is_required:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    UpsertLessonVideoRequest:
+      type: object
+      required: [youtube_video_id]
+      additionalProperties: false
+      properties:
+        youtube_video_id:
+          type: string
+          example: dQw4w9WgXcQ
+    LessonVideo:
+      type: object
+      required: [uuid, lesson_uuid, youtube_video_id, duration_seconds, updated_at]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        lesson_uuid:
+          type: string
+          format: uuid
+        youtube_video_id:
+          type: string
+        duration_seconds:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+    UpsertQuizRequest:
+      type: object
+      required: [quiz_name, is_active]
+      additionalProperties: false
+      properties:
+        quiz_name:
+          type: string
+        is_active:
+          type: boolean
+    AdminQuiz:
+      type: object
+      required: [uuid, course_uuid, quiz_name, is_active, updated_at]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        course_uuid:
+          type: string
+          format: uuid
+        quiz_name:
+          type: string
+        is_active:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+    CreateQuizQuestionRequest:
+      type: object
+      required: [question_text, points, position, options]
+      additionalProperties: false
+      properties:
+        question_text:
+          type: string
+        points:
+          type: integer
+          minimum: 1
+        position:
+          type: integer
+          minimum: 1
+        options:
+          type: array
+          minItems: 2
+          items:
+            $ref: "#/components/schemas/AdminQuizOptionRequest"
+    UpdateQuizQuestionRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        question_text:
+          type: string
+        points:
+          type: integer
+          minimum: 1
+        position:
+          type: integer
+          minimum: 1
+        options:
+          type: array
+          minItems: 2
+          items:
+            $ref: "#/components/schemas/AdminQuizOptionRequest"
+    AdminQuizOptionRequest:
+      type: object
+      required: [option_text, is_correct, position]
+      properties:
+        option_text:
+          type: string
+        is_correct:
+          type: boolean
+        position:
+          type: integer
+          minimum: 1
+    AdminQuizQuestion:
+      type: object
+      required: [uuid, question_text, points, position, options]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        question_text:
+          type: string
+        points:
+          type: integer
+        position:
+          type: integer
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminQuizOption"
+    AdminQuizOption:
+      allOf:
+        - $ref: "#/components/schemas/QuizOptionForStudent"
+        - type: object
+          required: [is_correct]
+          properties:
+            is_correct:
+              type: boolean
+    AdminCertificateSummary:
+      allOf:
+        - $ref: "#/components/schemas/CertificateSummary"
+        - type: object
+          required: [participant]
+          properties:
+            participant:
+              type: object
+              required: [uuid, full_name, email]
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                full_name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+    RevokeCertificateRequest:
+      type: object
+      required: [reason]
+      additionalProperties: false
+      properties:
+        reason:
+          type: string
+          example: Sertifikat diterbitkan berdasarkan data yang tidak valid.
+    RevokedCertificate:
+      type: object
+      required: [uuid, certificate_number, status, revoked_at, revocation_reason]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        certificate_number:
+          type: string
+        status:
+          type: string
+          enum: [revoked]
+        revoked_at:
+          type: string
+          format: date-time
+        revocation_reason:
+          type: string
+
+    EmbeddedCourse:
+      type: object
+      required: [uuid, name]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+    EmbeddedQuiz:
+      type: object
+      required: [uuid, name]
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+security:
+  - bearerAuth: []
