@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Certificate;
-use App\Models\Course;
-use App\Models\User;
+use App\Features\Certificate\Models\Certificate;
+use App\Features\Course\Models\Course;
+use App\Features\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 

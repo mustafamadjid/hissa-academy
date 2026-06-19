@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\Certificate;
-use App\Models\Course;
-use App\Models\Lesson;
-use App\Models\LessonVideo;
-use App\Models\Quizz;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\UserProgress;
+use App\Features\Certificate\Models\Certificate;
+use App\Features\Course\Models\Course;
+use App\Features\Lesson\Models\Lesson;
+use App\Features\LessonVideo\Models\LessonVideo;
+use App\Features\Quizz\Models\Quizz;
+use App\Features\User\Models\Role;
+use App\Features\User\Models\User;
+use App\Features\UserProgress\Models\UserProgress;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;

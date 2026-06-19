@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Lesson;
-use App\Models\User;
-use App\Models\UserProgress;
+use App\Features\Lesson\Models\Lesson;
+use App\Features\User\Models\User;
+use App\Features\UserProgress\Models\UserProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 

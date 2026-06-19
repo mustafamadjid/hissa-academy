@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Lesson;
-use App\Models\LessonVideo;
+use App\Features\Lesson\Models\Lesson;
+use App\Features\LessonVideo\Models\LessonVideo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 

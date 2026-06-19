@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Course;
-use App\Models\Quizz;
+use App\Features\Course\Models\Course;
+use App\Features\Quizz\Models\Quizz;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 
