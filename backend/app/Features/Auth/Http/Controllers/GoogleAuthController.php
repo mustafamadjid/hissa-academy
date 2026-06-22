@@ -15,7 +15,7 @@ class GoogleAuthController
         return Socialite::driver('google')->redirect();
     }
 
-     public function callback(Request $request, GoogleAuthService $googleAuthService)
+    public function callback(Request $request, GoogleAuthService $googleAuthService)
     {
         $socialiteUser = Socialite::driver('google')->user();
 
@@ -27,6 +27,6 @@ class GoogleAuthController
 
         $request->session()->regenerate();
 
-        return redirect()->away(config('app.frontend_url') . '/auth/callback');
+        return redirect()->away(config('app.frontend_url').'/auth/callback');
     }
 }

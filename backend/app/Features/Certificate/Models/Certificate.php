@@ -4,6 +4,7 @@ namespace App\Features\Certificate\Models;
 
 use App\Features\Course\Models\Course;
 use App\Features\User\Models\User;
+use Database\Factories\Features\Certificate\Models\CertificateFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +22,7 @@ use Illuminate\Support\Str;
 ])]
 class Certificate extends Model
 {
-    /** @use HasFactory<\Database\Factories\Features\Certificate\Models\CertificateFactory> */
+    /** @use HasFactory<CertificateFactory> */
     use HasFactory, SoftDeletes;
 
     protected static function booted(): void

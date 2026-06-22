@@ -1,10 +1,17 @@
 <?php
 
 use App\Features\Auth\Http\Controllers\GoogleAuthController;
+use App\Features\Auth\Http\Controllers\UserAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('auth')->group(function (): void {
+Route::prefix('auth')->middleware('web')->group(function (): void {
+    Route::post('/login', [UserAuthController::class, 'store'])
+        ->name('auth.login');
+
+    Route::post('/logout', [UserAuthController::class, 'destroy'])
+        ->name('auth.logout');
+
     Route::get('/google/redirect', [GoogleAuthController::class, 'redirect'])
         ->name('auth.google.redirect');
 

@@ -30,7 +30,6 @@ class UserFactory extends Factory
         return [
             'public_uuid' => (string) Str::uuid(),
             'role_id' => fn () => Role::query()->firstOrCreate(['name' => 'user'])->id,
-            'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->optional()->phoneNumber(),
             'full_name' => fake()->name(),
