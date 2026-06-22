@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lesson_videos', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('public_uuid')->unique();
-            $table->foreignId('lesson_id')->unique()->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('lesson_id')->unique()->constrained()->cascadeOnDelete();
             $table->string('video_url');
             $table->integer('duration_seconds');
             $table->timestamps();

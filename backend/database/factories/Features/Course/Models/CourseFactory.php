@@ -4,7 +4,6 @@ namespace Database\Factories\Features\Course\Models;
 
 use App\Features\Course\Models\Course;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Course>
@@ -21,7 +20,6 @@ class CourseFactory extends Factory
     public function definition(): array
     {
         return [
-            'public_uuid' => (string) Str::uuid(),
             'course_name' => fake()->unique()->words(3, true),
             'description' => fake()->sentence(),
             'minimum_score' => fake()->randomFloat(2, 0, 100),

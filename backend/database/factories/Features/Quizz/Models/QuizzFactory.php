@@ -5,7 +5,6 @@ namespace Database\Factories\Features\Quizz\Models;
 use App\Features\Course\Models\Course;
 use App\Features\Quizz\Models\Quizz;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Quizz>
@@ -22,7 +21,6 @@ class QuizzFactory extends Factory
     public function definition(): array
     {
         return [
-            'public_uuid' => (string) Str::uuid(),
             'course_id' => Course::factory(),
             'quiz_name' => fake()->sentence(3),
             'is_active' => fake()->boolean(),

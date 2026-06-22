@@ -2,6 +2,7 @@
 
 namespace App\Features\User\Models;
 
+use App\Models\Concerns\HasUuidPrimaryKey;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Role extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasUuidPrimaryKey, SoftDeletes;
 
     
     public function users(): HasMany

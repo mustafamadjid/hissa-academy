@@ -41,7 +41,7 @@ class GoogleAuthService
         ]);
     }
 
-    private function defaultRoleId(): int
+    private function defaultRoleId(): string
     {
         return Role::where('name', UserRole::STUDENT->value)->value('id');
     }

@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('quizzs', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('public_uuid')->unique();
-            $table->foreignId('course_id')->unique()->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('course_id')->unique()->constrained()->cascadeOnDelete();
             $table->string('quiz_name');
             $table->boolean('is_active');
             $table->timestamps();

@@ -4,6 +4,7 @@ namespace App\Features\UserProgress\Models;
 
 use App\Features\Lesson\Models\Lesson;
 use App\Features\User\Models\User;
+use App\Models\Concerns\HasUuidPrimaryKey;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class UserProgress extends Model
 {
     /** @use HasFactory<\Database\Factories\Features\UserProgress\Models\UserProgressFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasUuidPrimaryKey, SoftDeletes;
 
     protected $table = 'user_progress';
 

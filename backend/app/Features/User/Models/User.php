@@ -2,6 +2,7 @@
 
 namespace App\Features\User\Models;
 
+use App\Models\Concerns\HasUuidPrimaryKey;
 use Database\Factories\Features\User\Models\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable([
@@ -32,14 +32,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable,HasApiTokens, SoftDeletes;
-
-    protected static function booted(): void
-    {
-        static::creating(function (User $user): void {
-            $user->public_uuid ??= (string) Str::uuid();
-        });
-    }
+    use HasApiTokens, HasFactory, HasUuidPrimaryKey, Notifiable, SoftDeletes;
 
     public function role(): BelongsTo
     {

@@ -10,7 +10,6 @@ uses(RefreshDatabase::class);
 it('creates lessons with the expected schema and factory defaults', function () {
     expect(Schema::hasColumns('lessons', [
         'id',
-        'public_uuid',
         'course_id',
         'title',
         'position',
@@ -22,7 +21,7 @@ it('creates lessons with the expected schema and factory defaults', function () 
 
     $lesson = Lesson::factory()->create();
 
-    expect($lesson->public_uuid)->not->toBeEmpty()
+    expect($lesson->id)->toBeString()
         ->and($lesson->course)->toBeInstanceOf(Course::class)
         ->and($lesson->title)->not->toBeEmpty()
         ->and($lesson->position)->toBeInt()

@@ -6,7 +6,6 @@ use App\Features\User\Models\Role;
 use App\Features\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<User>
@@ -28,7 +27,6 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'public_uuid' => (string) Str::uuid(),
             'role_id' => fn () => Role::query()->firstOrCreate(['name' => 'user'])->id,
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->optional()->phoneNumber(),

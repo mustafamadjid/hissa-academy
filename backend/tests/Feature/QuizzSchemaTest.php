@@ -10,7 +10,6 @@ uses(RefreshDatabase::class);
 it('creates quizzs with the expected schema and factory defaults', function () {
     expect(Schema::hasColumns('quizzs', [
         'id',
-        'public_uuid',
         'course_id',
         'quiz_name',
         'is_active',
@@ -20,7 +19,7 @@ it('creates quizzs with the expected schema and factory defaults', function () {
 
     $quizz = Quizz::factory()->create();
 
-    expect($quizz->public_uuid)->not->toBeEmpty()
+    expect($quizz->id)->toBeString()
         ->and($quizz->course)->toBeInstanceOf(Course::class)
         ->and($quizz->quiz_name)->not->toBeEmpty()
         ->and($quizz->is_active)->toBeBool();

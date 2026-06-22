@@ -5,7 +5,6 @@ namespace Database\Factories\Features\Lesson\Models;
 use App\Features\Course\Models\Course;
 use App\Features\Lesson\Models\Lesson;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Lesson>
@@ -22,7 +21,6 @@ class LessonFactory extends Factory
     public function definition(): array
     {
         return [
-            'public_uuid' => (string) Str::uuid(),
             'course_id' => Course::factory(),
             'title' => fake()->sentence(3),
             'position' => fake()->numberBetween(1, 20),

@@ -4,6 +4,7 @@ namespace App\Features\Certificate\Models;
 
 use App\Features\Course\Models\Course;
 use App\Features\User\Models\User;
+use App\Models\Concerns\HasUuidPrimaryKey;
 use Database\Factories\Features\Certificate\Models\CertificateFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,12 +24,11 @@ use Illuminate\Support\Str;
 class Certificate extends Model
 {
     /** @use HasFactory<CertificateFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasUuidPrimaryKey, SoftDeletes;
 
     protected static function booted(): void
     {
         static::creating(function (Certificate $certificate): void {
-            $certificate->public_uuid ??= (string) Str::uuid();
             $certificate->certificate_number ??= self::generateCertificateNumber();
         });
     }

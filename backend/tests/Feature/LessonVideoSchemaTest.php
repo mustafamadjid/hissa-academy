@@ -10,7 +10,6 @@ uses(RefreshDatabase::class);
 it('creates lesson videos with the expected schema and factory defaults', function () {
     expect(Schema::hasColumns('lesson_videos', [
         'id',
-        'public_uuid',
         'lesson_id',
         'video_url',
         'duration_seconds',
@@ -20,7 +19,7 @@ it('creates lesson videos with the expected schema and factory defaults', functi
 
     $lessonVideo = LessonVideo::factory()->create();
 
-    expect($lessonVideo->public_uuid)->not->toBeEmpty()
+    expect($lessonVideo->id)->toBeString()
         ->and($lessonVideo->lesson)->toBeInstanceOf(Lesson::class)
         ->and($lessonVideo->video_url)->not->toBeEmpty()
         ->and($lessonVideo->duration_seconds)->toBeInt();

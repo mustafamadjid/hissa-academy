@@ -5,7 +5,6 @@ namespace Database\Factories\Features\LessonVideo\Models;
 use App\Features\Lesson\Models\Lesson;
 use App\Features\LessonVideo\Models\LessonVideo;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<LessonVideo>
@@ -22,7 +21,6 @@ class LessonVideoFactory extends Factory
     public function definition(): array
     {
         return [
-            'public_uuid' => (string) Str::uuid(),
             'lesson_id' => Lesson::factory(),
             'video_url' => fake()->url(),
             'duration_seconds' => fake()->numberBetween(60, 3600),

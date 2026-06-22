@@ -11,7 +11,6 @@ uses(RefreshDatabase::class);
 it('creates certificates with the expected schema and factory defaults', function () {
     expect(Schema::hasColumns('certificates', [
         'id',
-        'public_uuid',
         'user_id',
         'course_id',
         'certificate_number',
@@ -24,7 +23,7 @@ it('creates certificates with the expected schema and factory defaults', functio
 
     $certificate = Certificate::factory()->create();
 
-    expect($certificate->public_uuid)->not->toBeEmpty()
+    expect($certificate->id)->toBeString()
         ->and($certificate->user)->toBeInstanceOf(User::class)
         ->and($certificate->course)->toBeInstanceOf(Course::class)
         ->and($certificate->certificate_number)->toMatch('/^HISSA-' . now()->format('Y') . '-[A-Z0-9]{8}$/')
