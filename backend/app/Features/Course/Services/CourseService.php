@@ -8,6 +8,7 @@ use App\Features\Course\Exceptions\CourseOperationException;
 use App\Features\Course\Models\Course;
 use App\Features\User\Enums\UserRole;
 use App\Features\User\Models\User;
+use App\GlobalExceptions\AuthorizationException;
 use App\GlobalExceptions\AuthorizatrionException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Throwable;
@@ -72,7 +73,7 @@ final class CourseService
     private function ensureAdmin(?User $actor): void
     {
         if ($actor === null || $actor->role?->name !== UserRole::ADMIN->value) {
-            throw new AuthorizationException;
+            throw new AuthorizationException();
         }
     }
 }

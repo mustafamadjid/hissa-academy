@@ -8,6 +8,7 @@ use App\Features\Course\Http\Requests\CourseStoreRequest;
 use App\Features\Course\Http\Requests\CourseUpdateRequest;
 use App\Features\Course\Http\Resources\CourseResource;
 use App\Features\Course\Services\CourseService;
+use App\GlobalExceptions\AuthorizationException;
 use App\GlobalExceptions\AuthorizatrionException;
 use Illuminate\Http\JsonResponse;
 
@@ -73,7 +74,7 @@ final class CourseController
                 'message' => 'Course berhasil dibuat.',
                 'data' => new CourseResource($course),
             ], 201);
-        } catch (AuthorizatrionException $exception) {
+        } catch (AuthorizationException $exception) {
             return $this->forbidden($exception->getMessage());
         } catch (CourseOperationException $exception) {
             report($exception);
@@ -99,7 +100,7 @@ final class CourseController
                 'message' => 'Course berhasil diperbarui.',
                 'data' => new CourseResource($course),
             ]);
-        } catch (AuthorizatrionException $exception) {
+        } catch (AuthorizationException $exception) {
             return $this->forbidden($exception->getMessage());
         } catch (CourseOperationException $exception) {
             report($exception);
@@ -123,7 +124,7 @@ final class CourseController
                 'success' => true,
                 'message' => 'Course berhasil dihapus.',
             ]);
-        } catch (AuthorizatrionException $exception) {
+        } catch (AuthorizationException $exception) {
             return $this->forbidden($exception->getMessage());
         } catch (CourseOperationException $exception) {
             report($exception);
