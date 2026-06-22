@@ -15,6 +15,10 @@ class EnsureUserHasRole
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
+        if ($roles === []) {
+            return $next($request);
+        }
+
         $user = $request->user();
 
         if (! $user || ! $user->role || ! in_array($user->role->name, $roles, true)) {

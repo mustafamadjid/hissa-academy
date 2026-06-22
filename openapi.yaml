@@ -429,14 +429,37 @@ paths:
     get:
       tags: [Admin Courses]
       summary: Get admin courses
+      description: |
+        Mengambil daftar course untuk admin.
+
+        Endpoint mendukung pencarian pada `course_name` dan `description`, sorting,
+        serta pagination berbasis `page` dan `limit`.
       parameters:
         - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/PerPage"
+        - $ref: "#/components/parameters/AdminCourseLimit"
         - name: search
           in: query
           required: false
           schema:
             type: string
+            maxLength: 255
+          description: Pencarian berdasarkan nama course atau deskripsi.
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [course_name, minimum_score, status, created_at, updated_at]
+            default: created_at
+          description: Kolom yang digunakan untuk mengurutkan data.
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Arah pengurutan data.
       responses:
         "200":
           description: Daftar course admin berhasil diambil.
@@ -451,9 +474,14 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/AdminCourse"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/AdminCourseOperationFailed"
     post:
       tags: [Admin Courses]
       summary: Create course
+      description: Membuat course baru untuk katalog pembelajaran.
       requestBody:
         required: true
         content:
@@ -472,11 +500,16 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/AdminCourse"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/AdminCourseOperationFailed"
 
   /api/v1/admin/courses/{course_uuid}:
     get:
       tags: [Admin Courses]
       summary: Get admin course detail
+      description: Mengambil detail course admin berdasarkan UUID course.
       parameters:
         - $ref: "#/components/parameters/CourseUuid"
       responses:
@@ -491,9 +524,16 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/AdminCourse"
+        "404":
+          $ref: "#/components/responses/AdminCourseNotFound"
+        "500":
+          $ref: "#/components/responses/AdminCourseOperationFailed"
     patch:
       tags: [Admin Courses]
       summary: Update course
+      description: |
+        Memperbarui sebagian data course. Field yang dikirim harus valid,
+        sedangkan field yang tidak dikirim tidak berubah.
       parameters:
         - $ref: "#/components/parameters/CourseUuid"
       requestBody:
@@ -514,6 +554,29 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/AdminCourse"
+        "404":
+          $ref: "#/components/responses/AdminCourseNotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/AdminCourseOperationFailed"
+    delete:
+      tags: [Admin Courses]
+      summary: Delete course
+      description: Menghapus course berdasarkan UUID. Response sukses tidak mengembalikan data course.
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      responses:
+        "200":
+          description: Course berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteCourseResponse"
+        "404":
+          $ref: "#/components/responses/AdminCourseNotFound"
+        "500":
+          $ref: "#/components/responses/AdminCourseOperationFailed"
 
   /api/v1/admin/courses/{course_uuid}/lessons:
     post:
@@ -778,6 +841,16 @@ components:
         type: integer
         minimum: 1
       description: Jumlah data per halaman.
+    AdminCourseLimit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+      description: Jumlah data course per halaman.
     CourseUuid:
       name: course_uuid
       in: path
@@ -891,6 +964,42 @@ components:
             error:
               code: COURSE_NOT_FOUND
               details: {}
+    AdminCourseNotFound:
+      description: Course tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          example:
+            success: false
+            message: Course tidak ditemukan.
+    AdminCourseOperationFailed:
+      description: Operasi admin course gagal diproses oleh server.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          examples:
+            listFailed:
+              summary: Gagal mengambil daftar course
+              value:
+                success: false
+                message: Gagal mengambil daftar course.
+            createFailed:
+              summary: Gagal membuat course
+              value:
+                success: false
+                message: Gagal membuat course.
+            updateFailed:
+              summary: Gagal memperbarui course
+              value:
+                success: false
+                message: Gagal memperbarui course.
+            deleteFailed:
+              summary: Gagal menghapus course
+              value:
+                success: false
+                message: Gagal menghapus course.
     LessonNotFound:
       description: Lesson tidak ditemukan.
       content:
@@ -1103,6 +1212,16 @@ components:
             details:
               type: object
               additionalProperties: true
+    SimpleErrorResponse:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Course tidak ditemukan.
     PaginationMeta:
       type: object
       required: [current_page, per_page, total, last_page]
@@ -1623,28 +1742,28 @@ components:
 
     AdminCourse:
       type: object
-      required: [uuid, course_name, description, minimum_score, status]
+      required: [id, name, description, minimum_score, status]
       properties:
-        uuid:
+        id:
           type: string
           format: uuid
-        course_name:
+          example: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d
+        name:
           type: string
+          example: Dasar Keamanan Siber
         description:
           type: string
-          nullable: true
+          example: Course pengenalan keamanan siber untuk pemula.
         minimum_score:
-          type: integer
+          type: number
+          format: float
           minimum: 0
           maximum: 100
+          example: 75
         status:
-          $ref: "#/components/schemas/CourseStatus"
-        created_at:
           type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+          maxLength: 255
+          example: published
     CreateCourseRequest:
       type: object
       required: [course_name, description, minimum_score, status]
@@ -1652,28 +1771,54 @@ components:
       properties:
         course_name:
           type: string
+          maxLength: 255
+          example: Dasar Keamanan Siber
         description:
           type: string
+          maxLength: 255
+          example: Course pengenalan keamanan siber untuk pemula.
         minimum_score:
-          type: integer
+          type: number
+          format: float
           minimum: 0
           maximum: 100
+          example: 75
         status:
-          $ref: "#/components/schemas/CourseStatus"
+          type: string
+          maxLength: 255
+          example: published
     UpdateCourseRequest:
       type: object
       additionalProperties: false
       properties:
         course_name:
           type: string
+          maxLength: 255
+          example: Dasar Keamanan Siber
         description:
           type: string
+          maxLength: 255
+          example: Course pengenalan keamanan siber untuk pemula.
         minimum_score:
-          type: integer
+          type: number
+          format: float
           minimum: 0
           maximum: 100
+          example: 80
         status:
-          $ref: "#/components/schemas/CourseStatus"
+          type: string
+          maxLength: 255
+          example: archived
+    DeleteCourseResponse:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Course berhasil dihapus.
     CreateLessonRequest:
       type: object
       required: [title, position, is_required]
