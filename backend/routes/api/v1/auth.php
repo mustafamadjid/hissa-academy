@@ -2,12 +2,12 @@
 
 use App\Features\Auth\Http\Controllers\GoogleAuthController;
 use App\Features\Auth\Http\Controllers\UserAuthController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->middleware('web')->group(function (): void {
     Route::post('/login', [UserAuthController::class, 'store'])
-        ->name('auth.login');
+        ->name('auth.login')
+        ->middleware('throttle:login');
 
     Route::post('/logout', [UserAuthController::class, 'destroy'])
         ->name('auth.logout');
@@ -18,8 +18,7 @@ Route::prefix('auth')->middleware('web')->group(function (): void {
     Route::get('/google/callback', [GoogleAuthController::class, 'callback'])
         ->name('auth.google.callback');
 
-    Route::get('/me', function (Request $request) {
-        return $request->user()->load('role');
-    })->middleware('auth:sanctum')
+    Route::get('/me', [UserAuthController::class, 'me'])
+        ->middleware(['auth:sanctum', 'throttle:api'])
         ->name('auth.me');
 });
