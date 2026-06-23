@@ -9,10 +9,9 @@ use App\Features\Course\Models\Course;
 use App\Features\User\Enums\UserRole;
 use App\Features\User\Models\User;
 use App\GlobalExceptions\AuthorizationException;
-use App\GlobalExceptions\AuthorizatrionException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Throwable;
-
+  
 final class CourseService
 {
     public function __construct(
