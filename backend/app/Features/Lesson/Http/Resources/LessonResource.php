@@ -25,9 +25,15 @@ class LessonResource extends JsonResource
 
                 return [
                     'id' => $this->video->id,
-                    'youtube_video_id' => $this->extractYoutubeVideoId($this->video->video_url),
+                    'youtube_video_id' => $this->video->video_id ?? $this->extractYoutubeVideoId($this->video->video_url),
                     'video_url' => $this->video->video_url,
+                    'title' => $this->video->title,
+                    'description' => $this->video->description,
+                    'channel_title' => $this->video->channel_title,
+                    'thumbnail_url' => $this->video->thumbnail_url,
+                    'duration_iso' => $this->video->duration_iso,
                     'duration_seconds' => $this->video->duration_seconds,
+                    'privacy_status' => $this->video->privacy_status,
                 ];
             }),
         ];

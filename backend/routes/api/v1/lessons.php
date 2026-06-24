@@ -1,6 +1,7 @@
 <?php
 
 use App\Features\Lesson\Http\Controllers\LessonController;
+use App\Features\LessonVideo\Http\Controllers\LessonVideoController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')
@@ -18,6 +19,12 @@ Route::prefix('admin')
 
         Route::patch('/lessons/{lesson_uuid}', [LessonController::class, 'update'])
             ->name('lessons.update');
+
+        Route::put('/lessons/{lesson_uuid}/video', [LessonVideoController::class, 'update'])
+            ->name('lessons.video.update');
+
+        Route::delete('/lessons/{lesson_uuid}/video', [LessonVideoController::class, 'destroy'])
+            ->name('lessons.video.destroy');
 
         Route::delete('/lessons/{lesson_uuid}', [LessonController::class, 'destroy'])
             ->name('lessons.destroy');
