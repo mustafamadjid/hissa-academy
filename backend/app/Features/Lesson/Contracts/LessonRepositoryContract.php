@@ -24,4 +24,6 @@ interface LessonRepositoryContract
     public function update(Lesson $lesson, LessonUpdateData $data): Lesson;
 
     public function delete(Lesson $lesson): bool;
+
+    public function reorder(string $courseId, array $lessons): ?Lesson;
 }

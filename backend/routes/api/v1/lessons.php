@@ -14,6 +14,9 @@ Route::prefix('admin')
         Route::post('/courses/{course_uuid}/lessons', [LessonController::class, 'store'])
             ->name('courses.lessons.store');
 
+        Route::patch('/courses/{courseId}/lessons/reorder', [LessonController::class, 'reorder'])
+            ->name('courses.lessons.reorder');
+
         Route::get('/lessons/{lesson_uuid}', [LessonController::class, 'show'])
             ->name('lessons.show');
 

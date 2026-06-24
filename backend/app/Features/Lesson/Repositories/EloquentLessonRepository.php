@@ -80,6 +80,45 @@ final class EloquentLessonRepository implements LessonRepositoryContract
         return (bool) $lesson->delete();
     }
 
+    public function reorder(string $courseId, array $lessons): ?Lesson
+    {
+        return DB::transaction(function () use ($courseId, $lessons): ?Lesson {
+            $positionsByLessonId = collect($lessons)
+                ->mapWithKeys(fn (array $lesson): array => [
+                    (string) $lesson['id'] => (int) $lesson['position'],
+                ]);
+
+            $lessonIds = $positionsByLessonId->keys();
+
+            $existingLessons = Lesson::query()
+                ->where('course_id', $courseId)
+                ->whereIn('id', $lessonIds)
+                ->lockForUpdate()
+                ->get(['id', 'position']);
+
+            if ($existingLessons->count() !== $lessonIds->count()) {
+                return null;
+            }
+
+            foreach ($existingLessons as $lesson) {
+                $lesson->forceFill(['position' => -1 * $lesson->position])->save();
+            }
+
+            foreach ($existingLessons as $lesson) {
+                $lesson->forceFill([
+                    'position' => $positionsByLessonId->get($lesson->id),
+                ])->save();
+            }
+
+            return Lesson::query()
+                ->with(['course', 'video'])
+                ->where('course_id', $courseId)
+                ->whereIn('id', $lessonIds)
+                ->orderBy('position')
+                ->first();
+        });
+    }
+
     private function normalizeInsertPosition(string $courseId, int $requestedPosition): int
     {
         $maxPosition = (int) Lesson::query()

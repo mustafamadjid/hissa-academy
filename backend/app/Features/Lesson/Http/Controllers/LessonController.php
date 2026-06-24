@@ -3,6 +3,7 @@
 namespace App\Features\Lesson\Http\Controllers;
 
 use App\Features\Lesson\Exceptions\LessonOperationException;
+use App\Features\Lesson\Http\Requests\LessonReorderRequest;
 use App\Features\Lesson\Http\Requests\LessonStoreRequest;
 use App\Features\Lesson\Http\Requests\LessonUpdateRequest;
 use App\Features\Lesson\Http\Resources\LessonResource;
@@ -124,6 +125,32 @@ final class LessonController
             return response()->json([
                 'success' => true,
                 'message' => 'Lesson berhasil dihapus.',
+            ]);
+        } catch (AuthorizationException $exception) {
+            return $this->forbidden($exception->getMessage());
+        } catch (LessonOperationException $exception) {
+            report($exception);
+
+            return $this->serverError($exception->getMessage());
+        }
+    }
+
+    public function reorder (
+        LessonReorderRequest $request,
+        string $courseId,
+        LessonService $lessonService
+    ): JsonResponse {
+        try {
+            $lessons = $request->validated('lessons');
+            $reorder = $lessonService->reorder($courseId,$lessons, request()->user());
+
+            if ($reorder === null) {
+                return $this->lessonNotFound();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lesson berhasil diurutkan.',
             ]);
         } catch (AuthorizationException $exception) {
             return $this->forbidden($exception->getMessage());

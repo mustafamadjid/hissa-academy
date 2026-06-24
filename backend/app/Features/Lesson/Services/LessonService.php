@@ -80,7 +80,6 @@ final class LessonService
     public function delete(string $lessonId, ?User $actor): ?bool
     {
         $this->ensureAdmin->ensureAdmin($actor);
-
         try {
             $lesson = $this->lessonRepository->findById($lessonId);
 
@@ -91,6 +90,23 @@ final class LessonService
             return $this->lessonRepository->delete($lesson);
         } catch (Throwable $exception) {
             throw new LessonOperationException('Gagal menghapus lesson.', $exception);
+        }
+    }
+
+    public function reorder(string $courseId, array $lessons, ?User $actor): ?Lesson
+    {
+        $this->ensureAdmin->ensureAdmin($actor);
+
+        try {
+            $course = $this->lessonRepository->findCourseById($courseId);
+
+            if ($course === null) {
+                return null;
+            }
+
+            return $this->lessonRepository->reorder($courseId, $lessons);
+        } catch (Throwable $exception) {
+            throw new LessonOperationException('Gagal mengurutkan lesson.', $exception);
         }
     }
 

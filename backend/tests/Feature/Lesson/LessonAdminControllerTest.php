@@ -162,6 +162,51 @@ it('updates a lesson and reorders positions inside its course', function () {
     ]);
 });
 
+it('reorders lessons inside a course when requested by an admin', function () {
+    $this->actingAs(lessonAdminUser());
+    $course = Course::factory()->create();
+    $firstLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'position' => 1,
+    ]);
+    $secondLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'position' => 2,
+    ]);
+    $thirdLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'position' => 3,
+    ]);
+
+    $response = $this->patchJson("/api/v1/admin/courses/{$course->id}/lessons/reorder", [
+        'lessons' => [
+            ['id' => $thirdLesson->id, 'position' => 1],
+            ['id' => $firstLesson->id, 'position' => 2],
+            ['id' => $secondLesson->id, 'position' => 3],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('message', 'Lesson berhasil diurutkan.');
+
+    $this->assertDatabaseHas('lessons', [
+        'id' => $thirdLesson->id,
+        'course_id' => $course->id,
+        'position' => 1,
+    ]);
+    $this->assertDatabaseHas('lessons', [
+        'id' => $firstLesson->id,
+        'course_id' => $course->id,
+        'position' => 2,
+    ]);
+    $this->assertDatabaseHas('lessons', [
+        'id' => $secondLesson->id,
+        'course_id' => $course->id,
+        'position' => 3,
+    ]);
+});
+
 it('soft deletes a lesson when requested by an admin', function () {
     $this->actingAs(lessonAdminUser());
     $lesson = Lesson::factory()->create();
