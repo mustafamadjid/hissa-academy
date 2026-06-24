@@ -579,6 +579,29 @@ paths:
           $ref: "#/components/responses/AdminCourseOperationFailed"
 
   /api/v1/admin/courses/{course_uuid}/lessons:
+    get:
+      tags: [Admin Lessons]
+      summary: Get course lessons
+      parameters:
+        - $ref: "#/components/parameters/CourseUuid"
+      responses:
+        "200":
+          description: Daftar lesson berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/AdminLesson"
+        "404":
+          $ref: "#/components/responses/AdminCourseNotFound"
+        "500":
+          $ref: "#/components/responses/AdminLessonOperationFailed"
     post:
       tags: [Admin Lessons]
       summary: Create lesson
@@ -602,10 +625,68 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/AdminLesson"
-        "409":
-          $ref: "#/components/responses/LessonPositionConflict"
+        "403":
+          $ref: "#/components/responses/AdminForbidden"
+        "404":
+          $ref: "#/components/responses/AdminCourseNotFound"
+        "422":
+          $ref: "#/components/responses/AdminValidationError"
+        "500":
+          $ref: "#/components/responses/AdminLessonOperationFailed"
+
+  /api/v1/admin/courses/{courseId}/lessons/reorder:
+    patch:
+      tags: [Admin Lessons]
+      summary: Reorder course lessons
+      parameters:
+        - $ref: "#/components/parameters/CourseId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderLessonsRequest"
+      responses:
+        "200":
+          description: Lesson berhasil diurutkan.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleSuccessResponse"
+              example:
+                success: true
+                message: Lesson berhasil diurutkan.
+        "403":
+          $ref: "#/components/responses/AdminForbidden"
+        "404":
+          $ref: "#/components/responses/AdminLessonNotFound"
+        "422":
+          $ref: "#/components/responses/AdminValidationError"
+        "500":
+          $ref: "#/components/responses/AdminLessonOperationFailed"
 
   /api/v1/admin/lessons/{lesson_uuid}:
+    get:
+      tags: [Admin Lessons]
+      summary: Get lesson detail
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      responses:
+        "200":
+          description: Detail lesson berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/AdminLesson"
+        "404":
+          $ref: "#/components/responses/AdminLessonNotFound"
+        "500":
+          $ref: "#/components/responses/AdminLessonOperationFailed"
     patch:
       tags: [Admin Lessons]
       summary: Update lesson
@@ -629,16 +710,35 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/AdminLesson"
+        "403":
+          $ref: "#/components/responses/AdminForbidden"
+        "404":
+          $ref: "#/components/responses/AdminLessonNotFound"
+        "422":
+          $ref: "#/components/responses/AdminValidationError"
+        "500":
+          $ref: "#/components/responses/AdminLessonOperationFailed"
     delete:
       tags: [Admin Lessons]
       summary: Delete lesson
       parameters:
         - $ref: "#/components/parameters/LessonUuid"
       responses:
-        "204":
-          description: Lesson berhasil dihapus tanpa response body.
-        "409":
-          $ref: "#/components/responses/LessonHasDependencies"
+        "200":
+          description: Lesson berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleSuccessResponse"
+              example:
+                success: true
+                message: Lesson berhasil dihapus.
+        "403":
+          $ref: "#/components/responses/AdminForbidden"
+        "404":
+          $ref: "#/components/responses/AdminLessonNotFound"
+        "500":
+          $ref: "#/components/responses/AdminLessonOperationFailed"
 
   /api/v1/admin/lessons/{lesson_uuid}/video:
     put:
@@ -664,8 +764,35 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/LessonVideo"
+        "403":
+          $ref: "#/components/responses/AdminForbidden"
+        "404":
+          $ref: "#/components/responses/AdminLessonNotFound"
         "422":
-          $ref: "#/components/responses/InvalidYoutubeVideo"
+          $ref: "#/components/responses/AdminValidationError"
+        "500":
+          $ref: "#/components/responses/AdminLessonVideoOperationFailed"
+    delete:
+      tags: [Admin Lessons]
+      summary: Delete lesson video metadata
+      parameters:
+        - $ref: "#/components/parameters/LessonUuid"
+      responses:
+        "200":
+          description: Metadata video lesson berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleSuccessResponse"
+              example:
+                success: true
+                message: Metadata video lesson berhasil dihapus.
+        "403":
+          $ref: "#/components/responses/AdminForbidden"
+        "404":
+          $ref: "#/components/responses/AdminLessonNotFound"
+        "500":
+          $ref: "#/components/responses/AdminLessonVideoOperationFailed"
 
   /api/v1/admin/courses/{course_uuid}/quiz:
     put:
@@ -858,6 +985,13 @@ components:
       schema:
         type: string
         format: uuid
+    CourseId:
+      name: courseId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     LessonUuid:
       name: lesson_uuid
       in: path
@@ -1000,6 +1134,87 @@ components:
               value:
                 success: false
                 message: Gagal menghapus course.
+    AdminForbidden:
+      description: User tidak memiliki izin untuk operasi admin ini.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          example:
+            success: false
+            message: User tidak memiliki izin.
+    AdminValidationError:
+      description: Data yang diberikan tidak valid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          example:
+            success: false
+            message: The given data was invalid.
+    AdminLessonNotFound:
+      description: Lesson tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          example:
+            success: false
+            message: Lesson tidak ditemukan.
+    AdminLessonOperationFailed:
+      description: Operasi admin lesson gagal diproses oleh server.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          examples:
+            listFailed:
+              summary: Gagal mengambil daftar lesson
+              value:
+                success: false
+                message: Gagal mengambil daftar lesson.
+            createFailed:
+              summary: Gagal membuat lesson
+              value:
+                success: false
+                message: Gagal membuat lesson.
+            detailFailed:
+              summary: Gagal mengambil detail lesson
+              value:
+                success: false
+                message: Gagal mengambil detail lesson.
+            updateFailed:
+              summary: Gagal memperbarui lesson
+              value:
+                success: false
+                message: Gagal memperbarui lesson.
+            deleteFailed:
+              summary: Gagal menghapus lesson
+              value:
+                success: false
+                message: Gagal menghapus lesson.
+            reorderFailed:
+              summary: Gagal mengurutkan lesson
+              value:
+                success: false
+                message: Gagal mengurutkan lesson.
+    AdminLessonVideoOperationFailed:
+      description: Operasi admin lesson video gagal diproses oleh server.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          examples:
+            saveFailed:
+              summary: Gagal menyimpan metadata video lesson
+              value:
+                success: false
+                message: Gagal menyimpan metadata video lesson.
+            deleteFailed:
+              summary: Gagal menghapus metadata video lesson
+              value:
+                success: false
+                message: Gagal menghapus metadata video lesson.
     LessonNotFound:
       description: Lesson tidak ditemukan.
       content:
@@ -1222,6 +1437,16 @@ components:
         message:
           type: string
           example: Course tidak ditemukan.
+    SimpleSuccessResponse:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request berhasil diproses.
     PaginationMeta:
       type: object
       required: [current_page, per_page, total, last_page]
@@ -1821,35 +2046,63 @@ components:
           example: Course berhasil dihapus.
     CreateLessonRequest:
       type: object
-      required: [title, position, is_required]
+      required: [title, youtube_video_id, position, is_required]
       additionalProperties: false
       properties:
         title:
           type: string
+          maxLength: 255
+        youtube_video_id:
+          type: string
+          pattern: "^[A-Za-z0-9_-]{6,20}$"
+          example: dQw4w9WgXcQ
         position:
           type: integer
           minimum: 1
         is_required:
           type: boolean
+        duration_seconds:
+          type: integer
+          minimum: 0
     UpdateLessonRequest:
       type: object
       additionalProperties: false
       properties:
         title:
           type: string
+          maxLength: 255
         position:
           type: integer
           minimum: 1
         is_required:
           type: boolean
+    ReorderLessonsRequest:
+      type: object
+      required: [lessons]
+      additionalProperties: false
+      properties:
+        lessons:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [id, position]
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                format: uuid
+              position:
+                type: integer
+                minimum: 1
     AdminLesson:
       type: object
-      required: [uuid, title, position, is_required]
+      required: [id, course_id, title, position, is_required]
       properties:
-        uuid:
+        id:
           type: string
           format: uuid
-        course_uuid:
+        course_id:
           type: string
           format: uuid
         title:
@@ -1858,12 +2111,10 @@ components:
           type: integer
         is_required:
           type: boolean
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+        video:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/LessonVideo"
     UpsertLessonVideoRequest:
       type: object
       required: [youtube_video_id]
@@ -1871,24 +2122,46 @@ components:
       properties:
         youtube_video_id:
           type: string
+          pattern: "^[A-Za-z0-9_-]{6,20}$"
           example: dQw4w9WgXcQ
     LessonVideo:
       type: object
-      required: [uuid, lesson_uuid, youtube_video_id, duration_seconds, updated_at]
+      required: [id, lesson_id, youtube_video_id, video_url]
       properties:
-        uuid:
+        id:
           type: string
           format: uuid
-        lesson_uuid:
+        lesson_id:
           type: string
           format: uuid
         youtube_video_id:
           type: string
+          nullable: true
+        video_url:
+          type: string
+          format: uri
+        title:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        channel_title:
+          type: string
+          nullable: true
+        thumbnail_url:
+          type: string
+          format: uri
+          nullable: true
+        duration_iso:
+          type: string
+          nullable: true
         duration_seconds:
           type: integer
-        updated_at:
+          nullable: true
+        privacy_status:
           type: string
-          format: date-time
+          nullable: true
     UpsertQuizRequest:
       type: object
       required: [quiz_name, is_active]
