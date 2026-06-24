@@ -13,12 +13,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable([
     'lesson_id',
     'video_url',
+    'video_id',
+    'title',
+    'description',
+    'channel_title',
+    'thumbnail_url',
+    'duration_iso',
     'duration_seconds',
+    'privacy_status',
 ])]
 class LessonVideo extends Model
 {
     /** @use HasFactory<\Database\Factories\Features\LessonVideo\Models\LessonVideoFactory> */
     use HasFactory, HasUuidPrimaryKey, SoftDeletes;
+
+    protected $casts = [
+        'duration_seconds' => 'integer',
+    ];
 
     public function lesson(): BelongsTo
     {

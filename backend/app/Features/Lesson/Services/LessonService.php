@@ -7,9 +7,8 @@ use App\Features\Lesson\DTOs\LessonCreateData;
 use App\Features\Lesson\DTOs\LessonUpdateData;
 use App\Features\Lesson\Exceptions\LessonOperationException;
 use App\Features\Lesson\Models\Lesson;
-use App\Features\User\Enums\UserRole;
 use App\Features\User\Models\User;
-use App\GlobalExceptions\AuthorizationException;
+use App\Helper\EnsureAdminForService;
 use Illuminate\Support\Collection;
 use Throwable;
 
@@ -17,6 +16,7 @@ final class LessonService
 {
     public function __construct(
         private readonly LessonRepositoryContract $lessonRepository,
+        private readonly EnsureAdminForService $ensureAdmin,
     ) {}
 
     public function listByCourse(string $courseId): ?Collection
@@ -36,7 +36,7 @@ final class LessonService
 
     public function create(string $courseId, LessonCreateData $data, ?User $actor): ?Lesson
     {
-        $this->ensureAdmin($actor);
+        $this->ensureAdmin->ensureAdmin($actor);
 
         try {
             $course = $this->lessonRepository->findCourseById($courseId);
@@ -62,7 +62,7 @@ final class LessonService
 
     public function update(string $lessonId, LessonUpdateData $data, ?User $actor): ?Lesson
     {
-        $this->ensureAdmin($actor);
+        $this->ensureAdmin->ensureAdmin($actor);
 
         try {
             $lesson = $this->lessonRepository->findById($lessonId);
@@ -79,7 +79,7 @@ final class LessonService
 
     public function delete(string $lessonId, ?User $actor): ?bool
     {
-        $this->ensureAdmin($actor);
+        $this->ensureAdmin->ensureAdmin($actor);
 
         try {
             $lesson = $this->lessonRepository->findById($lessonId);
@@ -94,10 +94,4 @@ final class LessonService
         }
     }
 
-    private function ensureAdmin(?User $actor): void
-    {
-        if ($actor === null || $actor->role?->name !== UserRole::ADMIN->value) {
-            throw new AuthorizationException();
-        }
-    }
 }
