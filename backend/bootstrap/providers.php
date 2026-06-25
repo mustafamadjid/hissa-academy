@@ -4,6 +4,7 @@ use App\Providers\AppServiceProvider;
 use App\Providers\Course\CourseServiceProvider;
 use App\Providers\Lesson\LessonServiceProvider;
 use App\Providers\LessonVideo\LessonVideoServiceProvider;
+use App\Providers\Quizz\QuizzServiceProvider;
 use App\Providers\User\UserServiceProvider;
 
 return [
@@ -11,5 +12,6 @@ return [
     CourseServiceProvider::class,
     LessonServiceProvider::class,
     LessonVideoServiceProvider::class,
+    QuizzServiceProvider::class,
     UserServiceProvider::class,
 ];
