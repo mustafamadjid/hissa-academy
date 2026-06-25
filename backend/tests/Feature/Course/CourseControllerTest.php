@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('returns paginated courses with a manual json response format', function () {
+    $this->actingAs(adminUser());
+
     Course::factory()->create([
         'course_name' => 'PHP Fundamentals',
         'description' => 'Programming basics',
@@ -53,6 +55,8 @@ it('creates a course', function () {
 });
 
 it('returns validation errors when creating a course with invalid payload', function () {
+    $this->actingAs(adminUser());
+
     $response = $this->postJson('/api/v1/admin/courses', [
         'course_name' => '',
         'description' => '',
@@ -70,6 +74,8 @@ it('returns validation errors when creating a course with invalid payload', func
 });
 
 it('returns a course detail', function () {
+    $this->actingAs(adminUser());
+
     $course = Course::factory()->create([
         'course_name' => 'Laravel Basics',
     ]);
@@ -84,6 +90,8 @@ it('returns a course detail', function () {
 });
 
 it('returns not found when a course does not exist', function () {
+    $this->actingAs(adminUser());
+
     $response = $this->getJson('/api/v1/admin/courses/00000000-0000-0000-0000-000000000000');
 
     $response->assertNotFound()
@@ -156,9 +164,7 @@ it('rejects course updates when the user is not authenticated', function () {
         'course_name' => 'Updated Course',
     ]);
 
-    $response->assertForbidden()
-        ->assertJsonPath('success', false)
-        ->assertJsonPath('message', 'Anda tidak memiliki akses.');
+    $response->assertUnauthorized();
 
     $this->assertDatabaseHas('courses', [
         'id' => $course->id,

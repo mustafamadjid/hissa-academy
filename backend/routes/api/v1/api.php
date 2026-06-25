@@ -11,6 +11,7 @@ Route::prefix('v1')
             'progress.php',
             'quizzes.php',
             'certificates.php',
+            'students.php',
         ] as $routeFile) {
             $routePath = __DIR__.'/'.$routeFile;
 

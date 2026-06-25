@@ -140,6 +140,31 @@ final class AdminQuizController
         }
     }
 
+    public function destroyQuestion(string $question_uuid, QuizzService $quizzService): JsonResponse
+    {
+        try {
+            $deleted = $quizzService->deleteQuestion($question_uuid, request()->user());
+
+            if (! $deleted) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pertanyaan quiz tidak ditemukan.',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pertanyaan quiz berhasil dihapus.',
+            ]);
+        } catch (AuthorizationException $exception) {
+            return $this->forbidden($exception->getMessage());
+        } catch (QuizzOperationException $exception) {
+            report($exception);
+
+            return $this->serverError($exception->getMessage());
+        }
+    }
+
     private function notFound(): JsonResponse
     {
         return response()->json([

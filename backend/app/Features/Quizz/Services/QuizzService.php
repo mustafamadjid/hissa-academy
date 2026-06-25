@@ -149,4 +149,21 @@ final class QuizzService
             throw new QuizzOperationException('Gagal memperbarui pertanyaan quiz.', $exception);
         }
     }
+
+    public function deleteQuestion(string $questionId, ?User $actor): bool
+    {
+        $this->ensureAdmin->ensureAdmin($actor);
+
+        try {
+            $question = $this->quizzRepository->findQuestionById($questionId);
+
+            if ($question === null) {
+                return false;
+            }
+
+            return $this->quizzRepository->deleteQuestion($question);
+        } catch (Throwable $exception) {
+            throw new QuizzOperationException('Gagal menghapus pertanyaan quiz.', $exception);
+        }
+    }
 }

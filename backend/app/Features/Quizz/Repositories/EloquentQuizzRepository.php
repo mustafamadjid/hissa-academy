@@ -60,6 +60,11 @@ final class EloquentQuizzRepository implements QuizzRepositoryContract
         return (bool) $quiz->delete();
     }
 
+    public function deleteQuestion(Question $question): bool
+    {
+        return (bool) $question->delete();
+    }
+
     public function listQuestionsWithAnswers(Quizz $quiz): Collection
     {
         return Question::query()

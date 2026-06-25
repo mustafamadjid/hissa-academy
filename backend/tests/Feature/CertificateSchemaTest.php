@@ -17,6 +17,8 @@ it('creates certificates with the expected schema and factory defaults', functio
         'issued_at',
         'status',
         'pdf_path',
+        'revoked_reason',
+        'revoked_at',
         'created_at',
         'updated_at',
     ]))->toBeTrue();
@@ -26,10 +28,12 @@ it('creates certificates with the expected schema and factory defaults', functio
     expect($certificate->id)->toBeString()
         ->and($certificate->user)->toBeInstanceOf(User::class)
         ->and($certificate->course)->toBeInstanceOf(Course::class)
-        ->and($certificate->certificate_number)->toMatch('/^HISSA-' . now()->format('Y') . '-[A-Z0-9]{8}$/')
+        ->and($certificate->certificate_number)->toMatch('/^HISSA-'.now()->format('Y').'-[A-Z0-9]{8}$/')
         ->and($certificate->issued_at)->not->toBeNull()
         ->and($certificate->status)->not->toBeEmpty()
-        ->and($certificate->pdf_path)->not->toBeEmpty();
+        ->and($certificate->pdf_path)->not->toBeEmpty()
+        ->and($certificate->revoked_reason)->toBeNull()
+        ->and($certificate->revoked_at)->toBeNull();
 });
 
 it('generates unique certificate numbers from the model', function () {
@@ -37,6 +41,6 @@ it('generates unique certificate numbers from the model', function () {
 
     $certificateNumber = Certificate::generateCertificateNumber();
 
-    expect($certificateNumber)->toMatch('/^HISSA-' . now()->format('Y') . '-[A-Z0-9]{8}$/')
+    expect($certificateNumber)->toMatch('/^HISSA-'.now()->format('Y').'-[A-Z0-9]{8}$/')
         ->and($certificateNumber)->not->toBe($existingCertificate->certificate_number);
 });

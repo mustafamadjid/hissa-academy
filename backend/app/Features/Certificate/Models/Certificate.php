@@ -20,6 +20,8 @@ use Illuminate\Support\Str;
     'issued_at',
     'status',
     'pdf_path',
+    'revoked_reason',
+    'revoked_at',
 ])]
 class Certificate extends Model
 {
@@ -64,6 +66,7 @@ class Certificate extends Model
     {
         return [
             'issued_at' => 'datetime',
+            'revoked_at' => 'datetime',
         ];
     }
 }

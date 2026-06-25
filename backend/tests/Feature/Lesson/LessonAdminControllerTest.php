@@ -10,6 +10,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('returns lessons for a course ordered by position', function () {
+    $this->actingAs(lessonAdminUser());
+
     $course = Course::factory()->create();
     Lesson::factory()->create([
         'course_id' => $course->id,
@@ -93,6 +95,8 @@ it('returns validation errors when creating a lesson with invalid payload', func
 });
 
 it('returns lesson detail with video metadata', function () {
+    $this->actingAs(lessonAdminUser());
+
     $lesson = Lesson::factory()->create([
         'title' => 'Laravel Middleware',
         'position' => 3,
@@ -238,6 +242,8 @@ it('rejects lesson creation when the user is not an admin', function () {
 });
 
 it('returns not found when the course does not exist', function () {
+    $this->actingAs(lessonAdminUser());
+
     $response = $this->getJson('/api/v1/admin/courses/00000000-0000-0000-0000-000000000000/lessons');
 
     $response->assertNotFound()
@@ -246,6 +252,8 @@ it('returns not found when the course does not exist', function () {
 });
 
 it('returns not found when the lesson does not exist', function () {
+    $this->actingAs(lessonAdminUser());
+
     $response = $this->getJson('/api/v1/admin/lessons/00000000-0000-0000-0000-000000000000');
 
     $response->assertNotFound()

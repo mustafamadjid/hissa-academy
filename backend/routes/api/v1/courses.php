@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin/courses')
     ->name('admin.courses.')
-    ->middleware('throttle:api')
+    ->middleware(['auth:sanctum', 'role:admin', 'throttle:api'])
     ->group(function (): void {
         Route::get('/', [CourseController::class, 'index'])
             ->name('index');

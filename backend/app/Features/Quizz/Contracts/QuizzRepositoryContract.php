@@ -26,6 +26,8 @@ interface QuizzRepositoryContract
 
     public function deleteQuiz(Quizz $quiz): bool;
 
+    public function deleteQuestion(Question $question): bool;
+
     /**
      * @return Collection<int, Question>
      */

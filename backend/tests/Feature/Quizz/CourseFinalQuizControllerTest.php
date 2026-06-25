@@ -11,6 +11,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('returns the final quiz configuration for a course', function () {
+    $this->actingAs(quizzAdminUser());
+
     $course = Course::factory()->create();
     $quiz = Quizz::factory()->create([
         'course_id' => $course->id,
@@ -32,6 +34,8 @@ it('returns the final quiz configuration for a course', function () {
 });
 
 it('returns not found when retrieving a quiz for a missing course', function () {
+    $this->actingAs(quizzAdminUser());
+
     $response = $this->getJson('/api/v1/admin/courses/00000000-0000-0000-0000-000000000000/quiz');
 
     $response->assertNotFound()
@@ -40,6 +44,8 @@ it('returns not found when retrieving a quiz for a missing course', function () 
 });
 
 it('returns not found when the course has no final quiz', function () {
+    $this->actingAs(quizzAdminUser());
+
     $course = Course::factory()->create();
 
     $response = $this->getJson("/api/v1/admin/courses/{$course->id}/quiz");
@@ -352,6 +358,53 @@ it('rejects quiz question update when the user is not an admin', function () {
         'id' => $question->id,
         'question' => 'Pertanyaan lama',
         'points' => 1,
+    ]);
+});
+
+it('deletes a quiz question when dependencies allow it', function () {
+    $this->actingAs(quizzAdminUser());
+    $question = Question::factory()->create();
+    $answer = Answer::factory()->create([
+        'question_id' => $question->id,
+        'answer' => 'Jawaban yang ikut terhapus',
+    ]);
+
+    $response = $this->deleteJson("/api/v1/admin/quiz-questions/{$question->id}");
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('message', 'Pertanyaan quiz berhasil dihapus.');
+
+    $this->assertDatabaseMissing('questions', [
+        'id' => $question->id,
+    ]);
+    $this->assertDatabaseMissing('answers_options', [
+        'id' => $answer->id,
+    ]);
+});
+
+it('returns not found when deleting a missing quiz question', function () {
+    $this->actingAs(quizzAdminUser());
+
+    $response = $this->deleteJson('/api/v1/admin/quiz-questions/00000000-0000-0000-0000-000000000000');
+
+    $response->assertNotFound()
+        ->assertJsonPath('success', false)
+        ->assertJsonPath('message', 'Pertanyaan quiz tidak ditemukan.');
+});
+
+it('rejects quiz question deletion when the user is not an admin', function () {
+    $this->actingAs(quizzStudentUser());
+    $question = Question::factory()->create();
+
+    $response = $this->deleteJson("/api/v1/admin/quiz-questions/{$question->id}");
+
+    $response->assertForbidden()
+        ->assertJsonPath('success', false)
+        ->assertJsonPath('message', 'Anda tidak memiliki akses.');
+
+    $this->assertDatabaseHas('questions', [
+        'id' => $question->id,
     ]);
 });
 

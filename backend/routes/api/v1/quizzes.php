@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware('throttle:api')
+    ->middleware(['auth:sanctum', 'role:admin', 'throttle:api'])
     ->group(function (): void {
         Route::get('/courses/{course_uuid}/quiz', [CourseFinalQuizController::class, 'show'])
             ->name('courses.quiz.show');
@@ -28,4 +28,7 @@ Route::prefix('admin')
 
         Route::patch('/quiz-questions/{question_uuid}', [AdminQuizController::class, 'updateQuestion'])
             ->name('quiz-questions.update');
+
+        Route::delete('/quiz-questions/{question_uuid}', [AdminQuizController::class, 'destroyQuestion'])
+            ->name('quiz-questions.destroy');
     });

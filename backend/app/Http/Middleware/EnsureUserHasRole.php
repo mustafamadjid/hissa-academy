@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\GlobalExceptions\AuthorizationException;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +23,7 @@ class EnsureUserHasRole
         $user = $request->user();
 
         if (! $user || ! $user->role || ! in_array($user->role->name, $roles, true)) {
-            abort(403, 'Access Denied');
+            throw new AuthorizationException();
         }
 
         return $next($request);

@@ -287,6 +287,48 @@ it('rejects question update when the actor is not an admin', function () {
     ))->toThrow(AuthorizationException::class, 'Anda tidak memiliki akses.');
 });
 
+it('deletes a question through the repository', function () {
+    $question = new Question(['question' => 'Apa itu Laravel?']);
+    $question->id = 'question-uuid';
+
+    $repository = Mockery::mock(QuizzRepositoryContract::class);
+    $repository->shouldReceive('findQuestionById')
+        ->once()
+        ->with('question-uuid')
+        ->andReturn($question);
+    $repository->shouldReceive('deleteQuestion')
+        ->once()
+        ->with($question)
+        ->andReturnTrue();
+
+    $service = makeQuizzService($repository);
+
+    expect($service->deleteQuestion('question-uuid', quizzAdminActor()))->toBeTrue();
+});
+
+it('returns false when deleting a missing question', function () {
+    $repository = Mockery::mock(QuizzRepositoryContract::class);
+    $repository->shouldReceive('findQuestionById')
+        ->once()
+        ->with('missing-question')
+        ->andReturnNull();
+    $repository->shouldReceive('deleteQuestion')->never();
+
+    $service = makeQuizzService($repository);
+
+    expect($service->deleteQuestion('missing-question', quizzAdminActor()))->toBeFalse();
+});
+
+it('rejects question deletion when the actor is not an admin', function () {
+    $repository = Mockery::mock(QuizzRepositoryContract::class);
+    $repository->shouldReceive('findQuestionById')->never();
+    $repository->shouldReceive('deleteQuestion')->never();
+    $service = makeQuizzService($repository);
+
+    expect(fn () => $service->deleteQuestion('question-uuid', quizzStudentActor()))
+        ->toThrow(AuthorizationException::class, 'Anda tidak memiliki akses.');
+});
+
 function makeQuizzService(QuizzRepositoryContract $repository): QuizzService
 {
     return new QuizzService($repository, new EnsureAdminForService);
