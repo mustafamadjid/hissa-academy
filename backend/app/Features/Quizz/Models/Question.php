@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'quizz_id',
     'question',
+    'points',
     'position',
     'image_url',
 ])]
@@ -20,6 +21,14 @@ class Question extends Model
 {
     /** @use HasFactory<QuestionFactory> */
     use HasFactory, HasUuidPrimaryKey;
+
+    protected function casts(): array
+    {
+        return [
+            'points' => 'integer',
+            'position' => 'integer',
+        ];
+    }
 
     public function quizz(): BelongsTo
     {

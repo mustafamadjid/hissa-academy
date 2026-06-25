@@ -16,6 +16,7 @@ class QuestionResource extends JsonResource
             'id' => $this->id,
             'quizz_id' => $this->quizz_id,
             'question' => $this->question,
+            'points' => (int) $this->points,
             'position' => (int) $this->position,
             'image_url' => $this->image_url,
             'answers' => AnswerResource::collection($this->whenLoaded('answers')),

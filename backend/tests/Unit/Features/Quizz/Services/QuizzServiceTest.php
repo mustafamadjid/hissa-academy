@@ -4,6 +4,7 @@ use App\Features\Course\Models\Course;
 use App\Features\Quizz\Contracts\QuizzRepositoryContract;
 use App\Features\Quizz\DTOs\QuestionCreateData;
 use App\Features\Quizz\DTOs\QuestionOptionCreateData;
+use App\Features\Quizz\DTOs\QuestionUpdateData;
 use App\Features\Quizz\DTOs\QuizzCreateData;
 use App\Features\Quizz\Exceptions\QuizzOperationException;
 use App\Features\Quizz\Models\Question;
@@ -231,6 +232,57 @@ it('rejects batch question creation when the actor is not an admin', function ()
                 ],
             ),
         ],
+        quizzStudentActor(),
+    ))->toThrow(AuthorizationException::class, 'Anda tidak memiliki akses.');
+});
+
+it('updates a question through the repository', function () {
+    $question = new Question([
+        'question' => 'Apa itu service container?',
+        'points' => 5,
+        'position' => 3,
+    ]);
+    $question->id = 'question-uuid';
+    $data = new QuestionUpdateData(
+        question: 'Apa itu service container?',
+        points: 5,
+        position: 3,
+        answers: [
+            new QuestionOptionCreateData(answer: 'Dependency injection container Laravel', isCorrect: true),
+        ],
+    );
+
+    $repository = Mockery::mock(QuizzRepositoryContract::class);
+    $repository->shouldReceive('findQuestionById')
+        ->once()
+        ->with('question-uuid')
+        ->andReturn($question);
+    $repository->shouldReceive('updateQuestionWithAnswers')
+        ->once()
+        ->with($question, $data)
+        ->andReturn($question);
+
+    $service = makeQuizzService($repository);
+
+    expect($service->updateQuestion('question-uuid', $data, quizzAdminActor()))->toBe($question);
+});
+
+it('rejects question update when the actor is not an admin', function () {
+    $repository = Mockery::mock(QuizzRepositoryContract::class);
+    $repository->shouldReceive('findQuestionById')->never();
+    $repository->shouldReceive('updateQuestionWithAnswers')->never();
+    $service = makeQuizzService($repository);
+
+    expect(fn () => $service->updateQuestion(
+        'question-uuid',
+        new QuestionUpdateData(
+            question: 'Apa itu service container?',
+            points: 5,
+            position: 3,
+            answers: [
+                new QuestionOptionCreateData(answer: 'Dependency injection container Laravel', isCorrect: true),
+            ],
+        ),
         quizzStudentActor(),
     ))->toThrow(AuthorizationException::class, 'Anda tidak memiliki akses.');
 });

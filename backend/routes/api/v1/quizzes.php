@@ -25,4 +25,7 @@ Route::prefix('admin')
 
         Route::post('/quizzes/{quiz_uuid}/questions', [AdminQuizController::class, 'storeQuestions'])
             ->name('quizzes.questions.store');
+
+        Route::patch('/quiz-questions/{question_uuid}', [AdminQuizController::class, 'updateQuestion'])
+            ->name('quiz-questions.update');
     });

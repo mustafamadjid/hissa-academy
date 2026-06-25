@@ -23,6 +23,7 @@ class QuestionFactory extends Factory
         return [
             'quizz_id' => Quizz::factory(),
             'question' => fake()->sentence(),
+            'points' => fake()->numberBetween(1, 10),
             'position' => fake()->numberBetween(1, 20),
             'image_url' => fake()->optional()->imageUrl(),
         ];

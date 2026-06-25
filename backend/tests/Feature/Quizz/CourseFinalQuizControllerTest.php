@@ -261,6 +261,100 @@ it('rejects batch question creation when the user is not an admin', function () 
     ]);
 });
 
+it('updates a quiz question and replaces its answer options', function () {
+    $this->actingAs(quizzAdminUser());
+    $quiz = Quizz::factory()->create();
+    $question = Question::factory()->create([
+        'quizz_id' => $quiz->id,
+        'question' => 'Pertanyaan lama',
+        'points' => 1,
+        'position' => 1,
+    ]);
+    Answer::factory()->create([
+        'question_id' => $question->id,
+        'answer' => 'Jawaban lama',
+        'is_correct' => true,
+    ]);
+
+    $response = $this->patchJson("/api/v1/admin/quiz-questions/{$question->id}", [
+        'question' => 'Apa itu service container?',
+        'points' => 5,
+        'position' => 3,
+        'answers' => [
+            ['answer' => 'Dependency injection container Laravel', 'is_correct' => true],
+            ['answer' => 'Template engine Laravel', 'is_correct' => false],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('message', 'Pertanyaan quiz berhasil diperbarui.')
+        ->assertJsonPath('data.id', $question->id)
+        ->assertJsonPath('data.question', 'Apa itu service container?')
+        ->assertJsonPath('data.points', 5)
+        ->assertJsonPath('data.position', 3)
+        ->assertJsonPath('data.answers.0.answer', 'Dependency injection container Laravel')
+        ->assertJsonPath('data.answers.0.is_correct', true)
+        ->assertJsonPath('data.answers.1.answer', 'Template engine Laravel')
+        ->assertJsonPath('data.answers.1.is_correct', false);
+
+    $this->assertDatabaseHas('questions', [
+        'id' => $question->id,
+        'question' => 'Apa itu service container?',
+        'points' => 5,
+        'position' => 3,
+    ]);
+    $this->assertDatabaseMissing('answers_options', [
+        'question_id' => $question->id,
+        'answer' => 'Jawaban lama',
+    ]);
+    $this->assertDatabaseHas('answers_options', [
+        'question_id' => $question->id,
+        'answer' => 'Dependency injection container Laravel',
+        'is_correct' => true,
+    ]);
+});
+
+it('returns validation errors when updating a quiz question with invalid payload', function () {
+    $this->actingAs(quizzAdminUser());
+    $question = Question::factory()->create();
+
+    $response = $this->patchJson("/api/v1/admin/quiz-questions/{$question->id}", [
+        'question' => '',
+        'points' => 0,
+        'position' => 0,
+        'answers' => [],
+    ]);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors([
+            'question',
+            'points',
+            'position',
+            'answers',
+        ]);
+});
+
+it('rejects quiz question update when the user is not an admin', function () {
+    $this->actingAs(quizzStudentUser());
+    $question = Question::factory()->create([
+        'question' => 'Pertanyaan lama',
+        'points' => 1,
+    ]);
+
+    $response = $this->patchJson("/api/v1/admin/quiz-questions/{$question->id}", validQuestionUpdatePayload());
+
+    $response->assertForbidden()
+        ->assertJsonPath('success', false)
+        ->assertJsonPath('message', 'Anda tidak memiliki akses.');
+
+    $this->assertDatabaseHas('questions', [
+        'id' => $question->id,
+        'question' => 'Pertanyaan lama',
+        'points' => 1,
+    ]);
+});
+
 function validFinalQuizPayload(array $overrides = []): array
 {
     return array_merge([
@@ -289,6 +383,19 @@ function validBatchQuestionsPayload(array $overrides = []): array
                     ['answer' => 'Mengirim email', 'is_correct' => false],
                 ],
             ],
+        ],
+    ], $overrides);
+}
+
+function validQuestionUpdatePayload(array $overrides = []): array
+{
+    return array_merge([
+        'question' => 'Apa itu service container?',
+        'points' => 5,
+        'position' => 3,
+        'answers' => [
+            ['answer' => 'Dependency injection container Laravel', 'is_correct' => true],
+            ['answer' => 'Template engine Laravel', 'is_correct' => false],
         ],
     ], $overrides);
 }

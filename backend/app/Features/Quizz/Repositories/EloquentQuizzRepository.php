@@ -5,6 +5,7 @@ namespace App\Features\Quizz\Repositories;
 use App\Features\Course\Models\Course;
 use App\Features\Quizz\Contracts\QuizzRepositoryContract;
 use App\Features\Quizz\DTOs\QuestionCreateData;
+use App\Features\Quizz\DTOs\QuestionUpdateData;
 use App\Features\Quizz\DTOs\QuizzCreateData;
 use App\Features\Quizz\Models\Question;
 use App\Features\Quizz\Models\Quizz;
@@ -37,6 +38,11 @@ final class EloquentQuizzRepository implements QuizzRepositoryContract
     public function findQuizById(string $quizId): ?Quizz
     {
         return Quizz::query()->find($quizId);
+    }
+
+    public function findQuestionById(string $questionId): ?Question
+    {
+        return Question::query()->find($questionId);
     }
 
     public function updateQuiz(Quizz $quiz, QuizzCreateData $data): Quizz
@@ -84,6 +90,27 @@ final class EloquentQuizzRepository implements QuizzRepositoryContract
 
                     return $question->load('answers');
                 });
+        });
+    }
+
+    public function updateQuestionWithAnswers(Question $question, QuestionUpdateData $data): Question
+    {
+        return DB::transaction(function () use ($question, $data): Question {
+            $question->update([
+                'question' => $data->question,
+                'points' => $data->points,
+                'position' => $data->position,
+            ]);
+
+            $question->answers()->delete();
+            $question->answers()->createMany(
+                array_map(fn ($answer): array => [
+                    'answer' => $answer->answer,
+                    'is_correct' => $answer->isCorrect,
+                ], $data->answers),
+            );
+
+            return $question->refresh()->load('answers');
         });
     }
 }

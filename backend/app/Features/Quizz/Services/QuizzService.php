@@ -4,7 +4,9 @@ namespace App\Features\Quizz\Services;
 
 use App\Features\Quizz\Contracts\QuizzRepositoryContract;
 use App\Features\Quizz\DTOs\QuestionCreateData;
+use App\Features\Quizz\DTOs\QuestionUpdateData;
 use App\Features\Quizz\DTOs\QuizzCreateData;
+use App\Features\Quizz\Models\Question;
 use App\Features\Quizz\Exceptions\QuizzOperationException;
 use App\Features\Quizz\Models\Quizz;
 use App\Features\User\Models\User;
@@ -128,6 +130,23 @@ final class QuizzService
             return $this->quizzRepository->createQuestionsWithAnswers($quiz, $questions);
         } catch (Throwable $exception) {
             throw new QuizzOperationException('Gagal membuat pertanyaan quiz.', $exception);
+        }
+    }
+
+    public function updateQuestion(string $questionId, QuestionUpdateData $data, ?User $actor): ?Question
+    {
+        $this->ensureAdmin->ensureAdmin($actor);
+
+        try {
+            $question = $this->quizzRepository->findQuestionById($questionId);
+
+            if ($question === null) {
+                return null;
+            }
+
+            return $this->quizzRepository->updateQuestionWithAnswers($question, $data);
+        } catch (Throwable $exception) {
+            throw new QuizzOperationException('Gagal memperbarui pertanyaan quiz.', $exception);
         }
     }
 }
