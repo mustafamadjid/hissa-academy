@@ -1,9 +1,25 @@
 <?php
 
 use App\Features\Lesson\Http\Controllers\LessonController;
+use App\Features\Lesson\Http\Controllers\StudentLessonController;
 use App\Features\LessonVideo\Http\Controllers\LessonVideoController;
 use App\Features\User\Enums\UserRole;
+use App\Features\UserProgress\Http\Controllers\StudentLessonProgressController;
 use Illuminate\Support\Facades\Route;
+
+Route::prefix('lessons')
+    ->name('lessons.')
+    ->middleware(['auth:sanctum', 'role:' . UserRole::STUDENT->value, 'throttle:api'])
+    ->group(function (): void {
+        Route::get('/{lesson_uuid}/progress', [StudentLessonProgressController::class, 'show'])
+            ->name('progress.show');
+
+        Route::post('/{lesson_uuid}/progress', [StudentLessonProgressController::class, 'store'])
+            ->name('progress.store');
+
+        Route::get('/{lesson_uuid}', [StudentLessonController::class, 'show'])
+            ->name('show');
+    });
 
 Route::prefix('admin')
     ->name('admin.')

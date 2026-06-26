@@ -1,8 +1,23 @@
 <?php
 
 use App\Features\Course\Http\Controllers\CourseController;
+use App\Features\Course\Http\Controllers\StudentCourseController;
 use App\Features\User\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
+
+Route::prefix('courses')
+    ->name('courses.')
+    ->middleware(['auth:sanctum', 'role:' . UserRole::STUDENT->value, 'throttle:api'])
+    ->group(function (): void {
+        Route::get('/', [StudentCourseController::class, 'index'])
+            ->name('index');
+
+        Route::get('/{course_uuid}/progress', [StudentCourseController::class, 'progress'])
+            ->name('progress');
+
+        Route::get('/{course_uuid}', [StudentCourseController::class, 'show'])
+            ->name('show');
+    });
 
 Route::prefix('admin/courses')
     ->name('admin.courses.')

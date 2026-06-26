@@ -34,6 +34,17 @@ final class EloquentLessonRepository implements LessonRepositoryContract
             ->find($lessonId);
     }
 
+    public function findActiveCourseLessonById(string $lessonId): ?Lesson
+    {
+        return Lesson::query()
+            ->with([
+                'course.lessons' => fn ($query) => $query->orderBy('position'),
+                'video',
+            ])
+            ->whereHas('course', fn ($query) => $query->where('status', 'active'))
+            ->find($lessonId);
+    }
+
     public function create(Course $course, LessonCreateData $data): Lesson
     {
         return DB::transaction(function () use ($course, $data): Lesson {

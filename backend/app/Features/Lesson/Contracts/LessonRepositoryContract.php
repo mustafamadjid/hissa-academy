@@ -19,6 +19,8 @@ interface LessonRepositoryContract
 
     public function findById(string $lessonId): ?Lesson;
 
+    public function findActiveCourseLessonById(string $lessonId): ?Lesson;
+
     public function create(Course $course, LessonCreateData $data): Lesson;
 
     public function update(Lesson $lesson, LessonUpdateData $data): Lesson;

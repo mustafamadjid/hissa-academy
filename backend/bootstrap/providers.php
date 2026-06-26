@@ -8,6 +8,7 @@ use App\Providers\LessonVideo\LessonVideoServiceProvider;
 use App\Providers\Quizz\QuizzServiceProvider;
 use App\Providers\Student\StudentServiceProvider;
 use App\Providers\User\UserServiceProvider;
+use App\Providers\UserProgress\UserProgressServiceProvider;
 
 return [
     AppServiceProvider::class,
@@ -18,4 +19,5 @@ return [
     QuizzServiceProvider::class,
     StudentServiceProvider::class,
     UserServiceProvider::class,
+    UserProgressServiceProvider::class,
 ];

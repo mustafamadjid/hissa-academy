@@ -6,6 +6,7 @@ use App\Features\Course\Contracts\CourseRepositoryContract;
 use App\Features\Course\DTOs\CourseListQueryData;
 use App\Features\Course\Models\Course;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 final class EloquentCourseRepository implements CourseRepositoryContract
 {
@@ -26,6 +27,23 @@ final class EloquentCourseRepository implements CourseRepositoryContract
             })
             ->orderBy($sortBy, $sortDirection)
             ->paginate($limit, ['id', 'course_name', 'description', 'minimum_score', 'status'], 'page', $page);
+    }
+
+    public function activeCoursesWithLessons(): Collection
+    {
+        return Course::query()
+            ->with(['lessons' => fn ($query) => $query->orderBy('position')])
+            ->where('status', 'active')
+            ->orderBy('course_name')
+            ->get();
+    }
+
+    public function findActiveWithLessons(string $id): ?Course
+    {
+        return Course::query()
+            ->with(['lessons' => fn ($query) => $query->with('video')->orderBy('position')])
+            ->where('status', 'active')
+            ->find($id);
     }
 
     public function findById(string $id): ?Course
