@@ -1,11 +1,12 @@
 <?php
 
 use App\Features\Course\Http\Controllers\CourseController;
+use App\Features\User\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin/courses')
     ->name('admin.courses.')
-    ->middleware(['auth:sanctum', 'role:admin', 'throttle:api'])
+    ->middleware(['auth:sanctum', 'role:' . UserRole::ADMIN->value, 'throttle:api'])
     ->group(function (): void {
         Route::get('/', [CourseController::class, 'index'])
             ->name('index');

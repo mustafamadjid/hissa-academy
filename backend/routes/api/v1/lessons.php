@@ -2,11 +2,12 @@
 
 use App\Features\Lesson\Http\Controllers\LessonController;
 use App\Features\LessonVideo\Http\Controllers\LessonVideoController;
+use App\Features\User\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth:sanctum', 'role:admin', 'throttle:api'])
+    ->middleware(['auth:sanctum', 'role:' . UserRole::ADMIN->value, 'throttle:api'])
     ->group(function (): void {
         Route::get('/courses/{course_uuid}/lessons', [LessonController::class, 'index'])
             ->name('courses.lessons.index');

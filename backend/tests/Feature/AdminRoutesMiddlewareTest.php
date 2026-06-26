@@ -1,5 +1,6 @@
 <?php
 
+use App\Features\User\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
 
 it('protects every admin api route with sanctum admin role and throttling middleware', function () {
@@ -11,7 +12,7 @@ it('protects every admin api route with sanctum admin role and throttling middle
     $adminRoutes->each(function ($route) {
         expect($route->gatherMiddleware())
             ->toContain('auth:sanctum')
-            ->toContain('role:admin')
+            ->toContain('role:' . UserRole::ADMIN->value)
             ->toContain('throttle:api');
     });
 });

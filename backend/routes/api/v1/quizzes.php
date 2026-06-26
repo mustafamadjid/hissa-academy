@@ -2,11 +2,12 @@
 
 use App\Features\Quizz\Http\Controllers\AdminQuizController;
 use App\Features\Quizz\Http\Controllers\CourseFinalQuizController;
+use App\Features\User\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth:sanctum', 'role:admin', 'throttle:api'])
+    ->middleware(['auth:sanctum', 'role:' . UserRole::ADMIN->value, 'throttle:api'])
     ->group(function (): void {
         Route::get('/courses/{course_uuid}/quiz', [CourseFinalQuizController::class, 'show'])
             ->name('courses.quiz.show');
