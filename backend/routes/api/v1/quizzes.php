@@ -2,8 +2,24 @@
 
 use App\Features\Quizz\Http\Controllers\AdminQuizController;
 use App\Features\Quizz\Http\Controllers\CourseFinalQuizController;
+use App\Features\Quizz\Http\Controllers\StudentQuizController;
 use App\Features\User\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth:sanctum', 'role:' . UserRole::STUDENT->value, 'throttle:api'])
+    ->group(function (): void {
+        Route::get('/courses/{course_uuid}/quiz', [StudentQuizController::class, 'courseQuiz'])
+            ->name('courses.quiz.show');
+
+        Route::post('/quizzes/{quiz_uuid}/attempts', [StudentQuizController::class, 'createAttempt'])
+            ->name('quizzes.attempts.store');
+
+        Route::get('/quiz-attempts/{attempt_uuid}', [StudentQuizController::class, 'attempt'])
+            ->name('quiz-attempts.show');
+
+        Route::post('/quiz-attempts/{attempt_uuid}/submit', [StudentQuizController::class, 'submitAttempt'])
+            ->name('quiz-attempts.submit');
+    });
 
 Route::prefix('admin')
     ->name('admin.')

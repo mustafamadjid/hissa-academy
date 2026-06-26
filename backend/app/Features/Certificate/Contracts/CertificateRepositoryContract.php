@@ -10,7 +10,11 @@ interface CertificateRepositoryContract
 {
     public function all(CertificateListData $query): LengthAwarePaginator;
 
+    public function forUser(string $userId, CertificateListData $query): LengthAwarePaginator;
+
     public function findById(string $certificateId): ?Certificate;
+
+    public function findForUser(string $certificateId, string $userId): ?Certificate;
 
     public function revoke(Certificate $certificate, string $reason): Certificate;
 }

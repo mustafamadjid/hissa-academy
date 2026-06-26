@@ -32,10 +32,43 @@ final class EloquentCertificateRepository implements CertificateRepositoryContra
             );
     }
 
+    public function forUser(string $userId, CertificateListData $query): LengthAwarePaginator
+    {
+        return Certificate::query()
+            ->with(['user', 'course'])
+            ->where('user_id', $userId)
+            ->orderByDesc('issued_at')
+            ->paginate(
+                $query->limit,
+                [
+                    'id',
+                    'user_id',
+                    'course_id',
+                    'certificate_number',
+                    'issued_at',
+                    'status',
+                    'pdf_path',
+                    'revoked_reason',
+                    'revoked_at',
+                ],
+                'page',
+                $query->page
+            );
+    }
+
     public function findById(string $certificateId): ?Certificate
     {
         return Certificate::query()
             ->with(['user', 'course'])
+            ->whereKey($certificateId)
+            ->first();
+    }
+
+    public function findForUser(string $certificateId, string $userId): ?Certificate
+    {
+        return Certificate::query()
+            ->with(['user', 'course'])
+            ->where('user_id', $userId)
             ->whereKey($certificateId)
             ->first();
     }
