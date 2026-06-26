@@ -64,6 +64,14 @@ final class EloquentCertificateRepository implements CertificateRepositoryContra
             ->first();
     }
 
+    public function findByCertificateNumber(string $certificateNumber): ?Certificate
+    {
+        return Certificate::query()
+            ->with(['user', 'course'])
+            ->where('certificate_number', $certificateNumber)
+            ->first();
+    }
+
     public function findForUser(string $certificateId, string $userId): ?Certificate
     {
         return Certificate::query()

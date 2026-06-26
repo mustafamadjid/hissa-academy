@@ -1,9 +1,18 @@
 <?php
 
 use App\Features\Certificate\Http\Controllers\CertificateController;
+use App\Features\Certificate\Http\Controllers\PublicCertificateController;
 use App\Features\Certificate\Http\Controllers\StudentCertificateController;
 use App\Features\User\Enums\UserRole;
 use Illuminate\Support\Facades\Route;
+
+Route::prefix('public/certificates')
+    ->name('public.certificates.')
+    ->middleware('throttle:api')
+    ->group(function (): void {
+        Route::get('/{certificate_number}', [PublicCertificateController::class, 'show'])
+            ->name('show');
+    });
 
 Route::prefix('certificates')
     ->name('certificates.')

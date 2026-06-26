@@ -14,6 +14,8 @@ interface CertificateRepositoryContract
 
     public function findById(string $certificateId): ?Certificate;
 
+    public function findByCertificateNumber(string $certificateNumber): ?Certificate;
+
     public function findForUser(string $certificateId, string $userId): ?Certificate;
 
     public function revoke(Certificate $certificate, string $reason): Certificate;
