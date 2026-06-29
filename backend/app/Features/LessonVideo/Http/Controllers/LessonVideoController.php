@@ -26,7 +26,7 @@ final class LessonVideoController
 
             return response()->json([
                 'success' => true,
-                'message' => 'Metadata video lesson berhasil disimpan.',
+                'message' => 'Metadata lesson video berhasil disimpan.',
                 'data' => new LessonVideoResource($video),
             ]);
         } catch (AuthorizationException $exception) {

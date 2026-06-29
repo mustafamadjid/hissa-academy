@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -101,4 +100,16 @@
   --grid-gutter-desktop: 24px;
   --grid-gutter-tablet: 20px;
   --grid-gutter-mobile: 16px;
+}
+
+/* Custom utility classes */
+.text-primary-green {
+  color: #10b981;
+}
+
+.focus-ring-primary-green {
+  --tw-ring-color: rgba(16, 185, 129, 0.15);
+}
+.border-primary-green {
+  border-color: #10b981;
 }

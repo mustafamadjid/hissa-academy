@@ -4,7 +4,7 @@ use App\Features\Auth\Http\Controllers\GoogleAuthController;
 use App\Features\Auth\Http\Controllers\UserAuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('auth')->middleware('web')->group(function (): void {
+Route::prefix('auth')->group(function (): void {
     Route::post('/login', [UserAuthController::class, 'store'])
         ->name('auth.login')
         ->middleware('throttle:login');
