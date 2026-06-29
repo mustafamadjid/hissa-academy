@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import {
-  BookOpen,
-  Plus,
-  Search,
-  CheckCircle2,
   AlertCircle,
+  BookOpen,
+  CheckCircle2,
   FileText,
   Layers,
+  Plus,
+  Search,
 } from "@lucide/vue";
 
 import AdminDashboard from "@/layouts/AdminDashboard/AdminDashboard.vue";
@@ -57,13 +57,20 @@ function requestDelete(course: CourseDto): void {
 
 async function submitCourse(values: CourseFormValues): Promise<void> {
   const saved = await saveCourse(values, selectedCourse.value?.id);
-  if (saved) isFormOpen.value = false;
+
+  if (saved) {
+    isFormOpen.value = false;
+  }
 }
 
 async function confirmDelete(): Promise<void> {
   if (!courseToDelete.value) return;
+
   const deleted = await removeCourse(courseToDelete.value.id);
-  if (deleted) courseToDelete.value = null;
+
+  if (deleted) {
+    courseToDelete.value = null;
+  }
 }
 
 onMounted(() => {
@@ -73,140 +80,172 @@ onMounted(() => {
 
 <template>
   <AdminDashboard>
-    <div class="max-w-[1400px] mx-auto space-y-8 p-4 md:p-6">
-      <!-- HEADER SECTION -->
+    <main class="mx-auto w-full max-w-350 px-4 py-6 md:px-6 md:py-8">
+      <!-- Page Header -->
       <header
-        class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+        class="flex flex-col gap-5 border-b border-slate-200 pb-6 md:flex-row md:items-end md:justify-between"
       >
-        <div class="space-y-1">
+        <div class="max-w-2xl">
           <div
-            class="flex items-center gap-2 text-emerald-600 font-semibold text-sm tracking-wide uppercase"
+            class="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-500"
           >
-            <Layers :size="16" />
+            <Layers :size="14" stroke-width="1.8" />
             <span>Learning Management</span>
           </div>
-          <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
+
+          <h1
+            class="text-2xl font-bold tracking-tight text-slate-950 md:text-3xl"
+          >
             Kelola Course
           </h1>
-          <p class="text-slate-500 max-w-2xl">
-            Pusat kendali konten pembelajaran. Tambah, edit, atau pantau
-            performa course HISSA Academy di sini.
+
+          <p class="mt-2 text-sm leading-6 text-slate-500 md:text-base">
+            Kelola informasi course, susunan materi, dan konten pembelajaran
+            HISSA Academy.
           </p>
         </div>
 
         <UButton
-          class="cursor-pointer p-4 shadow-sm hover:shadow-md transition-all duration-200"
-          size="xl"
-          color="primary"
+          size="lg"
+          color="neutral"
+          class="cursor-pointer justify-center rounded-lg bg-slate-900 px-4 text-white shadow-none transition-colors hover:bg-slate-800 active:bg-slate-950"
           @click="openCreateForm"
         >
-          <Plus :size="20" class="mr-1" />
-          Tambah Course Baru
+          <Plus :size="18" />
+          Tambah Course
         </UButton>
       </header>
 
-      <!-- STATS GRID -->
+      <!-- Summary -->
       <section
-        class="grid grid-cols-1 md:grid-cols-3 gap-4"
-        aria-label="Statistik Ringkas"
+        class="grid grid-cols-1 border-b border-slate-200 md:grid-cols-[240px_1fr]"
+        aria-label="Ringkasan course"
       >
-        <!-- Total Course -->
         <div
-          class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5"
+          class="flex items-center gap-4 py-5 md:border-r md:border-slate-200 md:pr-6"
         >
-          <div class="flex items-center gap-4">
-            <div
-              class="rounded-xl bg-emerald-50 p-3 text-emerald-600 group-hover:bg-emerald-100 transition-colors"
+          <div
+            class="flex size-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600"
+          >
+            <BookOpen :size="19" stroke-width="1.8" />
+          </div>
+
+          <div>
+            <p
+              class="text-xs font-medium uppercase tracking-wide text-slate-500"
             >
-              <BookOpen :size="24" />
-            </div>
-            <div>
-              <p
-                class="text-sm font-medium text-slate-500 uppercase tracking-wider"
-              >
-                Total Course
-              </p>
-              <h3 class="text-3xl font-bold text-slate-900">{{ total }}</h3>
-            </div>
+              Total Course
+            </p>
+
+            <p class="mt-0.5 text-2xl font-semibold text-slate-950">
+              {{ total }}
+            </p>
           </div>
         </div>
 
-        <!-- Info Card (Status Konten) -->
         <div
-          class="md:col-span-2 flex flex-col justify-center rounded-2xl border border-slate-200 bg-slate-50/50 p-6"
+          class="flex items-start gap-4 border-t border-slate-200 py-5 md:border-t-0 md:pl-6"
         >
-          <div class="flex gap-4 items-start">
-            <div class="rounded-xl bg-blue-50 p-3 text-blue-600">
-              <FileText :size="24" />
-            </div>
-            <div>
-              <p class="text-sm font-bold text-slate-800">Tips Pengelolaan</p>
-              <p class="mt-1 text-sm leading-relaxed text-slate-600">
-                Gunakan fitur "Cari" untuk menemukan course secara spesifik.
-                Pengaturan modul dan lesson tersedia di dalam detail
-                masing-masing course setelah data utama disimpan.
-              </p>
-            </div>
+          <div
+            class="flex size-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600"
+          >
+            <FileText :size="19" stroke-width="1.8" />
+          </div>
+
+          <div>
+            <p class="text-sm font-semibold text-slate-800">
+              Pengelolaan konten
+            </p>
+
+            <p class="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
+              Modul dan lesson dapat dikelola melalui halaman detail setelah
+              informasi utama course disimpan.
+            </p>
           </div>
         </div>
       </section>
 
-      <!-- FEEDBACK MESSAGES -->
-      <TransitionGroup name="fade">
+      <!-- Feedback Messages -->
+      <TransitionGroup name="feedback" tag="div" class="mt-6 space-y-3">
         <div
           v-if="successMessage"
           key="success"
-          class="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-800 shadow-sm"
+          role="status"
+          class="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 px-4 py-3 text-emerald-800"
         >
-          <CheckCircle2 :size="20" />
-          <span class="text-sm font-semibold">{{ successMessage }}</span>
+          <CheckCircle2 :size="18" class="mt-0.5 shrink-0" stroke-width="1.8" />
+
+          <span class="text-sm leading-5">
+            {{ successMessage }}
+          </span>
         </div>
 
         <div
           v-if="errorMessage"
           key="error"
-          class="flex flex-col gap-4 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-red-800 shadow-sm md:flex-row md:items-center md:justify-between"
+          role="alert"
+          class="flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50/50 px-4 py-3 text-red-800 sm:flex-row sm:items-center sm:justify-between"
         >
-          <div class="flex items-center gap-3">
-            <AlertCircle :size="20" />
-            <span class="text-sm font-semibold">{{ errorMessage }}</span>
+          <div class="flex items-start gap-3">
+            <AlertCircle
+              :size="18"
+              class="mt-0.5 shrink-0"
+              stroke-width="1.8"
+            />
+
+            <span class="text-sm leading-5">
+              {{ errorMessage }}
+            </span>
           </div>
+
           <UButton
             v-if="!isFormOpen && !courseToDelete"
-            label="Coba Muat Ulang"
-            color="primary"
+            label="Muat ulang"
+            color="neutral"
             variant="ghost"
             size="sm"
             icon="i-heroicons-arrow-path"
+            class="cursor-pointer self-start text-slate-700 hover:bg-slate-100 hover:text-slate-900 sm:self-auto"
             @click="fetchCourses"
           />
         </div>
       </TransitionGroup>
 
-      <!-- TABLE CONTROLS & DATA TABLE -->
-      <div
-        class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+      <!-- Course List -->
+      <section
+        class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white"
       >
-        <!-- Search Bar Area -->
-        <div class="border-b border-slate-100 bg-slate-50/30 p-5">
-          <div class="max-w-md">
+        <div
+          class="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-5"
+        >
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">Daftar Course</h2>
+
+            <p class="mt-1 text-xs text-slate-500">
+              {{ total }} course tersedia
+            </p>
+          </div>
+
+          <div class="w-full sm:max-w-sm">
             <UInput
               v-model="search"
               type="search"
-              placeholder="Cari berdasarkan nama atau kategori..."
-              class="w-full shadow-sm"
+              placeholder="Cari course..."
               size="md"
-              icon="i-heroicons-magnifying-glass"
+              variant="outline"
+              class="w-full"
+              :ui="{
+                base: 'rounded-lg border-slate-200 bg-white text-slate-900 shadow-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-slate-200',
+              }"
             >
               <template #leading>
-                <Search :size="18" class="text-slate-400" />
+                <Search :size="17" class="text-slate-400" stroke-width="1.8" />
               </template>
             </UInput>
           </div>
         </div>
 
-        <!-- The Table -->
-        <div class="p-2">
+        <div class="p-2 md:p-3">
           <CourseTable
             v-model:page="page"
             :courses="courses"
@@ -217,10 +256,9 @@ onMounted(() => {
             @delete="requestDelete"
           />
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
 
-    <!-- MODALS -->
     <CourseFormModal
       v-model:open="isFormOpen"
       :course="selectedCourse"
@@ -242,13 +280,16 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
+.feedback-enter-active,
+.feedback-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
 }
-.fade-enter-from,
-.fade-leave-to {
+
+.feedback-enter-from,
+.feedback-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-4px);
 }
 </style>
