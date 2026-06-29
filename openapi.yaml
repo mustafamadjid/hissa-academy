@@ -614,7 +614,7 @@ paths:
     get:
       tags: [Admin Courses]
       summary: Get admin course detail
-      description: Mengambil detail course admin berdasarkan UUID course.
+      description: Mengambil detail course admin beserta jumlah dan daftar lesson berdasarkan UUID course.
       parameters:
         - $ref: "#/components/parameters/CourseUuid"
       responses:
@@ -628,7 +628,7 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: "#/components/schemas/AdminCourse"
+                        $ref: "#/components/schemas/AdminCourseDetail"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "403":
@@ -2575,6 +2575,21 @@ components:
           type: string
           maxLength: 255
           example: published
+    AdminCourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminCourse"
+        - type: object
+          required: [total_lessons, lessons]
+          properties:
+            total_lessons:
+              type: integer
+              minimum: 0
+              example: 2
+            lessons:
+              type: array
+              description: Daftar lesson yang diurutkan berdasarkan position secara ascending.
+              items:
+                $ref: "#/components/schemas/AdminLesson"
     CreateCourseRequest:
       type: object
       required: [course_name, description, minimum_score, status]
