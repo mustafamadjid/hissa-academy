@@ -46,6 +46,14 @@ final class EloquentCourseRepository implements CourseRepositoryContract
             ->find($id);
     }
 
+    public function findWithLessonsById(string $id): ?Course
+    {
+        return Course::query()
+            ->with(['lessons' => fn ($query) => $query->with('video')->orderBy('position')])
+            ->withCount('lessons')
+            ->find($id);
+    }
+
     public function findById(string $id): ?Course
     {
         return Course::find($id);

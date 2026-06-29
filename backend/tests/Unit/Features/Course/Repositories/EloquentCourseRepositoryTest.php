@@ -3,6 +3,7 @@
 use App\Features\Course\DTOs\CourseListQueryData;
 use App\Features\Course\Models\Course;
 use App\Features\Course\Repositories\EloquentCourseRepository;
+use App\Features\Lesson\Models\Lesson;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -57,6 +58,29 @@ it('finds a course by id and returns null when it is missing', function () {
 
     expect($repository->findById($course->id)?->is($course))->toBeTrue()
         ->and($repository->findById('00000000-0000-0000-0000-000000000000'))->toBeNull();
+});
+
+it('finds a course with its lessons ordered by position and their total', function () {
+    $course = Course::factory()->create();
+    $secondLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'position' => 2,
+    ]);
+    $firstLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'position' => 1,
+    ]);
+    $repository = new EloquentCourseRepository;
+
+    $result = $repository->findWithLessonsById($course->id);
+
+    expect($result)->not->toBeNull()
+        ->and($result->relationLoaded('lessons'))->toBeTrue()
+        ->and($result->lessons_count)->toBe(2)
+        ->and($result->lessons->pluck('id')->all())->toBe([
+            $firstLesson->id,
+            $secondLesson->id,
+        ]);
 });
 
 it('creates a course', function () {

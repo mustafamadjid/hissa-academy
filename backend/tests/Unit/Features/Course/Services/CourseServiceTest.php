@@ -51,6 +51,19 @@ it('returns a course detail from the repository', function () {
     expect($service->findById('course-uuid'))->toBe($course);
 });
 
+it('returns a course detail with lessons from the repository', function () {
+    $course = new Course(['course_name' => 'Laravel Basics']);
+    $repository = Mockery::mock(CourseRepositoryContract::class);
+    $repository->shouldReceive('findWithLessonsById')
+        ->once()
+        ->with('course-uuid')
+        ->andReturn($course);
+
+    $service = makeCourseService($repository);
+
+    expect($service->findWithLessonsById('course-uuid'))->toBe($course);
+});
+
 it('creates a course through the repository', function () {
     $payload = validServiceCoursePayload();
     $course = new Course($payload);

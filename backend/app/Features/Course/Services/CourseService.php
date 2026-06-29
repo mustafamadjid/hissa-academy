@@ -36,6 +36,15 @@ final class CourseService
         }
     }
 
+    public function findWithLessonsById(string $id): ?Course
+    {
+        try {
+            return $this->courseRepository->findWithLessonsById($id);
+        } catch (Throwable $exception) {
+            throw new CourseOperationException('Gagal mengambil detail course.', $exception);
+        }
+    }
+
     public function create(array $data, ?User $actor): Course
     {
         $this->ensureAdmin->ensureAdmin($actor);
