@@ -4,6 +4,7 @@ import type {
   CreateCourseRequest,
   CreateCourseResponse,
   DeleteCourseResponse,
+  GetAdminCourseDetailResponse,
   GetAdminCoursesQuery,
   GetAdminCoursesResponse,
   UpdateCourseRequest,
@@ -18,6 +19,14 @@ export function getAdminCourses(
   return httpClient.get<GetAdminCoursesResponse>(ADMIN_COURSES_ENDPOINT, {
     params: query,
   });
+}
+
+export function getAdminCourseDetail(
+  courseId: string,
+): Promise<GetAdminCourseDetailResponse> {
+  return httpClient.get<GetAdminCourseDetailResponse>(
+    `${ADMIN_COURSES_ENDPOINT}/${courseId}`,
+  );
 }
 
 export function createCourse(

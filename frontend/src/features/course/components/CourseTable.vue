@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Pencil, Trash2, BookOpen, GraduationCap, Search } from "@lucide/vue";
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn, TableRow } from "@nuxt/ui";
 import type { CourseDto } from "../types/course.types";
 
 const props = defineProps<{
@@ -16,6 +16,7 @@ const tableData = computed(() => [...props.courses]);
 
 const emit = defineEmits<{
   "update:page": [value: number];
+  view: [course: CourseDto];
   edit: [course: CourseDto];
   delete: [course: CourseDto];
 }>();
@@ -52,6 +53,10 @@ function visibleRange(page: number, pageSize: number, total: number): string {
   const to = Math.min(page * pageSize, total);
   return `Menampilkan ${from}-${to} dari ${total} data`;
 }
+
+function selectCourse(_event: Event, row: TableRow<CourseDto>): void {
+  emit("view", row.original);
+}
 </script>
 
 <template>
@@ -69,8 +74,9 @@ function visibleRange(page: number, pageSize: number, total: number): string {
           base: 'min-w-full table-fixed',
           th: 'bg-slate-50/50 px-4 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200',
           td: 'px-4 py-4 text-sm text-slate-600 border-b border-slate-100 align-middle',
-          tr: 'hover:bg-slate-50/30 transition-colors group',
+          tr: 'cursor-pointer hover:bg-slate-50/30 transition-colors group',
         }"
+        @select="selectCourse"
       >
         <!-- Custom Empty State -->
         <template #empty>
@@ -93,17 +99,19 @@ function visibleRange(page: number, pageSize: number, total: number): string {
         <template #name-cell="{ row }">
           <div class="flex items-center gap-3">
             <div
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/90 text-white"
             >
               <BookOpen class="h-5 w-5" />
             </div>
-            <div class="flex flex-col min-w-0">
-              <span
-                class="font-semibold text-slate-900 truncate group-hover:text-emerald-700 transition-colors"
+            <div class="flex flex-col min-w-0 cursor-pointer">
+              <button
+                type="button"
+                class="truncate cursor- pointer text-left font-semibold text-slate-900 transition-colors group-hover:text-emerald-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                @click.stop="emit('view', row.original)"
               >
                 {{ row.original.name }}
-              </span>
-              <span class="text-xs text-slate-400 line-clamp-1">
+              </button>
+              <span class="text-xs text-slate-400 line-clamp-1 cursor-pointer">
                 {{ row.original.description }}
               </span>
             </div>
@@ -152,7 +160,7 @@ function visibleRange(page: number, pageSize: number, total: number): string {
                 variant="ghost"
                 size="sm"
                 class="hover:bg-emerald-50 hover:text-emerald-600 cursor-pointer"
-                @click="emit('edit', row.original)"
+                @click.stop="emit('edit', row.original)"
               />
             </UTooltip>
             <UTooltip text="Hapus Course">
@@ -162,7 +170,7 @@ function visibleRange(page: number, pageSize: number, total: number): string {
                 variant="ghost"
                 size="sm"
                 class="hover:bg-red-50 cursor-pointer"
-                @click="emit('delete', row.original)"
+                @click.stop="emit('delete', row.original)"
               />
             </UTooltip>
           </div>

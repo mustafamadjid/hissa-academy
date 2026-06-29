@@ -17,6 +17,40 @@ export interface CourseDto {
   status: string
 }
 
+export interface LessonVideoDto {
+  id: string
+  lesson_id: string
+  youtube_video_id: string | null
+  video_url: string
+  title: string | null
+  description: string | null
+  channel_title: string | null
+  thumbnail_url: string | null
+  duration_iso: string | null
+  duration_seconds: number | null
+  privacy_status: string | null
+}
+
+export interface AdminLessonDto {
+  id: string
+  course_id: string
+  title: string
+  position: number
+  is_required: boolean
+  video?: LessonVideoDto | null
+}
+
+export interface AdminCourseDetailDto extends CourseDto {
+  total_lessons: number
+  lessons: AdminLessonDto[]
+}
+
+export interface GetAdminCourseDetailResponse {
+  success: boolean
+  message: string
+  data: AdminCourseDetailDto
+}
+
 export interface GetAdminCoursesQuery {
   page?: number
   limit?: number

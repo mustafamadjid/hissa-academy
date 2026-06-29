@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import {
   AlertCircle,
   BookOpen,
@@ -34,6 +35,8 @@ const {
   clearMessages,
 } = useAdminCourses();
 
+const router = useRouter();
+
 const isFormOpen = ref(false);
 const selectedCourse = ref<CourseDto | null>(null);
 const courseToDelete = ref<CourseDto | null>(null);
@@ -53,6 +56,13 @@ function openEditForm(course: CourseDto): void {
 function requestDelete(course: CourseDto): void {
   clearMessages();
   courseToDelete.value = course;
+}
+
+function openCourseDetail(course: CourseDto): void {
+  void router.push({
+    name: "admin-course-detail",
+    params: { courseId: course.id },
+  });
 }
 
 async function submitCourse(values: CourseFormValues): Promise<void> {
@@ -108,7 +118,7 @@ onMounted(() => {
         <UButton
           size="lg"
           color="neutral"
-          class="cursor-pointer justify-center rounded-lg bg-slate-900 px-4 text-white shadow-none transition-colors hover:bg-slate-800 active:bg-slate-950"
+          class="cursor-pointer justify-center rounded-lg bg-primary px-4 text-white shadow-none transition-colors hover:bg-primary/90 active:bg-slate-950"
           @click="openCreateForm"
         >
           <Plus :size="18" />
@@ -252,6 +262,7 @@ onMounted(() => {
             :page-size="pageSize"
             :total="total"
             :is-loading="isLoading"
+            @view="openCourseDetail"
             @edit="openEditForm"
             @delete="requestDelete"
           />

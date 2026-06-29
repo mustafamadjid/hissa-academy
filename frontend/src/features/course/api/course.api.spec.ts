@@ -4,6 +4,7 @@ import { httpClient } from '@/shared/api/http-client'
 import {
   createCourse,
   deleteCourse,
+  getAdminCourseDetail,
   getAdminCourses,
   updateCourse,
 } from './course.api'
@@ -39,6 +40,14 @@ describe('course API', () => {
     expect(httpClient.get).toHaveBeenCalledWith('admin/courses', {
       params: query,
     })
+  })
+
+  it('gets an admin course detail by id', async () => {
+    vi.mocked(httpClient.get).mockResolvedValue({})
+
+    await getAdminCourseDetail('course-id')
+
+    expect(httpClient.get).toHaveBeenCalledWith('admin/courses/course-id')
   })
 
   it('creates a course', async () => {
