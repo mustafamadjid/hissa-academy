@@ -3,3 +3,5 @@ unit-test-rules.md
 be-rules.md
 .worktrees/
 design/
+frontend/auto-imports.d.ts
+frontend/components.d.ts

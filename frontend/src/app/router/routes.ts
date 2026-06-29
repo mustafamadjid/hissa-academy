@@ -1,6 +1,7 @@
 import type { RouteMeta, RouteRecordRaw } from 'vue-router'
 
-const adminPlaceholderPage = () => import('@/features/course/pages/Admin/AdminCoursePage.vue')
+const adminPlaceholderPage = () =>
+  import('@/features/dashboard/pages/AdminDashboardPage.vue')
 
 const adminRouteMeta = {
   requiresAuth: true,
@@ -33,7 +34,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/admin/courses',
     name: 'admin-courses',
-    component: adminPlaceholderPage,
+    component: () => import('@/features/course/pages/Admin/AdminCoursePage.vue'),
     meta: adminRouteMeta,
   },
   {
