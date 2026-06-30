@@ -7,6 +7,7 @@ use App\Features\Lesson\Contracts\LessonRepositoryContract;
 use App\Features\Lesson\DTOs\LessonCreateData;
 use App\Features\Lesson\DTOs\LessonUpdateData;
 use App\Features\Lesson\Models\Lesson;
+use App\Features\LessonVideo\DTOs\LessonVideoData;
 use App\Features\LessonVideo\Models\LessonVideo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -45,27 +46,42 @@ final class EloquentLessonRepository implements LessonRepositoryContract
             ->find($lessonId);
     }
 
-    public function create(Course $course, LessonCreateData $data): Lesson
+    public function create(Course $course, LessonCreateData $data, LessonVideoData $videoMetadata): Lesson
     {
-        return DB::transaction(function () use ($course, $data): Lesson {
-            $position = $this->normalizeInsertPosition($course->id, $data->position);
-            $this->shiftPositionsUp($course->id, $position);
+        $metadata = [
+            'video_url' => $this->youtubeVideoUrl($videoMetadata->videoId),
+            'video_id' => $videoMetadata->videoId,
+            'title' => $videoMetadata->title,
+            'description' => $videoMetadata->description,
+            'channel_title' => $videoMetadata->channelTitle,
+            'thumbnail_url' => $videoMetadata->thumbnailUrl,
+            'duration_iso' => $videoMetadata->durationIso,
+            'duration_seconds' => $videoMetadata->durationSeconds,
+            'privacy_status' => $videoMetadata->privacyStatus,
+        ];
 
-            $lesson = Lesson::query()->create([
-                'course_id' => $course->id,
-                'title' => $data->title,
-                'position' => $position,
-                'is_required' => $data->isRequired,
-            ]);
+        return DB::transaction(function () use ($course, $data, $metadata): Lesson {
+                $position = $this->normalizeInsertPosition(
+                    $course->id,
+                    $data->position
+                );
 
-            LessonVideo::query()->create([
-                'lesson_id' => $lesson->id,
-                'video_url' => $data->youtubeVideoUrl(),
-                'duration_seconds' => $data->durationSeconds,
-            ]);
+                $this->shiftPositionsUp($course->id, $position);
 
-            return $lesson->load(['course', 'video']);
-        });
+                $lesson = Lesson::query()->create([
+                    'course_id' => $course->id,
+                    'title' => $data->title,
+                    'position' => $position,
+                    'is_required' => $data->isRequired,
+                ]);
+
+                LessonVideo::query()->create([
+                    'lesson_id' => $lesson->id,
+                    ...$metadata,
+                ]);
+
+                return $lesson->load(['course', 'video']);
+            });
     }
 
     public function update(Lesson $lesson, LessonUpdateData $data): Lesson
@@ -211,5 +227,9 @@ final class EloquentLessonRepository implements LessonRepositoryContract
         foreach ($lessons as $lesson) {
             $lesson->forceFill(['position' => abs($lesson->position) - 1])->save();
         }
+    }
+    private function youtubeVideoUrl(string $videoId): string
+    {
+        return "https://www.youtube.com/watch?v={$videoId}";
     }
 }

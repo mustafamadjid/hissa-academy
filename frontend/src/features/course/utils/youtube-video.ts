@@ -1,4 +1,5 @@
 const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{6,20}$/
+const YOUTUBE_EMBED_BASE_URL = 'https://www.youtube.com/embed/'
 
 export function extractYoutubeVideoId(value: string): string | null {
   const input = value.trim()
@@ -33,4 +34,12 @@ export function extractYoutubeVideoId(value: string): string | null {
   }
 
   return candidate && YOUTUBE_VIDEO_ID_PATTERN.test(candidate) ? candidate : null
+}
+
+export function generateYoutubeEmbedUrl(videoId: string): string | null {
+  const normalizedVideoId = videoId.trim()
+
+  if (!YOUTUBE_VIDEO_ID_PATTERN.test(normalizedVideoId)) return null
+
+  return `${YOUTUBE_EMBED_BASE_URL}${normalizedVideoId}`
 }

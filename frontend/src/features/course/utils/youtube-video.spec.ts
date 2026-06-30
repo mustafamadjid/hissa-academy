@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractYoutubeVideoId } from './youtube-video'
+import {
+  extractYoutubeVideoId,
+  generateYoutubeEmbedUrl,
+} from './youtube-video'
 
 describe('extractYoutubeVideoId', () => {
   it.each([
@@ -19,5 +22,23 @@ describe('extractYoutubeVideoId', () => {
     'not a youtube link',
   ])('rejects invalid input %s', (input) => {
     expect(extractYoutubeVideoId(input)).toBeNull()
+  })
+})
+
+describe('generateYoutubeEmbedUrl', () => {
+  it('generates an embed URL from a YouTube video id', () => {
+    expect(generateYoutubeEmbedUrl('dQw4w9WgXcQ')).toBe(
+      'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    )
+  })
+
+  it('trims the YouTube video id', () => {
+    expect(generateYoutubeEmbedUrl('  dQw4w9WgXcQ  ')).toBe(
+      'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    )
+  })
+
+  it('rejects an invalid YouTube video id', () => {
+    expect(generateYoutubeEmbedUrl('invalid!')).toBeNull()
   })
 })
