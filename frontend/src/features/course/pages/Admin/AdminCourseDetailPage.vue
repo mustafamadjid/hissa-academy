@@ -51,6 +51,15 @@ function openLessonManagement(): void {
   void router.push(`/admin/courses/${courseId.value}/lessons`)
 }
 
+function openQuizManagement(): void {
+  if (!courseId.value) return
+
+  void router.push({
+    name: 'admin-course-quiz',
+    params: { courseId: courseId.value },
+  })
+}
+
 watch(
   courseId,
   (id) => {
@@ -127,6 +136,7 @@ watch(
           :course="course"
           @edit="openEditForm"
           @manage-lessons="openLessonManagement"
+          @manage-quiz="openQuizManagement"
         />
         <CourseLessonList :lessons="course.lessons" />
       </div>

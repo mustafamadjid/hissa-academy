@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ListVideo,
   Pencil,
+  CircleHelp,
   Target,
   Video,
 } from "@lucide/vue";
@@ -19,13 +20,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   edit: [];
   manageLessons: [];
+  manageQuiz: [];
 }>();
-
-const thumbnailUrl = computed(
-  () =>
-    props.course.lessons.find((lesson) => lesson.video?.thumbnail_url)?.video
-      ?.thumbnail_url ?? null,
-);
 
 const statusLabel = computed(() => {
   const labels: Record<string, string> = {
@@ -55,16 +51,8 @@ const statusLabel = computed(() => {
       <div
         class="flex h-36 overflow-hidden rounded-xl border border-emerald-100 bg-emerald-950 shadow-sm lg:h-32"
       >
-        <img
-          v-if="thumbnailUrl"
-          :src="thumbnailUrl"
-          :alt="`Thumbnail ${course.name}`"
-          class="h-full w-full object-cover"
-        />
-
         <div
-          v-else
-          class="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-600"
+          class="relative flex h-full w-full items-center justify-center overflow-hidden bg-linear-to-br from-emerald-950 via-emerald-800 to-emerald-600"
           aria-hidden="true"
         >
           <div
@@ -141,6 +129,17 @@ const statusLabel = computed(() => {
         >
           <ListVideo :size="16" aria-hidden="true" />
           Kelola Lesson
+        </UButton>
+
+        <UButton
+          color="primary"
+          variant="solid"
+          size="md"
+          class="w-full p-3 cursor-pointer justify-center bg-emerald-700 text-white shadow-none hover:bg-emerald-800 lg:w-auto"
+          @click="emit('manageQuiz')"
+        >
+          <CircleHelp :size="16" aria-hidden="true" />
+          Kelola Quiz
         </UButton>
       </div>
     </div>

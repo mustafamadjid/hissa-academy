@@ -1081,6 +1081,36 @@ paths:
         "500":
           $ref: "#/components/responses/ServerError"
 
+  /api/v1/admin/quizzes/{quiz_uuid}/questions/reorder:
+    patch:
+      tags: [Admin Quiz]
+      summary: Reorder quiz questions
+      parameters:
+        - $ref: "#/components/parameters/QuizUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderQuizQuestionsRequest"
+      responses:
+        "200":
+          description: Pertanyaan quiz berhasil diurutkan.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminQuestionListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/QuizOrQuestionNotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
   /api/v1/admin/quiz-questions/{question_uuid}:
     patch:
       tags: [Admin Quiz]
@@ -1779,6 +1809,15 @@ components:
           example:
             success: false
             message: Pertanyaan quiz tidak ditemukan.
+    QuizOrQuestionNotFound:
+      description: Quiz atau pertanyaan quiz tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          example:
+            success: false
+            message: Quiz atau pertanyaan quiz tidak ditemukan.
     StudentNotFound:
       description: Student tidak ditemukan.
       content:
@@ -2829,6 +2868,25 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/AdminQuizAnswerRequest"
+    ReorderQuizQuestionsRequest:
+      type: object
+      required: [questions]
+      additionalProperties: false
+      properties:
+        questions:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [id, position]
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                format: uuid
+              position:
+                type: integer
+                minimum: 1
     UpdateQuizQuestionRequest:
       type: object
       required: [question, points, position, answers]

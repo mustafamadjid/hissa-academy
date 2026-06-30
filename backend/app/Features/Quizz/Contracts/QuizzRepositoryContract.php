@@ -4,6 +4,7 @@ namespace App\Features\Quizz\Contracts;
 
 use App\Features\Course\Models\Course;
 use App\Features\Quizz\DTOs\QuestionCreateData;
+use App\Features\Quizz\DTOs\QuestionReorderData;
 use App\Features\Quizz\DTOs\QuestionUpdateData;
 use App\Features\Quizz\DTOs\QuizzCreateData;
 use App\Features\Quizz\Models\Question;
@@ -40,4 +41,9 @@ interface QuizzRepositoryContract
     public function createQuestionsWithAnswers(Quizz $quiz, array $questions): Collection;
 
     public function updateQuestionWithAnswers(Question $question, QuestionUpdateData $data): Question;
+
+    /**
+     * @return Collection<int, Question>|null
+     */
+    public function reorderQuestions(Quizz $quiz, QuestionReorderData $data): ?Collection;
 }

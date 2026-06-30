@@ -52,6 +52,13 @@ export const routes: RouteRecordRaw[] = [
     meta: adminRouteMeta,
   },
   {
+    path: '/admin/courses/:courseId/quiz',
+    name: 'admin-course-quiz',
+    component: () =>
+      import('@/features/quiz/pages/Admin/AdminCourseQuizPage.vue'),
+    meta: adminRouteMeta,
+  },
+  {
     path: '/admin/students',
     name: 'admin-students',
     component: adminPlaceholderPage,

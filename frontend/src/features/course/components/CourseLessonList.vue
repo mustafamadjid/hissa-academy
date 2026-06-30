@@ -1,11 +1,42 @@
 <script setup lang="ts">
-import { BookOpen, Clock3, FileText, GripVertical, Video } from '@lucide/vue'
+import { ref } from 'vue'
+import {
+  BookOpen,
+  ChevronDown,
+  Clock3,
+  FileText,
+  PlayCircle,
+  Video,
+} from '@lucide/vue'
 
 import type { AdminLessonDto } from '../types/course.types'
+import {
+  extractYoutubeVideoId,
+  generateYoutubeEmbedUrl,
+} from '../utils/youtube-video'
 
 defineProps<{
   lessons: readonly AdminLessonDto[]
 }>()
+
+const expandedLessonId = ref<string | null>(null)
+
+function getLessonEmbedUrl(lesson: AdminLessonDto): string | null {
+  const videoId =
+    lesson.video?.youtube_video_id ??
+    (lesson.video?.video_url
+      ? extractYoutubeVideoId(lesson.video.video_url)
+      : null)
+
+  return videoId ? generateYoutubeEmbedUrl(videoId) : null
+}
+
+function toggleLesson(lesson: AdminLessonDto): void {
+  if (!getLessonEmbedUrl(lesson)) return
+
+  expandedLessonId.value =
+    expandedLessonId.value === lesson.id ? null : lesson.id
+}
 
 function formatDuration(totalSeconds: number | null | undefined): string | null {
   if (totalSeconds === null || totalSeconds === undefined) return null
@@ -49,50 +80,107 @@ function formatDuration(totalSeconds: number | null | undefined): string | null 
         <li
           v-for="lesson in lessons"
           :key="lesson.id"
-          class="grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-3 px-4 py-4 sm:grid-cols-[auto_auto_minmax(0,1fr)_auto] sm:px-5"
+          class="px-4 py-4 sm:px-5"
         >
-          <GripVertical
-            :size="16"
-            class="text-slate-400"
-            aria-hidden="true"
-          />
-
-          <span
-            class="flex size-9 items-center justify-center rounded-lg"
+          <button
+            type="button"
+            class="grid w-full grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-3 rounded-lg text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-600 sm:grid-cols-[8rem_minmax(0,1fr)_auto]"
             :class="
-              lesson.video
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-slate-100 text-slate-500'
+              getLessonEmbedUrl(lesson)
+                ? 'cursor-pointer hover:bg-slate-50'
+                : 'cursor-default'
             "
+            :aria-expanded="
+              getLessonEmbedUrl(lesson)
+                ? expandedLessonId === lesson.id
+                : undefined
+            "
+            :aria-controls="
+              getLessonEmbedUrl(lesson) ? `lesson-video-${lesson.id}` : undefined
+            "
+            @click="toggleLesson(lesson)"
           >
-            <Video v-if="lesson.video" :size="17" aria-hidden="true" />
-            <FileText v-else :size="17" aria-hidden="true" />
-          </span>
+            <span
+              class="relative aspect-video overflow-hidden rounded-lg bg-slate-100"
+            >
+              <img
+                v-if="lesson.video?.thumbnail_url"
+                :src="lesson.video.thumbnail_url"
+                :alt="`Thumbnail ${lesson.title}`"
+                class="size-full object-cover"
+                loading="lazy"
+              />
+              <span
+                v-else
+                class="flex size-full items-center justify-center text-slate-400"
+                aria-hidden="true"
+              >
+                <FileText v-if="!lesson.video" :size="22" />
+                <Video v-else :size="22" />
+              </span>
+              <span
+                v-if="getLessonEmbedUrl(lesson)"
+                class="absolute inset-0 flex items-center justify-center bg-slate-950/20 text-white"
+                aria-hidden="true"
+              >
+                <PlayCircle :size="30" fill="currentColor" class="drop-shadow" />
+              </span>
+            </span>
 
-          <div class="min-w-0">
-            <p class="truncate text-sm font-semibold text-slate-800">
-              <span class="mr-2 text-slate-400">{{ lesson.position }}.</span>
-              {{ lesson.title }}
-            </p>
+            <span class="min-w-0">
+              <span class="block truncate text-sm font-semibold text-slate-800">
+                <span class="mr-2 text-slate-400">{{ lesson.position }}.</span>
+                {{ lesson.title }}
+              </span>
 
-            <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-              <span>{{ lesson.video ? 'Video lesson' : 'Materi lesson' }}</span>
-              <template v-if="formatDuration(lesson.video?.duration_seconds)">
-                <span aria-hidden="true">&bull;</span>
-                <span class="inline-flex items-center gap-1">
-                  <Clock3 :size="12" aria-hidden="true" />
-                  {{ formatDuration(lesson.video?.duration_seconds) }}
-                </span>
-              </template>
-            </div>
+              <span
+                class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500"
+              >
+                <span>{{ lesson.video ? 'Video lesson' : 'Materi lesson' }}</span>
+                <template v-if="formatDuration(lesson.video?.duration_seconds)">
+                  <span aria-hidden="true">&bull;</span>
+                  <span class="inline-flex items-center gap-1">
+                    <Clock3 :size="12" aria-hidden="true" />
+                    {{ formatDuration(lesson.video?.duration_seconds) }}
+                  </span>
+                </template>
+              </span>
+            </span>
+
+            <span class="flex items-center justify-end gap-3">
+              <span
+                v-if="lesson.is_required"
+                class="hidden w-fit rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700 sm:inline-flex"
+              >
+                Wajib
+              </span>
+
+              <ChevronDown
+                v-if="getLessonEmbedUrl(lesson)"
+                :size="18"
+                class="text-slate-400 transition-transform duration-200"
+                :class="expandedLessonId === lesson.id ? 'rotate-180' : ''"
+                aria-hidden="true"
+              />
+              <span v-else class="w-4" aria-hidden="true" />
+            </span>
+          </button>
+
+          <div
+            v-if="expandedLessonId === lesson.id && getLessonEmbedUrl(lesson)"
+            :id="`lesson-video-${lesson.id}`"
+            class="mt-4 aspect-video w-full overflow-hidden rounded-lg bg-slate-950"
+          >
+            <iframe
+              class="size-full border-0"
+              :src="getLessonEmbedUrl(lesson) ?? undefined"
+              :title="`Video lesson ${lesson.title}`"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            />
           </div>
-
-          <span
-            v-if="lesson.is_required"
-            class="col-start-3 w-fit rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700 sm:col-start-auto"
-          >
-            Wajib
-          </span>
         </li>
       </ol>
 

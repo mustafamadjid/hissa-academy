@@ -361,6 +361,88 @@ it('rejects quiz question update when the user is not an admin', function () {
     ]);
 });
 
+it('reorders questions inside a quiz when requested by an admin', function () {
+    $this->actingAs(quizzAdminUser());
+    $quiz = Quizz::factory()->create();
+    $firstQuestion = Question::factory()->create([
+        'quizz_id' => $quiz->id,
+        'position' => 1,
+    ]);
+    $secondQuestion = Question::factory()->create([
+        'quizz_id' => $quiz->id,
+        'position' => 2,
+    ]);
+    $thirdQuestion = Question::factory()->create([
+        'quizz_id' => $quiz->id,
+        'position' => 3,
+    ]);
+
+    $response = $this->patchJson("/api/v1/admin/quizzes/{$quiz->id}/questions/reorder", [
+        'questions' => [
+            ['id' => $thirdQuestion->id, 'position' => 1],
+            ['id' => $firstQuestion->id, 'position' => 2],
+            ['id' => $secondQuestion->id, 'position' => 3],
+        ],
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('message', 'Pertanyaan quiz berhasil diurutkan.')
+        ->assertJsonPath('data.0.id', $thirdQuestion->id)
+        ->assertJsonPath('data.0.position', 1)
+        ->assertJsonPath('data.1.id', $firstQuestion->id)
+        ->assertJsonPath('data.2.id', $secondQuestion->id);
+
+    $this->assertDatabaseHas('questions', ['id' => $thirdQuestion->id, 'position' => 1]);
+    $this->assertDatabaseHas('questions', ['id' => $firstQuestion->id, 'position' => 2]);
+    $this->assertDatabaseHas('questions', ['id' => $secondQuestion->id, 'position' => 3]);
+});
+
+it('rejects duplicate question positions when reordering', function () {
+    $this->actingAs(quizzAdminUser());
+    $quiz = Quizz::factory()->create();
+    $firstQuestion = Question::factory()->create(['quizz_id' => $quiz->id]);
+    $secondQuestion = Question::factory()->create(['quizz_id' => $quiz->id]);
+
+    $response = $this->patchJson("/api/v1/admin/quizzes/{$quiz->id}/questions/reorder", [
+        'questions' => [
+            ['id' => $firstQuestion->id, 'position' => 1],
+            ['id' => $secondQuestion->id, 'position' => 1],
+        ],
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['questions.1.position']);
+});
+
+it('does not reorder questions when one question belongs to another quiz', function () {
+    $this->actingAs(quizzAdminUser());
+    $quiz = Quizz::factory()->create();
+    $otherQuiz = Quizz::factory()->create();
+    $question = Question::factory()->create([
+        'quizz_id' => $quiz->id,
+        'position' => 1,
+    ]);
+    $otherQuestion = Question::factory()->create([
+        'quizz_id' => $otherQuiz->id,
+        'position' => 1,
+    ]);
+
+    $response = $this->patchJson("/api/v1/admin/quizzes/{$quiz->id}/questions/reorder", [
+        'questions' => [
+            ['id' => $question->id, 'position' => 2],
+            ['id' => $otherQuestion->id, 'position' => 1],
+        ],
+    ]);
+
+    $response->assertNotFound()
+        ->assertJsonPath('success', false)
+        ->assertJsonPath('message', 'Quiz atau pertanyaan quiz tidak ditemukan.');
+
+    $this->assertDatabaseHas('questions', ['id' => $question->id, 'position' => 1]);
+    $this->assertDatabaseHas('questions', ['id' => $otherQuestion->id, 'position' => 1]);
+});
+
 it('deletes a quiz question when dependencies allow it', function () {
     $this->actingAs(quizzAdminUser());
     $question = Question::factory()->create();

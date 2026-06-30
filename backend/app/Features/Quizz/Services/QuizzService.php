@@ -4,10 +4,11 @@ namespace App\Features\Quizz\Services;
 
 use App\Features\Quizz\Contracts\QuizzRepositoryContract;
 use App\Features\Quizz\DTOs\QuestionCreateData;
+use App\Features\Quizz\DTOs\QuestionReorderData;
 use App\Features\Quizz\DTOs\QuestionUpdateData;
 use App\Features\Quizz\DTOs\QuizzCreateData;
-use App\Features\Quizz\Models\Question;
 use App\Features\Quizz\Exceptions\QuizzOperationException;
+use App\Features\Quizz\Models\Question;
 use App\Features\Quizz\Models\Quizz;
 use App\Features\User\Models\User;
 use App\Helper\EnsureAdminForService;
@@ -194,6 +195,29 @@ final class QuizzService
             ]);
 
             throw new QuizzOperationException('Gagal memperbarui pertanyaan quiz.', $exception);
+        }
+    }
+
+    public function reorderQuestions(string $quizId, QuestionReorderData $data, ?User $actor): ?Collection
+    {
+        $this->ensureAdmin->ensureAdmin($actor);
+
+        try {
+            $quiz = $this->quizzRepository->findQuizById($quizId);
+
+            if ($quiz === null) {
+                return null;
+            }
+
+            return $this->quizzRepository->reorderQuestions($quiz, $data);
+        } catch (Throwable $exception) {
+            Log::error('Gagal mengurutkan pertanyaan quiz.', [
+                'quiz_id' => $quizId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
+            throw new QuizzOperationException('Gagal mengurutkan pertanyaan quiz.', $exception);
         }
     }
 

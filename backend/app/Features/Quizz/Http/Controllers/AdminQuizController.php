@@ -4,6 +4,7 @@ namespace App\Features\Quizz\Http\Controllers;
 
 use App\Features\Quizz\Exceptions\QuizzOperationException;
 use App\Features\Quizz\Http\Requests\QuestionBatchStoreRequest;
+use App\Features\Quizz\Http\Requests\QuestionReorderRequest;
 use App\Features\Quizz\Http\Requests\QuestionUpdateRequest;
 use App\Features\Quizz\Http\Requests\QuizzUpdateRequest;
 use App\Features\Quizz\Http\Resources\QuestionResource;
@@ -130,6 +131,35 @@ final class AdminQuizController
                 'success' => true,
                 'message' => 'Pertanyaan quiz berhasil diperbarui.',
                 'data' => new QuestionResource($question),
+            ]);
+        } catch (AuthorizationException $exception) {
+            return $this->forbidden($exception->getMessage());
+        } catch (QuizzOperationException $exception) {
+            report($exception);
+
+            return $this->serverError($exception->getMessage());
+        }
+    }
+
+    public function reorderQuestions(
+        QuestionReorderRequest $request,
+        string $quiz_uuid,
+        QuizzService $quizzService,
+    ): JsonResponse {
+        try {
+            $questions = $quizzService->reorderQuestions($quiz_uuid, $request->toDTO(), $request->user());
+
+            if ($questions === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Quiz atau pertanyaan quiz tidak ditemukan.',
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pertanyaan quiz berhasil diurutkan.',
+                'data' => QuestionResource::collection($questions),
             ]);
         } catch (AuthorizationException $exception) {
             return $this->forbidden($exception->getMessage());
