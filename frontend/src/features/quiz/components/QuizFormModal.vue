@@ -83,7 +83,7 @@ watch(
       </form>
     </template>
 
-    <template #footer>
+    <template #footer>class="p-3 cursor-pointer"
       <UButton
         class="p-3 cursor-pointer"
         label="Batal"
