@@ -10,6 +10,7 @@ use App\Features\Lesson\Models\Lesson;
 use App\Features\User\Models\User;
 use App\Helper\EnsureAdminForService;
 use Illuminate\Support\Collection;
+use App\Features\LessonVideo\Services\LessonVideoService;
 use Throwable;
 
 final class LessonService
@@ -17,6 +18,7 @@ final class LessonService
     public function __construct(
         private readonly LessonRepositoryContract $lessonRepository,
         private readonly EnsureAdminForService $ensureAdmin,
+        private readonly LessonVideoService $videoService
     ) {}
 
     public function listByCourse(string $courseId): ?Collection
@@ -45,7 +47,9 @@ final class LessonService
                 return null;
             }
 
-            return $this->lessonRepository->create($course, $data);
+            $metadata = $this->videoService->getVideoMetadata($data->youtubeVideoId);
+
+            return $this->lessonRepository->create($course, $data, $metadata);
         } catch (Throwable $exception) {
             throw new LessonOperationException('Gagal membuat lesson.', $exception);
         }

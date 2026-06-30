@@ -99,6 +99,82 @@ export interface DeleteCourseResponse {
   message: string
 }
 
+export interface GetAdminCourseLessonsResponse {
+  success: boolean
+  message: string
+  data: AdminLessonDto[]
+}
+
+export interface CreateLessonRequest {
+  title: string
+  youtube_video_id: string
+  position: number
+  is_required: boolean
+}
+
+export interface CreateLessonResponse {
+  success: boolean
+  message: string
+  data: AdminLessonDto
+}
+
+export interface UpdateLessonRequest {
+  title?: string
+  position?: number
+  is_required?: boolean
+}
+
+export interface UpdateLessonResponse {
+  success: boolean
+  message: string
+  data: AdminLessonDto
+}
+
+export interface ReorderLessonItemRequest {
+  id: string
+  position: number
+}
+
+export interface ReorderLessonsRequest {
+  lessons: ReorderLessonItemRequest[]
+}
+
+export interface SimpleLessonActionResponse {
+  success: boolean
+  message: string
+}
+
+export interface UpsertLessonVideoRequest {
+  youtube_video_id: string
+}
+
+export interface UpsertLessonVideoResponse {
+  success: boolean
+  message: string
+  data: LessonVideoDto
+}
+
+export interface LessonFormValues {
+  title: string
+  videoUrl: string
+}
+
+export interface LessonFormErrors {
+  title?: string
+  videoUrl?: string
+}
+
+export interface CreateLessonFormValues {
+  title: string
+  videoUrl: string
+  isRequired: boolean
+}
+
+export interface CreateLessonFormErrors {
+  title?: string
+  videoUrl?: string
+}
+
 export interface CourseFormValues {
   courseName: string
   description: string

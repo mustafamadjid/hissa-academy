@@ -45,6 +45,13 @@ export const routes: RouteRecordRaw[] = [
     meta: adminRouteMeta,
   },
   {
+    path: '/admin/courses/:courseId/lessons',
+    name: 'admin-course-lessons',
+    component: () =>
+      import('@/features/course/pages/Admin/AdminCourseLessonsPage.vue'),
+    meta: adminRouteMeta,
+  },
+  {
     path: '/admin/students',
     name: 'admin-students',
     component: adminPlaceholderPage,

@@ -6,6 +6,7 @@ use App\Features\LessonVideo\DTOs\LessonVideoData;
 use App\Features\LessonVideo\Exceptions\LessonVideoOperationException;
 use DateInterval;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class LessonVideoService
@@ -20,13 +21,16 @@ final class LessonVideoService
                 'key' => config('services.youtube.api_key'),
             ]
         );
+        
 
         if ($response->failed()) {
             throw new LessonVideoOperationException('Gagal mengambil metadata video.');
         }
 
         $item = $response->json('items.0');
+       
 
+    
         if (! is_array($item)) {
             throw new LessonVideoOperationException('Video tidak ditemukan.');
         }
