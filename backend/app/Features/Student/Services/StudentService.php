@@ -10,6 +10,7 @@ use App\Features\User\Models\User;
 use App\Helper\EnsureAdminForService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class StudentService
@@ -26,6 +27,11 @@ final class StudentService
         try {
             return $this->studentRepository->all($query);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil daftar student.', [
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentOperationException('Gagal mengambil daftar student.', $exception);
         }
     }
@@ -46,6 +52,12 @@ final class StudentService
                 'summary' => $this->studentRepository->learningSummary($studentId),
             ];
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil detail student.', [
+                'student_id' => $studentId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentOperationException('Gagal mengambil detail student.', $exception);
         }
     }
@@ -61,6 +73,12 @@ final class StudentService
 
             return $this->studentRepository->progressByCourse($studentId);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil progress student.', [
+                'student_id' => $studentId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentOperationException('Gagal mengambil progress student.', $exception);
         }
     }
@@ -79,6 +97,12 @@ final class StudentService
 
             return $this->studentRepository->certificates($studentId, $pagination);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil sertifikat student.', [
+                'student_id' => $studentId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentOperationException('Gagal mengambil sertifikat student.', $exception);
         }
     }

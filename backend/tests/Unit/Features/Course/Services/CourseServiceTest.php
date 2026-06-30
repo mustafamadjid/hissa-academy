@@ -10,6 +10,10 @@ use App\Features\User\Models\User;
 use App\GlobalExceptions\AuthorizationException;
 use App\Helper\EnsureAdminForService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 it('uses the shared admin helper for authorization checks', function () {
     $service = new ReflectionClass(CourseService::class);
@@ -135,6 +139,8 @@ it('rejects course deletion when the actor is not an admin', function () {
 });
 
 it('wraps repository errors in a course operation exception', function () {
+    Log::spy();
+
     $query = new CourseListQueryData;
     $repository = Mockery::mock(CourseRepositoryContract::class);
     $repository->shouldReceive('all')

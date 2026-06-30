@@ -8,6 +8,7 @@ use App\Features\Course\Models\Course;
 use App\Features\User\Models\User;
 use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
 use App\Helper\EnsureStudentForService;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class StudentCourseService
@@ -31,6 +32,11 @@ final class StudentCourseService
                 ->values()
                 ->all();
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil daftar course.', [
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new CourseOperationException('Gagal mengambil daftar course.', $exception);
         }
     }
@@ -74,6 +80,12 @@ final class StudentCourseService
                 'lessons' => $lessonData,
             ]);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil detail course.', [
+                'course_id' => $courseId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new CourseOperationException('Gagal mengambil detail course.', $exception);
         }
     }
@@ -90,6 +102,12 @@ final class StudentCourseService
 
             return $course === null ? null : $this->courseProgress($course, $actor);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil progress course.', [
+                'course_id' => $courseId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new CourseOperationException('Gagal mengambil progress course.', $exception);
         }
     }

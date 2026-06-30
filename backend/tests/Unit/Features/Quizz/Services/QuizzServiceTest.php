@@ -14,6 +14,10 @@ use App\Features\User\Models\Role;
 use App\Features\User\Models\User;
 use App\GlobalExceptions\AuthorizationException;
 use App\Helper\EnsureAdminForService;
+use Illuminate\Support\Facades\Log;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 it('returns the final quiz for an existing course', function () {
     $course = new Course(['course_name' => 'Laravel Basics']);
@@ -107,6 +111,8 @@ it('rejects final quiz creation when the actor is not an admin', function () {
 });
 
 it('wraps repository errors in a quizz operation exception', function () {
+    Log::spy();
+
     $repository = Mockery::mock(QuizzRepositoryContract::class);
     $repository->shouldReceive('findCourseById')
         ->once()

@@ -12,6 +12,7 @@ use App\Features\Quizz\Models\Quizz;
 use App\Features\User\Models\User;
 use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
 use App\Helper\EnsureStudentForService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -46,6 +47,12 @@ final class StudentQuizService
         } catch (StudentQuizOperationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil quiz.', [
+                'course_id' => $courseId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentQuizOperationException('Gagal mengambil quiz.', previous: $exception);
         }
     }
@@ -78,6 +85,12 @@ final class StudentQuizService
         } catch (StudentQuizOperationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
+            Log::error('Gagal membuat quiz attempt.', [
+                'quiz_id' => $quizId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentQuizOperationException('Gagal membuat quiz attempt.', previous: $exception);
         }
     }
@@ -89,6 +102,12 @@ final class StudentQuizService
         try {
             return $this->quizRepository->findAttemptForUser($attemptId, $actor->id);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil quiz attempt.', [
+                'attempt_id' => $attemptId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentQuizOperationException('Gagal mengambil quiz attempt.', previous: $exception);
         }
     }
@@ -167,6 +186,12 @@ final class StudentQuizService
         } catch (StudentQuizOperationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
+            Log::error('Gagal submit quiz attempt.', [
+                'attempt_id' => $attemptId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new StudentQuizOperationException('Gagal submit quiz attempt.', previous: $exception);
         }
     }

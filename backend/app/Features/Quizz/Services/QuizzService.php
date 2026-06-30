@@ -12,6 +12,7 @@ use App\Features\Quizz\Models\Quizz;
 use App\Features\User\Models\User;
 use App\Helper\EnsureAdminForService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class QuizzService
@@ -32,6 +33,11 @@ final class QuizzService
 
             return $this->quizzRepository->findFinalQuizByCourse($course);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil konfigurasi quiz.', [
+                'course_id' => $courseId,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal mengambil konfigurasi quiz.', $exception);
         }
     }
@@ -41,6 +47,11 @@ final class QuizzService
         try {
             return $this->quizzRepository->findCourseById($courseId) !== null;
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil detail course.', [
+                'course_id' => $courseId,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal mengambil detail course.', $exception);
         }
     }
@@ -58,6 +69,12 @@ final class QuizzService
 
             return $this->quizzRepository->createFinalQuiz($course, $data);
         } catch (Throwable $exception) {
+            Log::error('Gagal membuat quiz.', [
+                'course_id' => $courseId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal membuat quiz.', $exception);
         }
     }
@@ -75,6 +92,12 @@ final class QuizzService
 
             return $this->quizzRepository->updateQuiz($quiz, $data);
         } catch (Throwable $exception) {
+            Log::error('Gagal memperbarui quiz.', [
+                'quiz_id' => $quizId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal memperbarui quiz.', $exception);
         }
     }
@@ -92,6 +115,12 @@ final class QuizzService
 
             return $this->quizzRepository->deleteQuiz($quiz);
         } catch (Throwable $exception) {
+            Log::error('Gagal menghapus quiz.', [
+                'quiz_id' => $quizId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal menghapus quiz.', $exception);
         }
     }
@@ -109,6 +138,12 @@ final class QuizzService
 
             return $this->quizzRepository->listQuestionsWithAnswers($quiz);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil pertanyaan quiz.', [
+                'quiz_id' => $quizId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal mengambil pertanyaan quiz.', $exception);
         }
     }
@@ -129,6 +164,12 @@ final class QuizzService
 
             return $this->quizzRepository->createQuestionsWithAnswers($quiz, $questions);
         } catch (Throwable $exception) {
+            Log::error('Gagal membuat pertanyaan quiz.', [
+                'quiz_id' => $quizId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal membuat pertanyaan quiz.', $exception);
         }
     }
@@ -146,6 +187,12 @@ final class QuizzService
 
             return $this->quizzRepository->updateQuestionWithAnswers($question, $data);
         } catch (Throwable $exception) {
+            Log::error('Gagal memperbarui pertanyaan quiz.', [
+                'question_id' => $questionId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal memperbarui pertanyaan quiz.', $exception);
         }
     }
@@ -163,6 +210,12 @@ final class QuizzService
 
             return $this->quizzRepository->deleteQuestion($question);
         } catch (Throwable $exception) {
+            Log::error('Gagal menghapus pertanyaan quiz.', [
+                'question_id' => $questionId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new QuizzOperationException('Gagal menghapus pertanyaan quiz.', $exception);
         }
     }

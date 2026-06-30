@@ -10,6 +10,7 @@ use App\Features\UserProgress\Exceptions\UserProgressOperationException;
 use App\Features\UserProgress\Models\UserProgress;
 use App\GlobalExceptions\AuthorizationException;
 use App\Helper\EnsureStudentForService;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class StudentLessonProgressService
@@ -40,6 +41,12 @@ final class StudentLessonProgressService
                     'completed_at' => null,
                 ]);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil progress lesson.', [
+                'lesson_id' => $lessonId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new UserProgressOperationException('Gagal mengambil progress lesson.', $exception);
         }
     }
@@ -75,6 +82,12 @@ final class StudentLessonProgressService
         } catch (AuthorizationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
+            Log::error('Gagal menyimpan progress lesson.', [
+                'lesson_id' => $lessonId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new UserProgressOperationException('Gagal menyimpan progress lesson.', $exception);
         }
     }

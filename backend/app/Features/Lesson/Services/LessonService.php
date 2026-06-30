@@ -11,6 +11,7 @@ use App\Features\User\Models\User;
 use App\Helper\EnsureAdminForService;
 use Illuminate\Support\Collection;
 use App\Features\LessonVideo\Services\LessonVideoService;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class LessonService
@@ -32,6 +33,11 @@ final class LessonService
 
             return $this->lessonRepository->listByCourse($course);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil daftar lesson.', [
+                'course_id' => $courseId,
+                'exception' => $exception,
+            ]);
+
             throw new LessonOperationException('Gagal mengambil daftar lesson.', $exception);
         }
     }
@@ -51,6 +57,12 @@ final class LessonService
 
             return $this->lessonRepository->create($course, $data, $metadata);
         } catch (Throwable $exception) {
+            Log::error('Gagal membuat lesson.', [
+                'course_id' => $courseId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new LessonOperationException('Gagal membuat lesson.', $exception);
         }
     }
@@ -60,6 +72,11 @@ final class LessonService
         try {
             return $this->lessonRepository->findById($lessonId);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil detail lesson.', [
+                'lesson_id' => $lessonId,
+                'exception' => $exception,
+            ]);
+
             throw new LessonOperationException('Gagal mengambil detail lesson.', $exception);
         }
     }
@@ -77,6 +94,12 @@ final class LessonService
 
             return $this->lessonRepository->update($lesson, $data);
         } catch (Throwable $exception) {
+            Log::error('Gagal memperbarui lesson.', [
+                'lesson_id' => $lessonId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new LessonOperationException('Gagal memperbarui lesson.', $exception);
         }
     }
@@ -93,6 +116,12 @@ final class LessonService
 
             return $this->lessonRepository->delete($lesson);
         } catch (Throwable $exception) {
+            Log::error('Gagal menghapus lesson.', [
+                'lesson_id' => $lessonId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new LessonOperationException('Gagal menghapus lesson.', $exception);
         }
     }
@@ -110,6 +139,12 @@ final class LessonService
 
             return $this->lessonRepository->reorder($courseId, $lessons);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengurutkan lesson.', [
+                'course_id' => $courseId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new LessonOperationException('Gagal mengurutkan lesson.', $exception);
         }
     }

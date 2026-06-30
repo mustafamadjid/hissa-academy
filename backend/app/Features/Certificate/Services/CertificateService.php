@@ -10,6 +10,7 @@ use App\Features\Certificate\Models\Certificate;
 use App\Features\User\Models\User;
 use App\Helper\EnsureAdminForService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class CertificateService
@@ -26,6 +27,11 @@ final class CertificateService
         try {
             return $this->certificateRepository->all($query);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil daftar sertifikat.', [
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new CertificateOperationException('Gagal mengambil daftar sertifikat.', $exception);
         }
     }
@@ -43,6 +49,12 @@ final class CertificateService
 
             return $this->certificateRepository->revoke($certificate, $data->reason);
         } catch (Throwable $exception) {
+            Log::error('Gagal mencabut sertifikat.', [
+                'certificate_id' => $certificateId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new CertificateOperationException('Gagal mencabut sertifikat.', $exception);
         }
     }

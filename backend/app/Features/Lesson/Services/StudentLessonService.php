@@ -9,6 +9,7 @@ use App\Features\User\Models\User;
 use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
 use App\GlobalExceptions\AuthorizationException;
 use App\Helper\EnsureStudentForService;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class StudentLessonService
@@ -59,6 +60,12 @@ final class StudentLessonService
         } catch (AuthorizationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil detail lesson.', [
+                'lesson_id' => $lessonId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new LessonOperationException('Gagal mengambil detail lesson.', $exception);
         }
     }
