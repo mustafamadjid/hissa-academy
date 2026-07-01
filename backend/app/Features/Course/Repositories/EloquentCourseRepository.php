@@ -4,6 +4,7 @@ namespace App\Features\Course\Repositories;
 
 use App\Features\Course\Contracts\CourseRepositoryContract;
 use App\Features\Course\DTOs\CourseListQueryData;
+use App\Features\Course\DTOs\StudentCourseListData;
 use App\Features\Course\Models\Course;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -36,6 +37,20 @@ final class EloquentCourseRepository implements CourseRepositoryContract
             ->where('status', 'active')
             ->orderBy('course_name')
             ->get();
+    }
+
+    public function activeCoursesWithLessonsPaginated(StudentCourseListData $data): LengthAwarePaginator
+    {
+        $search = trim((string) ($data->search ?? ''));
+
+        return Course::query()
+            ->with(['lessons' => fn ($query) => $query->orderBy('position')])
+            ->where('status', 'active')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where('course_name', 'like', "%{$search}%");
+            })
+            ->orderBy('course_name')
+            ->paginate($data->perPage);
     }
 
     public function findActiveWithLessons(string $id): ?Course

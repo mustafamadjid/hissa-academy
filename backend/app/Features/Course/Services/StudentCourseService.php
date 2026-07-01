@@ -3,11 +3,13 @@
 namespace App\Features\Course\Services;
 
 use App\Features\Course\Contracts\CourseRepositoryContract;
+use App\Features\Course\DTOs\StudentCourseListData;
 use App\Features\Course\Exceptions\CourseOperationException;
 use App\Features\Course\Models\Course;
 use App\Features\User\Models\User;
 use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
 use App\Helper\EnsureStudentForService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -18,6 +20,25 @@ final class StudentCourseService
         private readonly UserProgressRepositoryContract $progressRepository,
         private readonly EnsureStudentForService $ensureStudent,
     ) {}
+
+    public function listAvailablePaginated(StudentCourseListData $data, ?User $actor): LengthAwarePaginator
+    {
+        $this->ensureStudent->ensureStudent($actor);
+
+        try {
+            $courses = $this->courseRepository->activeCoursesWithLessonsPaginated($data);
+
+            return $courses->through(fn (Course $course): array => $this->courseSummary($course, $actor));
+        } catch (Throwable $exception) {
+            Log::error('Gagal mengambil daftar course.', [
+                'actor_id' => $actor?->id,
+                'search' => $data->search,
+                'exception' => $exception,
+            ]);
+
+            throw new CourseOperationException('Gagal mengambil daftar course.', $exception);
+        }
+    }
 
     /**
      * @return array<int, array<string, mixed>>

@@ -233,6 +233,91 @@ it('validates lesson progress heartbeat payload', function () {
         ->assertJsonValidationErrors(['last_position_seconds', 'watched_seconds']);
 });
 
+it('filters courses by search keyword', function () {
+    $student = studentApiUser();
+    $this->actingAs($student);
+
+    $course1 = Course::factory()->create([
+        'course_name' => 'Laravel Basics',
+        'status' => 'active',
+    ]);
+    $course2 = Course::factory()->create([
+        'course_name' => 'Advanced PHP',
+        'status' => 'active',
+    ]);
+    Course::factory()->create([
+        'course_name' => 'React Fundamentals',
+        'status' => 'active',
+    ]);
+
+    $response = $this->getJson('/api/v1/courses?search=Laravel');
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.0.name', 'Laravel Basics')
+        ->assertJsonPath('meta.total', 1)
+        ->assertJsonMissingPath('data.1');
+});
+
+it('returns paginated courses with default per_page', function () {
+    $student = studentApiUser();
+    $this->actingAs($student);
+
+    Course::factory()->count(20)->create(['status' => 'active']);
+
+    $response = $this->getJson('/api/v1/courses');
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('meta.per_page', 15)
+        ->assertJsonPath('meta.total', 20)
+        ->assertJsonCount(15, 'data');
+});
+
+it('respects custom per_page parameter', function () {
+    $student = studentApiUser();
+    $this->actingAs($student);
+
+    Course::factory()->count(20)->create(['status' => 'active']);
+
+    $response = $this->getJson('/api/v1/courses?per_page=5');
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('meta.per_page', 5)
+        ->assertJsonCount(5, 'data');
+});
+
+it('returns pagination links in response', function () {
+    $student = studentApiUser();
+    $this->actingAs($student);
+
+    Course::factory()->count(20)->create(['status' => 'active']);
+
+    $response = $this->getJson('/api/v1/courses?page=1&per_page=10');
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('meta.current_page', 1)
+        ->assertJsonPath('meta.last_page', 2)
+        ->assertJsonPath('links.first', fn ($url) => str_contains($url, 'page=1'))
+        ->assertJsonPath('links.next', fn ($url) => str_contains($url, 'page=2'));
+});
+
+it('reads search from query parameter not json body', function () {
+    $student = studentApiUser();
+    $this->actingAs($student);
+
+    Course::factory()->create(['course_name' => 'Laravel Basics', 'status' => 'active']);
+    Course::factory()->create(['course_name' => 'PHP Advanced', 'status' => 'active']);
+
+    $response = $this->getJson('/api/v1/courses?search=Laravel');
+
+    $response->assertOk()
+        ->assertJsonPath('data.0.name', 'Laravel Basics')
+        ->assertJsonPath('meta.total', 1);
+});
+
 function studentApiUser(): User
 {
     return userWithApiRole('student');

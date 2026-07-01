@@ -3,6 +3,7 @@
 namespace App\Features\Course\Contracts;
 
 use App\Features\Course\DTOs\CourseListQueryData;
+use App\Features\Course\DTOs\StudentCourseListData;
 use App\Features\Course\Models\Course;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -15,6 +16,8 @@ interface CourseRepositoryContract
      * @return Collection<int, Course>
      */
     public function activeCoursesWithLessons(): Collection;
+
+    public function activeCoursesWithLessonsPaginated(StudentCourseListData $data): LengthAwarePaginator;
 
     public function findActiveWithLessons(string $id): ?Course;
 

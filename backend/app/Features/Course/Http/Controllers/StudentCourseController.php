@@ -3,6 +3,7 @@
 namespace App\Features\Course\Http\Controllers;
 
 use App\Features\Course\Exceptions\CourseOperationException;
+use App\Features\Course\Http\Requests\StudentCourseListRequest;
 use App\Features\Course\Http\Resources\StudentCourseResource;
 use App\Features\Course\Services\StudentCourseService;
 use App\GlobalExceptions\AuthorizationException;
@@ -11,13 +12,27 @@ use Illuminate\Http\Request;
 
 final class StudentCourseController
 {
-    public function index(Request $request, StudentCourseService $courseService): JsonResponse
+    public function index(StudentCourseListRequest $request, StudentCourseService $courseService): JsonResponse
     {
         try {
+            $courses = $courseService->listAvailablePaginated($request->toDTO(), $request->user());
+
             return response()->json([
                 'success' => true,
                 'message' => 'Daftar course berhasil diambil.',
-                'data' => StudentCourseResource::collection($courseService->listAvailable($request->user())),
+                'data' => StudentCourseResource::collection($courses),
+                'meta' => [
+                    'current_page' => $courses->currentPage(),
+                    'per_page' => $courses->perPage(),
+                    'total' => $courses->total(),
+                    'last_page' => $courses->lastPage(),
+                ],
+                'links' => [
+                    'first' => $courses->url(1),
+                    'last' => $courses->url($courses->lastPage()),
+                    'prev' => $courses->previousPageUrl(),
+                    'next' => $courses->nextPageUrl(),
+                ],
             ]);
         } catch (AuthorizationException $exception) {
             return $this->forbidden($exception->getMessage());
