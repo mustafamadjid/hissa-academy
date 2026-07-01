@@ -6,13 +6,8 @@ import { useAuthStore } from "@/features/auth/stores/auth.store";
 export function registerRouterGuards(router: Router): void {
   router.beforeEach(async (to) => {
     const authStore = useAuthStore(pinia);
-    const requiresSession = Boolean(
-      to.meta.requiresAuth || to.meta.guestOnly || to.meta.roles?.length,
-    );
 
-    if (requiresSession) {
-      await authStore.restoreSession();
-    }
+    await authStore.restoreSession();
 
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
       return { name: "landing" };
