@@ -1,9 +1,9 @@
-<script setup>
-import Navbar from "./Navbar/Navbar.vue";
+<script setup lang="ts">
+import Navbar from "@/layouts/Guest/Navbar/Navbar.vue";
 </script>
 
 <template>
-  <main>
+  <main class="pt-20">
     <Navbar />
     <slot />
   </main>
