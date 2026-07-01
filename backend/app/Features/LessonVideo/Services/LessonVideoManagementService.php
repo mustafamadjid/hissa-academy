@@ -9,6 +9,7 @@ use App\Features\LessonVideo\Models\LessonVideo;
 use App\Features\User\Models\User;
 use App\GlobalExceptions\AuthorizationException;
 use App\Helper\EnsureAdminForService;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class LessonVideoManagementService
@@ -36,6 +37,12 @@ final class LessonVideoManagementService
         } catch (LessonVideoOperationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
+            Log::error('Gagal menyimpan metadata video lesson.', [
+                'lesson_id' => $lessonId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new LessonVideoOperationException('Gagal menyimpan metadata video lesson.', $exception);
         }
     }
@@ -59,6 +66,12 @@ final class LessonVideoManagementService
         } catch (AuthorizationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
+            Log::error('Gagal menghapus metadata video lesson.', [
+                'lesson_id' => $lessonId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new LessonVideoOperationException('Gagal menghapus metadata video lesson.', $exception);
         }
     }

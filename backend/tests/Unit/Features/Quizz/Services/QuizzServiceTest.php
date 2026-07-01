@@ -4,6 +4,7 @@ use App\Features\Course\Models\Course;
 use App\Features\Quizz\Contracts\QuizzRepositoryContract;
 use App\Features\Quizz\DTOs\QuestionCreateData;
 use App\Features\Quizz\DTOs\QuestionOptionCreateData;
+use App\Features\Quizz\DTOs\QuestionReorderData;
 use App\Features\Quizz\DTOs\QuestionUpdateData;
 use App\Features\Quizz\DTOs\QuizzCreateData;
 use App\Features\Quizz\Exceptions\QuizzOperationException;
@@ -14,6 +15,10 @@ use App\Features\User\Models\Role;
 use App\Features\User\Models\User;
 use App\GlobalExceptions\AuthorizationException;
 use App\Helper\EnsureAdminForService;
+use Illuminate\Support\Facades\Log;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 it('returns the final quiz for an existing course', function () {
     $course = new Course(['course_name' => 'Laravel Basics']);
@@ -107,6 +112,8 @@ it('rejects final quiz creation when the actor is not an admin', function () {
 });
 
 it('wraps repository errors in a quizz operation exception', function () {
+    Log::spy();
+
     $repository = Mockery::mock(QuizzRepositoryContract::class);
     $repository->shouldReceive('findCourseById')
         ->once()
@@ -283,6 +290,48 @@ it('rejects question update when the actor is not an admin', function () {
                 new QuestionOptionCreateData(answer: 'Dependency injection container Laravel', isCorrect: true),
             ],
         ),
+        quizzStudentActor(),
+    ))->toThrow(AuthorizationException::class, 'Anda tidak memiliki akses.');
+});
+
+it('reorders quiz questions through the repository', function () {
+    $quiz = new Quizz(['quiz_name' => 'Final Quiz']);
+    $quiz->id = 'quiz-uuid';
+    $data = new QuestionReorderData([
+        ['id' => 'question-b', 'position' => 1],
+        ['id' => 'question-a', 'position' => 2],
+    ]);
+    $questions = collect([
+        new Question(['question' => 'Question B', 'position' => 1]),
+        new Question(['question' => 'Question A', 'position' => 2]),
+    ]);
+
+    $repository = Mockery::mock(QuizzRepositoryContract::class);
+    $repository->shouldReceive('findQuizById')
+        ->once()
+        ->with('quiz-uuid')
+        ->andReturn($quiz);
+    $repository->shouldReceive('reorderQuestions')
+        ->once()
+        ->with($quiz, $data)
+        ->andReturn($questions);
+
+    $service = makeQuizzService($repository);
+
+    expect($service->reorderQuestions('quiz-uuid', $data, quizzAdminActor()))->toBe($questions);
+});
+
+it('rejects question reorder when the actor is not an admin', function () {
+    $repository = Mockery::mock(QuizzRepositoryContract::class);
+    $repository->shouldReceive('findQuizById')->never();
+    $repository->shouldReceive('reorderQuestions')->never();
+    $service = makeQuizzService($repository);
+
+    expect(fn () => $service->reorderQuestions(
+        'quiz-uuid',
+        new QuestionReorderData([
+            ['id' => 'question-uuid', 'position' => 1],
+        ]),
         quizzStudentActor(),
     ))->toThrow(AuthorizationException::class, 'Anda tidak memiliki akses.');
 });

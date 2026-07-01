@@ -6,6 +6,7 @@ use App\Features\Course\Models\Course;
 use App\Features\Lesson\DTOs\LessonCreateData;
 use App\Features\Lesson\DTOs\LessonUpdateData;
 use App\Features\Lesson\Models\Lesson;
+use App\Features\LessonVideo\DTOs\LessonVideoData;
 use Illuminate\Support\Collection;
 
 interface LessonRepositoryContract
@@ -21,7 +22,7 @@ interface LessonRepositoryContract
 
     public function findActiveCourseLessonById(string $lessonId): ?Lesson;
 
-    public function create(Course $course, LessonCreateData $data): Lesson;
+    public function create(Course $course, LessonCreateData $data, LessonVideoData $videoMetadata): Lesson;
 
     public function update(Lesson $lesson, LessonUpdateData $data): Lesson;
 

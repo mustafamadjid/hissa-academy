@@ -44,7 +44,7 @@ final class CourseController
         CourseService $courseService,
     ): JsonResponse {
         try {
-            $course = $courseService->findById($course_uuid);
+            $course = $courseService->findWithLessonsById($course_uuid);
 
             if ($course === null) {
                 return $this->notFound();

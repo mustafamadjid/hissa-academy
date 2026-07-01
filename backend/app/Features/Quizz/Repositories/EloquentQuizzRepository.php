@@ -5,6 +5,7 @@ namespace App\Features\Quizz\Repositories;
 use App\Features\Course\Models\Course;
 use App\Features\Quizz\Contracts\QuizzRepositoryContract;
 use App\Features\Quizz\DTOs\QuestionCreateData;
+use App\Features\Quizz\DTOs\QuestionReorderData;
 use App\Features\Quizz\DTOs\QuestionUpdateData;
 use App\Features\Quizz\DTOs\QuizzCreateData;
 use App\Features\Quizz\Models\Question;
@@ -116,6 +117,44 @@ final class EloquentQuizzRepository implements QuizzRepositoryContract
             );
 
             return $question->refresh()->load('answers');
+        });
+    }
+
+    public function reorderQuestions(Quizz $quiz, QuestionReorderData $data): ?Collection
+    {
+        return DB::transaction(function () use ($quiz, $data): ?Collection {
+            $positionsByQuestionId = collect($data->questions)
+                ->mapWithKeys(fn (array $question): array => [
+                    (string) $question['id'] => (int) $question['position'],
+                ]);
+
+            $questionIds = $positionsByQuestionId->keys();
+            $questions = Question::query()
+                ->where('quizz_id', $quiz->id)
+                ->whereIn('id', $questionIds)
+                ->lockForUpdate()
+                ->get();
+
+            if ($questions->count() !== $questionIds->count()) {
+                return null;
+            }
+
+            foreach ($questions->values() as $index => $question) {
+                $question->forceFill(['position' => -($index + 1)])->save();
+            }
+
+            foreach ($questions as $question) {
+                $question->forceFill([
+                    'position' => $positionsByQuestionId->get($question->id),
+                ])->save();
+            }
+
+            return Question::query()
+                ->with('answers')
+                ->where('quizz_id', $quiz->id)
+                ->whereIn('id', $questionIds)
+                ->orderBy('position')
+                ->get();
         });
     }
 }

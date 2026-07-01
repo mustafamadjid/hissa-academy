@@ -1,6 +1,7 @@
 <?php
 
 use App\Features\Course\Models\Course;
+use App\Features\Lesson\Models\Lesson;
 use App\Features\User\Models\Role;
 use App\Features\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -79,6 +80,16 @@ it('returns a course detail', function () {
     $course = Course::factory()->create([
         'course_name' => 'Laravel Basics',
     ]);
+    $secondLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'title' => 'Routing',
+        'position' => 2,
+    ]);
+    $firstLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'title' => 'Introduction',
+        'position' => 1,
+    ]);
 
     $response = $this->getJson("/api/v1/admin/courses/{$course->id}");
 
@@ -86,7 +97,12 @@ it('returns a course detail', function () {
         ->assertJsonPath('success', true)
         ->assertJsonPath('message', 'Detail course berhasil diambil.')
         ->assertJsonPath('data.id', $course->id)
-        ->assertJsonPath('data.name', 'Laravel Basics');
+        ->assertJsonPath('data.name', 'Laravel Basics')
+        ->assertJsonPath('data.total_lessons', 2)
+        ->assertJsonPath('data.lessons.0.id', $firstLesson->id)
+        ->assertJsonPath('data.lessons.0.title', 'Introduction')
+        ->assertJsonPath('data.lessons.1.id', $secondLesson->id)
+        ->assertJsonPath('data.lessons.1.title', 'Routing');
 });
 
 it('returns not found when a course does not exist', function () {

@@ -18,6 +18,8 @@ interface CourseRepositoryContract
 
     public function findActiveWithLessons(string $id): ?Course;
 
+    public function findWithLessonsById(string $id): ?Course;
+
     public function findById(string $id): ?Course;
 
     public function create(array $data): Course;

@@ -614,7 +614,7 @@ paths:
     get:
       tags: [Admin Courses]
       summary: Get admin course detail
-      description: Mengambil detail course admin berdasarkan UUID course.
+      description: Mengambil detail course admin beserta jumlah dan daftar lesson berdasarkan UUID course.
       parameters:
         - $ref: "#/components/parameters/CourseUuid"
       responses:
@@ -628,7 +628,7 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: "#/components/schemas/AdminCourse"
+                        $ref: "#/components/schemas/AdminCourseDetail"
         "401":
           $ref: "#/components/responses/Unauthenticated"
         "403":
@@ -1076,6 +1076,36 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/QuizNotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/v1/admin/quizzes/{quiz_uuid}/questions/reorder:
+    patch:
+      tags: [Admin Quiz]
+      summary: Reorder quiz questions
+      parameters:
+        - $ref: "#/components/parameters/QuizUuid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderQuizQuestionsRequest"
+      responses:
+        "200":
+          description: Pertanyaan quiz berhasil diurutkan.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminQuestionListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/QuizOrQuestionNotFound"
         "422":
           $ref: "#/components/responses/ValidationError"
         "500":
@@ -1779,6 +1809,15 @@ components:
           example:
             success: false
             message: Pertanyaan quiz tidak ditemukan.
+    QuizOrQuestionNotFound:
+      description: Quiz atau pertanyaan quiz tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleErrorResponse"
+          example:
+            success: false
+            message: Quiz atau pertanyaan quiz tidak ditemukan.
     StudentNotFound:
       description: Student tidak ditemukan.
       content:
@@ -2575,6 +2614,21 @@ components:
           type: string
           maxLength: 255
           example: published
+    AdminCourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminCourse"
+        - type: object
+          required: [total_lessons, lessons]
+          properties:
+            total_lessons:
+              type: integer
+              minimum: 0
+              example: 2
+            lessons:
+              type: array
+              description: Daftar lesson yang diurutkan berdasarkan position secara ascending.
+              items:
+                $ref: "#/components/schemas/AdminLesson"
     CreateCourseRequest:
       type: object
       required: [course_name, description, minimum_score, status]
@@ -2814,6 +2868,25 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/AdminQuizAnswerRequest"
+    ReorderQuizQuestionsRequest:
+      type: object
+      required: [questions]
+      additionalProperties: false
+      properties:
+        questions:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [id, position]
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                format: uuid
+              position:
+                type: integer
+                minimum: 1
     UpdateQuizQuestionRequest:
       type: object
       required: [question, points, position, answers]

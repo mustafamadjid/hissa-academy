@@ -9,6 +9,7 @@ use App\Features\Certificate\Models\Certificate;
 use App\Features\User\Models\User;
 use App\Helper\EnsureStudentForService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class StudentCertificateService
@@ -25,6 +26,11 @@ final class StudentCertificateService
         try {
             return $this->certificateRepository->forUser($actor->id, $query);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil daftar sertifikat.', [
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new CertificateOperationException('Gagal mengambil daftar sertifikat.', $exception);
         }
     }
@@ -36,6 +42,12 @@ final class StudentCertificateService
         try {
             return $this->certificateRepository->findForUser($certificateId, $actor->id);
         } catch (Throwable $exception) {
+            Log::error('Gagal mengambil detail sertifikat.', [
+                'certificate_id' => $certificateId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
             throw new CertificateOperationException('Gagal mengambil detail sertifikat.', $exception);
         }
     }

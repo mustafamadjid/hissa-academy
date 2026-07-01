@@ -1,5 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Manrope:wght@200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
 @import "tailwindcss";
+@import "@nuxt/ui";
 
+@layer base {
+  html {
+    font-family: "Plus Jakarta Sans";
+  }
+
+  body {
+    font-family: inherit;
+  }
+}
 @theme {
   /* Brand Colors */
   --color-primary-dark-green: #064e3b;
@@ -100,6 +111,10 @@
   --grid-gutter-desktop: 24px;
   --grid-gutter-tablet: 20px;
   --grid-gutter-mobile: 16px;
+}
+
+:root {
+  --ui-primary: var(--color-primary-dark-green);
 }
 
 /* Custom utility classes */
