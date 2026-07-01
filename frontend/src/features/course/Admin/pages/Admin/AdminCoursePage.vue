@@ -16,7 +16,10 @@ import DeleteConfirmationModal from "@/shared/components/ui/DeleteConfirmationMo
 import CourseFormModal from "../../components/CourseFormModal.vue";
 import CourseTable from "../../components/CourseTable.vue";
 import { useAdminCourses } from "../../composables/useAdminCourses";
-import type { CourseDto, CourseFormValues } from "../../types/course.types";
+import type {
+  CourseDto,
+  CourseFormValues,
+} from "../../../types/course.types.ts";
 
 const {
   courses,

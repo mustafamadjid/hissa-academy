@@ -10,6 +10,13 @@ export function registerRouterGuards(router: Router): void {
     await authStore.restoreSession();
 
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+      if (to.meta.roles?.includes("student")) {
+        return {
+          name: "login-student",
+          query: { redirect: to.fullPath },
+        };
+      }
+
       return { name: "landing" };
     }
 

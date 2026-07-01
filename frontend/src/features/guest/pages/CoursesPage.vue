@@ -22,7 +22,7 @@ import heroImage from "@/assets/images/landing-page/landing-3.png";
 import GuestLayout from "@/layouts/Guest/GuestLayout.vue";
 
 import CourseCatalogCard from "../components/CourseCatalogCard.vue";
-import { useCourseCatalog } from "../composables/useCourseCatalog";
+import { useCourseCatalog } from "../../course/Student/composables/useCourseCatalog.ts";
 
 const {
   courses,
@@ -72,7 +72,11 @@ function clearFilters(): void {
 }
 
 const hasActiveFilters = () => {
-  return selectedCategory.value !== "all" || selectedLevel.value !== "all" || search.value;
+  return (
+    selectedCategory.value !== "all" ||
+    selectedLevel.value !== "all" ||
+    search.value
+  );
 };
 </script>
 
@@ -141,7 +145,8 @@ const hasActiveFilters = () => {
             <p
               class="mx-auto mt-6 max-w-2xl text-base leading-7 text-neutral-medium sm:text-lg"
             >
-              Materi terstruktur, belajar bertahap, dan fokus praktis untuk membangun pemahaman investasi yang lebih baik.
+              Materi terstruktur, belajar bertahap, dan fokus praktis untuk
+              membangun pemahaman investasi yang lebih baik.
             </p>
 
             <div class="mx-auto mt-10 max-w-3xl">
@@ -172,7 +177,9 @@ const hasActiveFilters = () => {
                 </a>
               </label>
 
-              <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <div
+                class="mt-4 flex flex-wrap items-center justify-center gap-3"
+              >
                 <span class="text-xs text-neutral-medium">Coba cari:</span>
                 <button
                   type="button"
@@ -199,17 +206,23 @@ const hasActiveFilters = () => {
             </div>
 
             <div class="mt-10 flex flex-wrap items-center justify-center gap-6">
-              <div class="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark-green">
+              <div
+                class="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark-green"
+              >
                 <CheckCircle2 class="size-5 text-primary-green" />
                 Materi Terstruktur
               </div>
 
-              <div class="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark-green">
+              <div
+                class="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark-green"
+              >
                 <Clock class="size-5 text-primary-green" />
                 Belajar Fleksibel
               </div>
 
-              <div class="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark-green">
+              <div
+                class="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark-green"
+              >
                 <GraduationCap class="size-5 text-primary-green" />
                 Sertifikat Digital
               </div>
@@ -233,9 +246,13 @@ const hasActiveFilters = () => {
         />
 
         <div class="relative mx-auto max-w-7xl">
-          <div class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div
+            class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+          >
             <div class="max-w-3xl">
-              <div class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.16em] text-primary-green">
+              <div
+                class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.16em] text-primary-green"
+              >
                 <span class="h-0.5 w-8 bg-primary-green" />
                 {{ courses.length }} Course Tersedia
               </div>
@@ -252,7 +269,10 @@ const hasActiveFilters = () => {
               <button
                 type="button"
                 class="inline-flex items-center gap-2 rounded-xl border border-neutral-low bg-white px-4 py-2.5 text-sm font-medium text-neutral-high shadow-sm transition hover:border-primary-green hover:text-primary-green"
-                :class="{ 'border-primary-green bg-primary-green/5 text-primary-green': showFilters }"
+                :class="{
+                  'border-primary-green bg-primary-green/5 text-primary-green':
+                    showFilters,
+                }"
                 @click="toggleFilters"
               >
                 <Filter class="size-4" />
@@ -277,7 +297,9 @@ const hasActiveFilters = () => {
           >
             <div class="grid gap-6 sm:grid-cols-2">
               <div>
-                <label class="mb-3 block text-sm font-semibold text-neutral-high">
+                <label
+                  class="mb-3 block text-sm font-semibold text-neutral-high"
+                >
                   Kategori
                 </label>
                 <div class="grid gap-2">
@@ -287,7 +309,8 @@ const hasActiveFilters = () => {
                     type="button"
                     class="flex items-center gap-3 rounded-xl border border-neutral-low bg-white px-4 py-3 text-left text-sm font-medium text-neutral-high transition hover:border-primary-green hover:bg-primary-green/5"
                     :class="{
-                      'border-primary-green bg-primary-green/5 text-primary-dark-green': selectedCategory === category.value
+                      'border-primary-green bg-primary-green/5 text-primary-dark-green':
+                        selectedCategory === category.value,
                     }"
                     @click="selectedCategory = category.value"
                   >
@@ -298,7 +321,9 @@ const hasActiveFilters = () => {
               </div>
 
               <div>
-                <label class="mb-3 block text-sm font-semibold text-neutral-high">
+                <label
+                  class="mb-3 block text-sm font-semibold text-neutral-high"
+                >
                   Level
                 </label>
                 <div class="grid gap-2">
@@ -308,7 +333,8 @@ const hasActiveFilters = () => {
                     type="button"
                     class="flex items-center gap-3 rounded-xl border border-neutral-low bg-white px-4 py-3 text-left text-sm font-medium text-neutral-high transition hover:border-primary-green hover:bg-primary-green/5"
                     :class="{
-                      'border-primary-green bg-primary-green/5 text-primary-dark-green': selectedLevel === level.value
+                      'border-primary-green bg-primary-green/5 text-primary-dark-green':
+                        selectedLevel === level.value,
                     }"
                     @click="selectedLevel = level.value"
                   >
@@ -329,7 +355,9 @@ const hasActiveFilters = () => {
                 <div
                   class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary-green/10"
                 >
-                  <LoaderCircle class="size-8 animate-spin text-primary-green" />
+                  <LoaderCircle
+                    class="size-8 animate-spin text-primary-green"
+                  />
                 </div>
 
                 <p class="mt-5 font-semibold text-primary-dark-green">
@@ -397,9 +425,7 @@ const hasActiveFilters = () => {
                   <span v-if="search">
                     Tidak ada course yang cocok dengan "{{ search }}".
                   </span>
-                  <span v-else>
-                    Coba ubah filter atau pencarian Anda.
-                  </span>
+                  <span v-else> Coba ubah filter atau pencarian Anda. </span>
                 </p>
 
                 <button
@@ -430,10 +456,7 @@ const hasActiveFilters = () => {
             v-if="!isLoading && !error && (canGoBack || canGoForward)"
             class="mt-12 flex flex-col items-center justify-center gap-6 border-t border-neutral-low pt-8 sm:flex-row"
           >
-            <nav
-              class="flex items-center gap-3"
-              aria-label="Paginasi course"
-            >
+            <nav class="flex items-center gap-3" aria-label="Paginasi course">
               <button
                 type="button"
                 class="inline-flex size-10 items-center justify-center rounded-lg border border-neutral-low bg-white text-neutral-high shadow-sm transition hover:border-primary-green hover:text-primary-green disabled:cursor-not-allowed disabled:opacity-40"

@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { AlertCircle, ArrowLeft, CheckCircle2, RotateCcw } from '@lucide/vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, ref, watch } from "vue";
+import { AlertCircle, ArrowLeft, CheckCircle2, RotateCcw } from "@lucide/vue";
+import { useRoute, useRouter } from "vue-router";
 
-import AdminDashboard from '@/layouts/AdminDashboard/AdminDashboard.vue'
-import CourseDetailHero from '../../components/CourseDetailHero.vue'
-import CourseFormModal from '../../components/CourseFormModal.vue'
-import CourseLessonList from '../../components/CourseLessonList.vue'
-import { useAdminCourseDetail } from '../../composables/useAdminCourseDetail'
-import type { CourseFormValues } from '../../types/course.types'
+import AdminDashboard from "@/layouts/AdminDashboard/AdminDashboard.vue";
+import CourseDetailHero from "../../components/CourseDetailHero.vue";
+import CourseFormModal from "../../components/CourseFormModal.vue";
+import CourseLessonList from "../../components/CourseLessonList.vue";
+import { useAdminCourseDetail } from "../../composables/useAdminCourseDetail";
+import type { CourseFormValues } from "../../../types/course.types.ts";
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 const courseId = computed(() =>
-  typeof route.params.courseId === 'string' ? route.params.courseId : '',
-)
-const isEditFormOpen = ref(false)
+  typeof route.params.courseId === "string" ? route.params.courseId : "",
+);
+const isEditFormOpen = ref(false);
 
 const {
   course,
@@ -26,47 +26,47 @@ const {
   fetchCourse,
   saveCourse,
   clearMessages,
-} = useAdminCourseDetail()
+} = useAdminCourseDetail();
 
 function openEditForm(): void {
-  clearMessages()
-  isEditFormOpen.value = true
+  clearMessages();
+  isEditFormOpen.value = true;
 }
 
 async function submitCourse(values: CourseFormValues): Promise<void> {
-  if (!courseId.value) return
+  if (!courseId.value) return;
 
-  const saved = await saveCourse(courseId.value, values)
+  const saved = await saveCourse(courseId.value, values);
 
-  if (saved) isEditFormOpen.value = false
+  if (saved) isEditFormOpen.value = false;
 }
 
 function retryFetch(): void {
-  if (courseId.value) void fetchCourse(courseId.value)
+  if (courseId.value) void fetchCourse(courseId.value);
 }
 
 function openLessonManagement(): void {
-  if (!courseId.value) return
+  if (!courseId.value) return;
 
-  void router.push(`/admin/courses/${courseId.value}/lessons`)
+  void router.push(`/admin/courses/${courseId.value}/lessons`);
 }
 
 function openQuizManagement(): void {
-  if (!courseId.value) return
+  if (!courseId.value) return;
 
   void router.push({
-    name: 'admin-course-quiz',
+    name: "admin-course-quiz",
     params: { courseId: courseId.value },
-  })
+  });
 }
 
 watch(
   courseId,
   (id) => {
-    if (id) void fetchCourse(id)
+    if (id) void fetchCourse(id);
   },
   { immediate: true },
-)
+);
 </script>
 
 <template>
@@ -116,7 +116,9 @@ watch(
         >
           <AlertCircle :size="23" aria-hidden="true" />
         </span>
-        <h1 class="text-lg font-bold text-slate-900">Detail course tidak tersedia</h1>
+        <h1 class="text-lg font-bold text-slate-900">
+          Detail course tidak tersedia
+        </h1>
         <p class="mt-2 max-w-md text-sm leading-6 text-slate-500">
           {{ errorMessage }}
         </p>
