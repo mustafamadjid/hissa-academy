@@ -5,11 +5,17 @@ import { Menu, X } from "@lucide/vue";
 import { guestMenu } from "../navbar-menu";
 import logo from "@/assets/images/logo.webp";
 
+import { useAuthStore } from "@/features/auth/stores/auth.store";
+import { storeToRefs } from "pinia";
+
 const isMobileMenuOpen = ref(false);
 
 function toggleMobileMenu(): void {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 }
+
+const authStore = useAuthStore();
+const { isAuthenticated } = storeToRefs(authStore);
 
 function closeMobileMenu(): void {
   isMobileMenuOpen.value = false;
@@ -66,10 +72,18 @@ function closeMobileMenu(): void {
       <!-- Desktop CTA -->
       <div class="hidden items-center md:flex">
         <RouterLink
-          :to="{ name: 'guest-courses' }"
+          v-if="!isAuthenticated"
+          :to="{ name: 'login-student' }"
           class="inline-flex items-center justify-center rounded-full bg-primary-dark-green px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-green hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark-green"
         >
           Mulai Belajar
+        </RouterLink>
+        <RouterLink
+          v-else
+          :to="{ name: 'guest-courses' }"
+          class="inline-flex items-center justify-center rounded-full bg-primary-dark-green px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-green hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark-green"
+        >
+          Lihat Course Anda
         </RouterLink>
       </div>
 
@@ -122,11 +136,21 @@ function closeMobileMenu(): void {
           </RouterLink>
 
           <RouterLink
-            :to="{ name: 'guest-courses' }"
+            v-if="!isAuthenticated"
+            :to="{ name: 'login-student' }"
             class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-primary-dark-green px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-green"
             @click="closeMobileMenu"
           >
             Mulai Belajar
+          </RouterLink>
+
+          <RouterLink
+            v-else
+            :to="{ name: 'guest-courses' }"
+            class="mt-4 inline-flex w-full items-center justify-center rounded-full bg-primary-dark-green px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-green"
+            @click="closeMobileMenu"
+          >
+            Lihat Course Anda
           </RouterLink>
         </div>
       </div>

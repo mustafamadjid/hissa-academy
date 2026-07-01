@@ -3,6 +3,7 @@
 use App\Features\Auth\Http\Controllers\GoogleAuthController;
 use App\Features\Auth\Http\Controllers\UserAuthController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 Route::prefix('auth')->group(function (): void {
     Route::post('/login', [UserAuthController::class, 'store'])
@@ -12,11 +13,15 @@ Route::prefix('auth')->group(function (): void {
     Route::post('/logout', [UserAuthController::class, 'destroy'])
         ->name('auth.logout');
 
-    Route::get('/google/redirect', [GoogleAuthController::class, 'redirect'])
-        ->name('auth.google.redirect');
+    Route::middleware('web')
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+        ->group(function (): void {
+            Route::get('/google/redirect', [GoogleAuthController::class, 'redirect'])
+                ->name('auth.google.redirect');
 
-    Route::get('/google/callback', [GoogleAuthController::class, 'callback'])
-        ->name('auth.google.callback');
+            Route::get('/google/callback', [GoogleAuthController::class, 'callback'])
+                ->name('auth.google.callback');
+        });
 
     Route::get('/me', [UserAuthController::class, 'me'])
         ->middleware(['auth:sanctum', 'throttle:api'])

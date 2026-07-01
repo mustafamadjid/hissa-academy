@@ -9,6 +9,24 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 
 uses(RefreshDatabase::class);
 
+it('starts a session before redirecting to Google', function () {
+    config([
+        'session.driver' => 'database',
+        'services.google.client_id' => 'test-client-id',
+        'services.google.client_secret' => 'test-client-secret',
+        'services.google.redirect' => 'http://localhost/api/v1/auth/google/callback',
+    ]);
+
+    $response = $this
+        ->withHeader('Referer', 'http://localhost:5173/login/student')
+        ->get('/api/v1/auth/google/redirect');
+
+    $response->assertRedirectContains('accounts.google.com/o/oauth2/auth')
+        ->assertSessionHas('state');
+
+    $this->assertDatabaseCount('sessions', 1);
+});
+
 it('logs in a Google user and redirects to the frontend callback URL', function () {
     $this->travelTo(now()->startOfSecond());
     config(['app.frontend_url' => 'https://frontend.example.com']);

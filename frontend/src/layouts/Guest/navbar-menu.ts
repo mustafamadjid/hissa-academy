@@ -1,5 +1,5 @@
-import { Home, BookOpen, FileCheck, Info, Phone } from '@lucide/vue';
-import type { Component } from 'vue';
+import { Home, BookOpen, FileCheck, Info, Phone } from "@lucide/vue";
+import type { Component } from "vue";
 
 export interface GuestMenuItem {
   label: string;
@@ -11,7 +11,7 @@ export interface GuestMenuItem {
 export const guestMenu: GuestMenuItem[] = [
   {
     label: "Beranda",
-    routeName: "guest-home",
+    routeName: "landing",
     icon: Home,
   },
   {

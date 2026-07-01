@@ -13,6 +13,19 @@ function getBackendOrigin(): string {
   return new URL(baseUrl, window.location.origin).origin;
 }
 
+export function getGoogleRedirectUrl(): string {
+  const baseUrl = axiosInstance.defaults.baseURL;
+
+  if (!baseUrl) {
+    throw new Error("API base URL is not configured");
+  }
+
+  return new URL(
+    `${baseUrl.replace(/\/$/, "")}/auth/google/redirect`,
+    window.location.origin,
+  ).toString();
+}
+
 export async function getCurrentUser(): Promise<AuthUser> {
   return httpClient.get<AuthUser>("/auth/me");
 }

@@ -7,14 +7,14 @@ import type { AuthUser, LoginCredentials } from '../types/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<AuthUser | null>(null)
-  const initialized = ref(false)
-  const isRestoring = ref(false)
+  const isSessionInitialized = ref(false)
+  const isRestoringSession = ref(false)
   const sessionError = ref<string | null>(null)
   const isAuthenticated = computed(() => user.value !== null)
   let restorePromise: Promise<void> | null = null
 
   function restoreSession(): Promise<void> {
-    if (initialized.value) {
+    if (isSessionInitialized.value) {
       return Promise.resolve()
     }
 
@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     restorePromise = (async () => {
-      isRestoring.value = true
+      isRestoringSession.value = true
       sessionError.value = null
 
       try {
@@ -38,8 +38,8 @@ export const useAuthStore = defineStore('auth', () => {
               : 'Gagal memulihkan sesi. Silakan coba kembali.'
         }
       } finally {
-        initialized.value = true
-        isRestoring.value = false
+        isSessionInitialized.value = true
+        isRestoringSession.value = false
         restorePromise = null
       }
     })()
@@ -50,7 +50,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function signIn(credentials: LoginCredentials): Promise<void> {
     sessionError.value = null
     user.value = await authApi.login(credentials)
-    initialized.value = true
+    isSessionInitialized.value = true
   }
 
   async function signOut(): Promise<void> {
@@ -58,15 +58,17 @@ export const useAuthStore = defineStore('auth', () => {
       await authApi.logout()
     } finally {
       user.value = null
-      initialized.value = true
+      isSessionInitialized.value = true
       sessionError.value = null
     }
   }
 
   return {
     user,
-    initialized,
-    isRestoring,
+    isSessionInitialized,
+    isRestoringSession,
+    initialized: isSessionInitialized,
+    isRestoring: isRestoringSession,
     sessionError,
     isAuthenticated,
     restoreSession,

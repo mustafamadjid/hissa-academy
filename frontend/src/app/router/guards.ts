@@ -1,31 +1,36 @@
-import type { Router } from 'vue-router'
+import type { Router } from "vue-router";
 
-import { pinia } from '@/app/pinia'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { pinia } from "@/app/pinia";
+import { useAuthStore } from "@/features/auth/stores/auth.store";
 
 export function registerRouterGuards(router: Router): void {
   router.beforeEach(async (to) => {
-    const authStore = useAuthStore(pinia)
+    const authStore = useAuthStore(pinia);
+    const requiresSession = Boolean(
+      to.meta.requiresAuth || to.meta.guestOnly || to.meta.roles?.length,
+    );
 
-    await authStore.restoreSession()
+    if (requiresSession) {
+      await authStore.restoreSession();
+    }
 
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-      return { name: 'landing' }
+      return { name: "landing" };
     }
 
     if (to.meta.guestOnly && authStore.isAuthenticated) {
-      return authStore.user?.role.name === 'admin'
-        ? { name: 'admin-courses' }
-        : { name: 'forbidden' }
+      return authStore.user?.role.name === "admin"
+        ? { name: "admin-courses" }
+        : { name: "landing" };
     }
 
     if (
       to.meta.roles?.length &&
       (!authStore.user || !to.meta.roles.includes(authStore.user.role.name))
     ) {
-      return { name: 'forbidden' }
+      return { name: "forbidden" };
     }
 
-    return true
-  })
+    return true;
+  });
 }
