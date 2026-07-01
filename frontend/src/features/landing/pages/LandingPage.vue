@@ -1,8 +1,10 @@
+<script setup>
+import GuestLayout from "@/layouts/Guest/GuestLayout.vue";
+</script>
 <template>
-  <main class="flex min-h-screen items-center justify-center bg-background p-6">
-    <section class="text-center">
-      <h1 class="text-3xl font-bold text-primary-dark-green">HISSA Academy</h1>
-      <p class="mt-2 text-neutral-medium">Selamat datang di HISSA Academy.</p>
-    </section>
-  </main>
+  <GuestLayout>
+    <div>
+      <h1>Hello</h1>
+    </div>
+  </GuestLayout>
 </template>

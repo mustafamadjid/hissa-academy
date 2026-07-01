@@ -15,6 +15,31 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/landing/pages/LandingPage.vue'),
   },
   {
+    path: '/home',
+    name: 'guest-home',
+    component: () => import('@/features/guest/pages/HomePage.vue'),
+  },
+  {
+    path: '/courses',
+    name: 'guest-courses',
+    component: () => import('@/features/guest/pages/CoursesPage.vue'),
+  },
+  {
+    path: '/certificates',
+    name: 'guest-certificates',
+    component: () => import('@/features/guest/pages/CertificatesPage.vue'),
+  },
+  {
+    path: '/about',
+    name: 'guest-about',
+    component: () => import('@/features/guest/pages/AboutPage.vue'),
+  },
+  {
+    path: '/contact',
+    name: 'guest-contact',
+    component: () => import('@/features/guest/pages/ContactPage.vue'),
+  },
+  {
     path: '/login/administrator',
     name: 'administrator-login',
     component: () => import('@/features/auth/pages/LoginPage.vue'),
