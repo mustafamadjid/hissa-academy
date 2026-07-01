@@ -47,6 +47,29 @@ it('returns active courses available for a student', function () {
         ->assertJsonMissingPath('data.1');
 });
 
+it('returns active courses without authentication', function () {
+    $activeCourse = Course::factory()->create([
+        'course_name' => 'Public Laravel Basics',
+        'status' => 'active',
+    ]);
+    Course::factory()->create(['status' => 'draft']);
+    Lesson::factory()->create([
+        'course_id' => $activeCourse->id,
+        'is_required' => true,
+    ]);
+
+    $response = $this->getJson('/api/v1/courses');
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.0.id', $activeCourse->id)
+        ->assertJsonPath('data.0.name', 'Public Laravel Basics')
+        ->assertJsonPath('data.0.total_lessons', 1)
+        ->assertJsonPath('data.0.completed_lessons', 0)
+        ->assertJsonPath('data.0.progress_percentage', 0)
+        ->assertJsonMissingPath('data.1');
+});
+
 it('returns course detail with ordered lesson lock status and progress', function () {
     $student = studentApiUser();
     $this->actingAs($student);
@@ -119,10 +142,11 @@ it('returns course progress summary for the active student', function () {
         ->assertJsonPath('data.progress_percentage', 50);
 });
 
-it('rejects course student endpoints for non students', function () {
+it('rejects protected course student endpoints for non students', function () {
     $this->actingAs(userWithApiRole('admin'));
 
-    $response = $this->getJson('/api/v1/courses');
+    $course = Course::factory()->create(['status' => 'active']);
+    $response = $this->getJson("/api/v1/courses/{$course->id}");
 
     $response->assertForbidden()
         ->assertJsonPath('success', false)

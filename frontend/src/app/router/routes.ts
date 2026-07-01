@@ -59,8 +59,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: "/auth/callback",
     name: "google-auth-callback",
-    component: () =>
-      import("@/features/auth/pages/GoogleAuthCallbackPage.vue"),
+    component: () => import("@/features/auth/pages/GoogleAuthCallbackPage.vue"),
   },
   {
     path: "/forbidden",

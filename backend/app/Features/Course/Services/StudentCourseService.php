@@ -6,6 +6,7 @@ use App\Features\Course\Contracts\CourseRepositoryContract;
 use App\Features\Course\DTOs\StudentCourseListData;
 use App\Features\Course\Exceptions\CourseOperationException;
 use App\Features\Course\Models\Course;
+use App\Features\User\Enums\UserRole;
 use App\Features\User\Models\User;
 use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
 use App\Helper\EnsureStudentForService;
@@ -23,15 +24,13 @@ final class StudentCourseService
 
     public function listAvailablePaginated(StudentCourseListData $data, ?User $actor): LengthAwarePaginator
     {
-        $this->ensureStudent->ensureStudent($actor);
-
         try {
             $courses = $this->courseRepository->activeCoursesWithLessonsPaginated($data);
+            $student = $actor?->role?->name === UserRole::STUDENT->value ? $actor : null;
 
-            return $courses->through(fn (Course $course): array => $this->courseSummary($course, $actor));
+            return $courses->through(fn (Course $course): array => $this->courseSummary($course, $student));
         } catch (Throwable $exception) {
             Log::error('Gagal mengambil daftar course.', [
-                'actor_id' => $actor?->id,
                 'search' => $data->search,
                 'exception' => $exception,
             ]);
@@ -155,7 +154,7 @@ final class StudentCourseService
     /**
      * @return array<string, mixed>
      */
-    private function courseSummary(Course $course, User $actor): array
+    private function courseSummary(Course $course, ?User $actor): array
     {
         return array_merge([
             'id' => $course->id,
@@ -169,11 +168,21 @@ final class StudentCourseService
     /**
      * @return array<string, mixed>
      */
-    private function courseProgress(Course $course, User $actor): array
+    private function courseProgress(Course $course, ?User $actor): array
     {
         $lessonIds = $course->lessons->pluck('id')->all();
-        $progressByLesson = $this->progressByLesson($actor->id, $lessonIds);
         $totalLessons = count($lessonIds);
+
+        if ($actor === null) {
+            return [
+                'course_id' => $course->id,
+                'total_lessons' => $totalLessons,
+                'completed_lessons' => 0,
+                'progress_percentage' => 0,
+            ];
+        }
+
+        $progressByLesson = $this->progressByLesson($actor->id, $lessonIds);
         $completedLessons = $progressByLesson
             ->filter(fn ($progress): bool => $progress->status === 'completed')
             ->count();

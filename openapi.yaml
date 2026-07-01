@@ -134,6 +134,38 @@ paths:
     get:
       tags: [Student Courses]
       summary: Get published courses
+      security: []
+      description: |
+        Mengambil daftar course yang dipublikasikan untuk student.
+        
+        Endpoint mendukung pencarian pada `name` dan `description`, sorting,
+        serta pagination berbasis `page` dan `limit`.
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+          description: Pencarian berdasarkan nama course atau deskripsi.
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [name, minimum_score, created_at, updated_at]
+            default: created_at
+          description: Kolom yang digunakan untuk mengurutkan data.
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Arah pengurutan data.
       responses:
         "200":
           description: Daftar course berhasil diambil.
@@ -141,10 +173,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StudentCourseListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
         "500":
           $ref: "#/components/responses/ServerError"
 
