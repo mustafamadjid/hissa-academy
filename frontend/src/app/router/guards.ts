@@ -30,7 +30,7 @@ export function registerRouterGuards(router: Router): void {
       to.meta.roles?.length &&
       (!authStore.user || !to.meta.roles.includes(authStore.user.role))
     ) {
-      return { name: "forbidden" };
+      return { name: "landing" };
     }
 
     return true;

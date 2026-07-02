@@ -6,17 +6,24 @@ import { useRoute } from "vue-router";
 import GuestLayout from "@/layouts/Guest/GuestLayout.vue";
 
 import LessonPlaylist from "../components/LessonPlaylist.vue";
+import YouTubeLessonPlayer from "../components/YouTubeLessonPlayer.vue";
 import { useLessonDetail } from "../composables/useLessonDetail";
+import { useLessonProgress } from "../composables/useLessonProgress";
 
 const route = useRoute();
 const lessonId = computed(() => String(route.params.lessonId));
-const { lesson, course, isLoading, error, isLocked, embedUrl, fetchLesson } = useLessonDetail();
+const { lesson, course, isLoading, error, isLocked, fetchLesson } = useLessonDetail();
+const { progressError, setLesson, recordWatch, flush } = useLessonProgress();
 
 const orderedLessons = computed(() =>
   [...(course.value?.lessons ?? [])].sort((left, right) => left.position - right.position),
 );
 
 watch(lessonId, (id) => void fetchLesson(id), { immediate: true });
+watch(lesson, (currentLesson) => {
+  if (currentLesson) setLesson(currentLesson.id, currentLesson.progress);
+});
+
 </script>
 
 <template>
@@ -48,14 +55,15 @@ watch(lessonId, (id) => void fetchLesson(id), { immediate: true });
           <div class="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-primary-green/15 bg-white shadow-elevation-2 lg:grid lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_360px]">
             <div class="flex min-w-0 flex-col bg-[#07130e]">
               <div class="aspect-video w-full lg:my-auto">
-                <iframe
-                  v-if="embedUrl"
-                  :src="embedUrl"
-                  :title="lesson.video?.title ?? lesson.title"
-                  class="size-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  allowfullscreen
+                <YouTubeLessonPlayer
+                  v-if="lesson.video?.youtube_video_id"
+                  :lesson-id="lesson.id"
+                  :video-id="lesson.video.youtube_video_id"
+                  :key="lesson.id"
+                  :title="lesson.video.title ?? lesson.title"
+                  :start-seconds="lesson.progress?.last_position_seconds ?? 0"
+                  @watch-sample="recordWatch"
+                  @playback-stopped="flush"
                 />
                 <div v-else class="grid size-full place-items-center text-center text-white">
                   <div><PlayCircle class="mx-auto size-16 text-lime-accent" /><p class="mt-4 font-semibold">Video lesson belum tersedia</p></div>
@@ -67,6 +75,9 @@ watch(lessonId, (id) => void fetchLesson(id), { immediate: true });
         </section>
 
         <section class="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:py-14">
+          <p v-if="progressError" role="status" class="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ progressError }} Progress akan dicoba kembali saat video dilanjutkan.
+          </p>
           <RouterLink :to="{ name: 'course-detail', params: { courseId: lesson.course_id } }" class="inline-flex items-center gap-2 text-sm font-semibold text-primary-green">
             <ArrowLeft class="size-4" /> {{ course.name }}
           </RouterLink>

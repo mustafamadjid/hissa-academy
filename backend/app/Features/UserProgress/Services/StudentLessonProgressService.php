@@ -94,7 +94,7 @@ final class StudentLessonProgressService
 
     private function resolveStatus(int $totalWatchedSeconds, int $durationSeconds): string
     {
-        if ($durationSeconds > 0 && $totalWatchedSeconds >= (int) ceil($durationSeconds * 0.9)) {
+        if ($durationSeconds > 0 && $totalWatchedSeconds >= (int) ceil($durationSeconds * 0.8)) {
             return 'completed';
         }
 

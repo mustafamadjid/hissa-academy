@@ -57,3 +57,14 @@ export interface GetLearningCourseDetailResponse {
   message: string;
   data: LearningCourseDetailDto;
 }
+
+export interface SubmitLessonProgressRequest {
+  last_position_seconds: number;
+  watched_seconds: number;
+}
+
+export interface SubmitLessonProgressResponse {
+  success: boolean;
+  message: string;
+  data: LessonProgressDto;
+}
