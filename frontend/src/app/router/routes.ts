@@ -53,9 +53,10 @@ export const routes: RouteRecordRaw[] = [
     meta: studentRouteMeta,
   },
   {
-    path: "/certificates",
-    name: "guest-certificates",
-    component: () => import("@/features/guest/pages/CertificatesPage.vue"),
+    path: "/verify-certificate",
+    name: "verify-certificate",
+    component: () =>
+      import("@/features/guest/pages/VerifyCertificatesPage.vue"),
   },
   {
     path: "/about",

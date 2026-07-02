@@ -21,7 +21,7 @@ export const guestMenu: GuestMenuItem[] = [
   },
   {
     label: "Verifikasi Sertifikat",
-    routeName: "guest-certificates",
+    routeName: "verify-certificate",
     icon: FileCheck,
   },
   {

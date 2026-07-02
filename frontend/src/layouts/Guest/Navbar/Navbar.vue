@@ -50,7 +50,7 @@ function closeMobileMenu(): void {
 
       <!-- Desktop Navigation -->
       <div
-        class="absolute left-1/2 hidden h-full -translate-x-1/2 items-center md:flex"
+        class="absolute left-1/2 hidden h-full -translate-x-1/2 items-center lg:flex"
       >
         <div class="flex h-full items-center gap-8 lg:gap-10">
           <RouterLink
@@ -74,7 +74,7 @@ function closeMobileMenu(): void {
       </div>
 
       <!-- Desktop CTA -->
-      <div class="hidden items-center md:flex">
+      <div class="hidden items-center lg:flex">
         <RouterLink
           v-if="!isAuthenticated"
           :to="{ name: 'login-student' }"
@@ -112,7 +112,7 @@ function closeMobileMenu(): void {
       <!-- Mobile Menu Button -->
       <button
         type="button"
-        class="inline-flex size-11 items-center justify-center rounded-xl border border-neutral-low bg-white text-neutral-high transition-colors hover:bg-surface-dim md:hidden"
+        class="inline-flex size-11 items-center justify-center rounded-xl border border-neutral-low bg-white text-neutral-high transition-colors hover:bg-surface-dim lg:hidden"
         :aria-expanded="isMobileMenuOpen"
         aria-controls="mobile-navigation"
         aria-label="Buka menu navigasi"
@@ -135,7 +135,7 @@ function closeMobileMenu(): void {
       <div
         v-if="isMobileMenuOpen"
         id="mobile-navigation"
-        class="border-t border-neutral-low bg-white px-5 pb-6 pt-3 shadow-lg md:hidden"
+        class="border-t border-neutral-low bg-white px-5 pb-6 pt-3 shadow-lg lg:hidden"
       >
         <div class="mx-auto flex max-w-7xl flex-col">
           <RouterLink
