@@ -4,6 +4,7 @@ namespace App\Features\Quizz\Services;
 
 use App\Features\Certificate\Models\Certificate;
 use App\Features\Quizz\Contracts\StudentQuizRepositoryContract;
+use App\Features\Quizz\DTOs\QuizAccessData;
 use App\Features\Quizz\DTOs\SubmitQuizAttemptData;
 use App\Features\Quizz\Exceptions\StudentQuizOperationException;
 use App\Features\Quizz\Models\Question;
@@ -11,6 +12,7 @@ use App\Features\Quizz\Models\QuizAttempt;
 use App\Features\Quizz\Models\Quizz;
 use App\Features\User\Models\User;
 use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
+use App\Features\UserProgress\Enums\LessonProgressStatus;
 use App\Helper\EnsureStudentForService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +25,40 @@ final class StudentQuizService
         private readonly UserProgressRepositoryContract $progressRepository,
         private readonly EnsureStudentForService $ensureStudent,
     ) {}
+
+    public function quizAccess(string $courseId, ?User $actor): ?QuizAccessData
+    {
+        $this->ensureStudent->ensureStudent($actor);
+
+        try {
+            $quiz = $this->quizRepository->findActiveCourseQuiz($courseId);
+
+            if ($quiz === null) {
+                return null;
+            }
+
+            $requiredLessonIds = $this->requiredLessonIds($quiz);
+            $completedRequiredLessons = $this->completedRequiredLessonCount($actor, $requiredLessonIds);
+            $canAccess = $completedRequiredLessons === count($requiredLessonIds);
+
+            return new QuizAccessData(
+                courseUuid: $courseId,
+                quizUuid: $quiz->id,
+                canAccess: $canAccess,
+                requiredLessons: count($requiredLessonIds),
+                completedRequiredLessons: $completedRequiredLessons,
+                reason: $canAccess ? null : 'REQUIRED_LESSONS_NOT_COMPLETED',
+            );
+        } catch (Throwable $exception) {
+            Log::error('Gagal mengecek akses quiz.', [
+                'course_id' => $courseId,
+                'actor_id' => $actor?->id,
+                'exception' => $exception,
+            ]);
+
+            throw new StudentQuizOperationException('Gagal mengecek akses quiz.', previous: $exception);
+        }
+    }
 
     /**
      * @return array{quiz: Quizz, attempts_used: int}|null
@@ -100,7 +136,17 @@ final class StudentQuizService
         $this->ensureStudent->ensureStudent($actor);
 
         try {
-            return $this->quizRepository->findAttemptForUser($attemptId, $actor->id);
+            $attempt = $this->quizRepository->findAttemptForUser($attemptId, $actor->id);
+
+            if ($attempt === null) {
+                return null;
+            }
+
+            $this->ensureQuizUnlocked($attempt->quiz, $actor);
+
+            return $attempt;
+        } catch (StudentQuizOperationException $exception) {
+            throw $exception;
         } catch (Throwable $exception) {
             Log::error('Gagal mengambil quiz attempt.', [
                 'attempt_id' => $attemptId,
@@ -131,6 +177,8 @@ final class StudentQuizService
             if ($attempt === null) {
                 return null;
             }
+
+            $this->ensureQuizUnlocked($attempt->quiz, $actor);
 
             if ($attempt->status !== 'in_progress') {
                 throw new StudentQuizOperationException(
@@ -198,16 +246,13 @@ final class StudentQuizService
 
     private function ensureQuizUnlocked(Quizz $quiz, User $actor): void
     {
-        $requiredLessonIds = $quiz->course?->lessons?->pluck('id')->all() ?? [];
+        $requiredLessonIds = $this->requiredLessonIds($quiz);
 
         if ($requiredLessonIds === []) {
             return;
         }
 
-        $completedRequiredLessonCount = $this->progressRepository
-            ->forUserLessons($actor->id, $requiredLessonIds)
-            ->filter(fn ($progress): bool => $progress->status === 'completed')
-            ->count();
+        $completedRequiredLessonCount = $this->completedRequiredLessonCount($actor, $requiredLessonIds);
 
         if ($completedRequiredLessonCount !== count($requiredLessonIds)) {
             throw new StudentQuizOperationException(
@@ -217,6 +262,25 @@ final class StudentQuizService
                 ['reason' => 'REQUIRED_LESSONS_NOT_COMPLETED'],
             );
         }
+    }
+
+    /** @return array<int, string> */
+    private function requiredLessonIds(Quizz $quiz): array
+    {
+        return $quiz->course?->lessons?->pluck('id')->values()->all() ?? [];
+    }
+
+    /** @param array<int, string> $requiredLessonIds */
+    private function completedRequiredLessonCount(User $actor, array $requiredLessonIds): int
+    {
+        if ($requiredLessonIds === []) {
+            return 0;
+        }
+
+        return $this->progressRepository
+            ->forUserLessons($actor->id, $requiredLessonIds)
+            ->filter(fn ($progress): bool => $progress->status === LessonProgressStatus::COMPLETED->value)
+            ->count();
     }
 
     private function issueCertificate(User $actor, QuizAttempt $attempt): Certificate

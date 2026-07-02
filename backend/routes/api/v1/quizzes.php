@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'role:'.UserRole::STUDENT->value, 'throttle:api'])
     ->group(function (): void {
+        Route::get('/courses/{course_uuid}/quiz/access', [StudentQuizController::class, 'access'])
+            ->name('courses.quiz.access');
+
         Route::get('/courses/{course_uuid}/quiz', [StudentQuizController::class, 'courseQuiz'])
             ->name('courses.quiz.show');
 

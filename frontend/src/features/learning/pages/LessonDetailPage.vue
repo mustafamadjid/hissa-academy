@@ -3,6 +3,7 @@ import { ArrowLeft, BookOpen, LoaderCircle, LockKeyhole, PlayCircle } from "@luc
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import { useQuizAccess } from "@/features/quiz/composables/useQuizAccess";
 import GuestLayout from "@/layouts/Guest/GuestLayout.vue";
 
 import LessonPlaylist from "../components/LessonPlaylist.vue";
@@ -14,19 +15,17 @@ const route = useRoute();
 const lessonId = computed(() => String(route.params.lessonId));
 const { lesson, course, isLoading, error, isLocked, fetchLesson } = useLessonDetail();
 const { progressError, setLesson, recordWatch, flush } = useLessonProgress();
+const { quizAccess, fetchQuizAccess } = useQuizAccess();
 
 const orderedLessons = computed(() =>
   [...(course.value?.lessons ?? [])].sort((left, right) => left.position - right.position),
 );
-const quizUnlocked = computed(() =>
-  orderedLessons.value
-    .filter((item) => item.is_required)
-    .every((item) => item.progress?.status === "completed"),
-);
-
 watch(lessonId, (id) => void fetchLesson(id), { immediate: true });
 watch(lesson, (currentLesson) => {
   if (currentLesson) setLesson(currentLesson.id, currentLesson.progress);
+});
+watch(course, (currentCourse) => {
+  if (currentCourse) void fetchQuizAccess(currentCourse.id);
 });
 
 </script>
@@ -79,7 +78,7 @@ watch(lesson, (currentLesson) => {
               :lessons="orderedLessons"
               :active-lesson-id="lesson.id"
               :course-id="course.id"
-              :quiz-unlocked="quizUnlocked"
+              :quiz-unlocked="quizAccess?.can_access ?? null"
             />
           </div>
         </section>

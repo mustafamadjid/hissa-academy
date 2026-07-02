@@ -4,6 +4,15 @@ export interface StudentQuizAttemptPolicyDto {
   attempts_remaining: number | null;
 }
 
+export interface QuizAccessDto {
+  course_uuid: string;
+  quiz_uuid: string;
+  can_access: boolean;
+  required_lessons: number;
+  completed_required_lessons: number;
+  reason: "REQUIRED_LESSONS_NOT_COMPLETED" | null;
+}
+
 export interface StudentQuizDto {
   uuid: string;
   name: string;

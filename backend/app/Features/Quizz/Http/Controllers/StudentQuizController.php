@@ -3,7 +3,9 @@
 namespace App\Features\Quizz\Http\Controllers;
 
 use App\Features\Quizz\Exceptions\StudentQuizOperationException;
+use App\Features\Quizz\Http\Requests\QuizAccessRequest;
 use App\Features\Quizz\Http\Requests\SubmitQuizAttemptRequest;
+use App\Features\Quizz\Http\Resources\QuizAccessResource;
 use App\Features\Quizz\Http\Resources\QuizAttemptResource;
 use App\Features\Quizz\Http\Resources\QuizSubmitResultResource;
 use App\Features\Quizz\Http\Resources\StudentQuizResource;
@@ -14,6 +16,27 @@ use Illuminate\Http\Request;
 
 final class StudentQuizController
 {
+    public function access(string $course_uuid, QuizAccessRequest $request, StudentQuizService $quizService): JsonResponse
+    {
+        try {
+            $access = $quizService->quizAccess($course_uuid, $request->user());
+
+            if ($access === null) {
+                return $this->notFound('Quiz tidak ditemukan.');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Akses quiz berhasil diperiksa.',
+                'data' => new QuizAccessResource($access),
+            ]);
+        } catch (AuthorizationException $exception) {
+            return $this->error($exception->getMessage(), 403);
+        } catch (StudentQuizOperationException $exception) {
+            return $this->operationError($exception);
+        }
+    }
+
     public function courseQuiz(string $course_uuid, Request $request, StudentQuizService $quizService): JsonResponse
     {
         try {

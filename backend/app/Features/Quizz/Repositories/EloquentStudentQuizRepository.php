@@ -70,7 +70,11 @@ final class EloquentStudentQuizRepository implements StudentQuizRepositoryContra
     public function findAttemptForUser(string $attemptId, string $userId): ?QuizAttempt
     {
         return QuizAttempt::query()
-            ->with(['quiz.course', 'quiz.questions.answers', 'answers'])
+            ->with([
+                'quiz.course.lessons' => fn ($query) => $query->where('is_required', true),
+                'quiz.questions.answers',
+                'answers',
+            ])
             ->where('user_id', $userId)
             ->find($attemptId);
     }

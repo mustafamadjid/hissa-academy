@@ -6,7 +6,7 @@ defineProps<{
   lessons: readonly StudentCourseLessonDto[];
   authenticated: boolean;
   courseId: string;
-  quizUnlocked: boolean;
+  quizUnlocked: boolean | null;
 }>();
 </script>
 
@@ -79,7 +79,7 @@ defineProps<{
       </li>
       <li v-if="lessons.length > 0" class="border-t border-neutral-low">
         <RouterLink
-          v-if="quizUnlocked"
+          v-if="quizUnlocked === true"
           :to="{ name: 'student-course-quiz', params: { courseId } }"
           class="flex w-full items-center gap-4 bg-primary-green/5 px-5 py-4 text-left transition hover:bg-primary-green/10 focus-visible:outline-2 focus-visible:outline-primary-green"
         >
@@ -90,7 +90,7 @@ defineProps<{
           <span class="text-xs font-semibold text-primary-green">Kerjakan</span>
         </RouterLink>
         <div
-          v-else
+          v-else-if="quizUnlocked === false"
           class="flex items-center gap-4 bg-surface-dim/70 px-5 py-4 text-neutral-medium"
           aria-disabled="true"
         >
@@ -99,6 +99,17 @@ defineProps<{
             >{{ lessons.length + 1 }}. Quiz Akhir Course</span
           >
           <span class="text-xs">Selesaikan semua lesson wajib</span>
+        </div>
+        <div
+          v-else
+          class="flex items-center gap-4 bg-surface-dim/70 px-5 py-4 text-neutral-medium"
+          aria-disabled="true"
+        >
+          <LockKeyhole class="size-5 shrink-0" />
+          <span class="min-w-0 flex-1 text-sm font-bold"
+            >{{ lessons.length + 1 }}. Quiz Akhir Course</span
+          >
+          <span class="text-xs">Status akses tidak tersedia</span>
         </div>
       </li>
       <li

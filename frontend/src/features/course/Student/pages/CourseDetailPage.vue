@@ -15,6 +15,7 @@ import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { useAuthStore } from "@/features/auth/stores/auth.store";
+import { useQuizAccess } from "@/features/quiz/composables/useQuizAccess";
 import GuestLayout from "@/layouts/Guest/GuestLayout.vue";
 
 import CourseCurriculum from "../components/CourseCurriculum.vue";
@@ -24,6 +25,12 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const { course, isLoading, error, fetchCourse } = useCourseDetail();
+const {
+  quizAccess,
+  isQuizAccessLoading,
+  quizAccessError,
+  fetchQuizAccess,
+} = useQuizAccess();
 
 const courseId = computed(() => String(route.params.courseId));
 const firstAvailableLesson = computed(() =>
@@ -31,11 +38,6 @@ const firstAvailableLesson = computed(() =>
     .slice()
     .sort((left, right) => left.position - right.position)
     .find((lesson) => !lesson.is_locked),
-);
-const quizUnlocked = computed(() =>
-  Boolean(course.value?.lessons.filter((lesson) => lesson.is_required).every(
-    (lesson) => lesson.progress?.status === "completed",
-  )),
 );
 
 async function startCourse(): Promise<void> {
@@ -55,7 +57,13 @@ async function startCourse(): Promise<void> {
   }
 }
 
-onMounted(() => void fetchCourse(courseId.value, authStore.isAuthenticated));
+onMounted(() => {
+  void fetchCourse(courseId.value, authStore.isAuthenticated);
+
+  if (authStore.isAuthenticated) {
+    void fetchQuizAccess(courseId.value);
+  }
+});
 </script>
 
 <template>
@@ -212,17 +220,18 @@ onMounted(() => void fetchCourse(courseId.value, authStore.isAuthenticated));
               :lessons="course.lessons"
               :authenticated="authStore.isAuthenticated"
               :course-id="course.id"
-              :quiz-unlocked="quizUnlocked"
+              :quiz-unlocked="quizAccess?.can_access ?? null"
             />
             <section v-if="authStore.isAuthenticated" class="rounded-2xl border border-primary-green/15 bg-white p-6 shadow-sm">
               <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
                 <div class="grid size-12 shrink-0 place-items-center rounded-xl bg-primary-green/10">
-                  <ClipboardCheck v-if="quizUnlocked" class="size-6 text-primary-green" />
+                  <LoaderCircle v-if="isQuizAccessLoading" class="size-6 animate-spin text-primary-green" />
+                  <ClipboardCheck v-else-if="quizAccess?.can_access" class="size-6 text-primary-green" />
                   <LockKeyhole v-else class="size-6 text-neutral-medium" />
                 </div>
-                <div class="flex-1"><h2 class="font-bold">Quiz akhir course</h2><p class="mt-1 text-sm text-neutral-medium">{{ quizUnlocked ? "Semua lesson wajib selesai. Quiz siap dikerjakan." : "Selesaikan semua lesson wajib untuk membuka quiz." }}</p></div>
-                <RouterLink v-if="quizUnlocked" :to="{ name: 'student-course-quiz', params: { courseId: course.id } }" class="rounded-xl bg-primary-dark-green px-5 py-3 text-center text-sm font-bold text-white">Buka Quiz</RouterLink>
-                <span v-else class="rounded-xl bg-surface-dim px-5 py-3 text-center text-sm font-semibold text-neutral-medium">Terkunci</span>
+                <div class="flex-1"><h2 class="font-bold">Quiz akhir course</h2><p class="mt-1 text-sm text-neutral-medium">{{ isQuizAccessLoading ? "Memeriksa akses quiz..." : quizAccessError ? quizAccessError : quizAccess?.can_access ? "Semua lesson wajib selesai. Quiz siap dikerjakan." : "Selesaikan semua lesson wajib untuk membuka quiz." }}</p></div>
+                <RouterLink v-if="quizAccess?.can_access" :to="{ name: 'student-course-quiz', params: { courseId: course.id } }" class="rounded-xl bg-primary-dark-green px-5 py-3 text-center text-sm font-bold text-white">Buka Quiz</RouterLink>
+                <span v-else class="rounded-xl bg-surface-dim px-5 py-3 text-center text-sm font-semibold text-neutral-medium">{{ isQuizAccessLoading ? "Memeriksa..." : quizAccessError ? "Tidak tersedia" : "Terkunci" }}</span>
               </div>
             </section>
           </div>

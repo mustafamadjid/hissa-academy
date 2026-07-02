@@ -12,6 +12,56 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+it('reports quiz access from completion of required lessons only', function () {
+    $student = studentQuizUser();
+    $this->actingAs($student);
+
+    $course = Course::factory()->create(['status' => 'active']);
+    $completedLesson = Lesson::factory()->create(['course_id' => $course->id, 'is_required' => true]);
+    Lesson::factory()->create(['course_id' => $course->id, 'is_required' => true]);
+    Lesson::factory()->create(['course_id' => $course->id, 'is_required' => false]);
+    UserProgress::factory()->create([
+        'user_id' => $student->id,
+        'lesson_id' => $completedLesson->id,
+        'status' => 'completed',
+    ]);
+    $quiz = Quizz::factory()->create(['course_id' => $course->id, 'is_active' => true]);
+
+    $response = $this->getJson("/api/v1/courses/{$course->id}/quiz/access");
+
+    $response->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('message', 'Akses quiz berhasil diperiksa.')
+        ->assertJsonPath('data.course_uuid', $course->id)
+        ->assertJsonPath('data.quiz_uuid', $quiz->id)
+        ->assertJsonPath('data.can_access', false)
+        ->assertJsonPath('data.required_lessons', 2)
+        ->assertJsonPath('data.completed_required_lessons', 1)
+        ->assertJsonPath('data.reason', 'REQUIRED_LESSONS_NOT_COMPLETED');
+});
+
+it('allows quiz access when every required lesson is completed', function () {
+    $student = studentQuizUser();
+    $this->actingAs($student);
+
+    [$quiz] = studentQuizReadyQuiz($student);
+
+    $this->getJson("/api/v1/courses/{$quiz->course_id}/quiz/access")
+        ->assertOk()
+        ->assertJsonPath('data.can_access', true)
+        ->assertJsonPath('data.required_lessons', 1)
+        ->assertJsonPath('data.completed_required_lessons', 1)
+        ->assertJsonPath('data.reason', null);
+});
+
+it('validates the course uuid used to check quiz access', function () {
+    $this->actingAs(studentQuizUser());
+
+    $this->getJson('/api/v1/courses/not-a-uuid/quiz/access')
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('course_uuid');
+});
+
 it('returns an unlocked course quiz after all required lessons are completed', function () {
     $student = studentQuizUser();
     $this->actingAs($student);
@@ -102,6 +152,24 @@ it('creates and returns a quiz attempt without exposing correct answers', functi
         ->assertJsonPath('data.score', null)
         ->assertJsonPath('data.questions.0.selected_option_uuid', null)
         ->assertJsonMissingPath('data.questions.0.options.0.is_correct');
+});
+
+it('never exposes quiz questions after required lesson access becomes locked', function () {
+    $student = studentQuizUser();
+    $this->actingAs($student);
+
+    [$quiz] = studentQuizReadyQuiz($student);
+    $attemptUuid = $this->postJson("/api/v1/quizzes/{$quiz->id}/attempts", [])->json('data.uuid');
+
+    UserProgress::query()
+        ->where('user_id', $student->id)
+        ->whereHas('lesson', fn ($query) => $query->where('course_id', $quiz->course_id))
+        ->update(['status' => 'in_progress', 'completed_at' => null]);
+
+    $this->getJson("/api/v1/quiz-attempts/{$attemptUuid}")
+        ->assertForbidden()
+        ->assertJsonPath('error.code', 'QUIZ_LOCKED')
+        ->assertJsonMissingPath('data.questions');
 });
 
 it('submits a passing attempt and issues a certificate', function () {

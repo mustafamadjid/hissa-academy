@@ -294,10 +294,62 @@ paths:
         "500":
           $ref: "#/components/responses/ServerError"
 
-  /api/v1/courses/{course_uuid}/quiz:
-    get:
-      tags: [Student Quiz]
-      summary: Get course quiz
+   /api/v1/courses/{course_uuid}/quiz/access:
+     get:
+       tags: [Student Quiz]
+       summary: Check quiz access permission
+       parameters:
+         - $ref: "#/components/parameters/CourseUuid"
+       responses:
+         "200":
+           description: Access check berhasil diproses.
+           content:
+             application/json:
+               schema:
+                 allOf:
+                   - $ref: "#/components/schemas/SuccessResponse"
+                   - type: object
+                     properties:
+                       data:
+                         type: object
+                         properties:
+                           course_uuid:
+                             type: string
+                             format: uuid
+                           quiz_uuid:
+                             type: string
+                             format: uuid
+                           can_access:
+                             type: boolean
+                           required_lessons:
+                             type: integer
+                             minimum: 0
+                           completed_required_lessons:
+                             type: integer
+                             minimum: 0
+                           reason:
+                             type: string
+                             nullable: true
+                         required:
+                           - course_uuid
+                           - quiz_uuid
+                           - can_access
+                           - required_lessons
+                           - completed_required_lessons
+                           - reason
+         "401":
+           $ref: "#/components/responses/Unauthenticated"
+         "403":
+           $ref: "#/components/responses/Forbidden"
+         "404":
+           $ref: "#/components/responses/QuizNotFound"
+         "500":
+           $ref: "#/components/responses/ServerError"
+
+   /api/v1/courses/{course_uuid}/quiz:
+     get:
+       tags: [Student Quiz]
+       summary: Get course quiz
       parameters:
         - $ref: "#/components/parameters/CourseUuid"
       responses:
