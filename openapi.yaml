@@ -1,32 +1,36 @@
 openapi: 3.0.3
 info:
   title: HISSA Academy API
-  version: "1.1.0"
-  description: |
-    Kontrak HTTP HISSA Academy yang disinkronkan dengan implementasi Laravel.
-    Endpoint privat menerima autentikasi Laravel Sanctum melalui session cookie
-    untuk SPA stateful atau bearer token Sanctum. Semua identifier domain yang
-    diekspos backend berbentuk UUID.
-servers:
-  - url: /
-    description: Application root
-tags:
-  - name: Authentication
-  - name: Student Courses
-  - name: Student Lessons
-  - name: Student Quiz
-  - name: Student Certificates
-  - name: Public Verification
-  - name: Admin Courses
-  - name: Admin Lessons
-  - name: Admin Quiz
-  - name: Admin Students
-  - name: Admin Certificates
+  version: 1.1.0
+  description: 'Kontrak HTTP HISSA Academy yang disinkronkan dengan implementasi Laravel.
 
+    Endpoint privat menerima autentikasi Laravel Sanctum melalui session cookie
+
+    untuk SPA stateful atau bearer token Sanctum. Semua identifier domain yang
+
+    diekspos backend berbentuk UUID.
+
+    '
+servers:
+- url: /
+  description: Application root
+tags:
+- name: Authentication
+- name: Student Courses
+- name: Student Lessons
+- name: Student Quiz
+- name: Student Certificates
+- name: Public Verification
+- name: Admin Courses
+- name: Admin Lessons
+- name: Admin Quiz
+- name: Admin Students
+- name: Admin Certificates
 paths:
   /api/v1/auth/login:
     post:
-      tags: [Authentication]
+      tags:
+      - Authentication
       summary: Login
       security: []
       requestBody:
@@ -34,63 +38,63 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
+              $ref: '#/components/schemas/LoginRequest'
       responses:
-        "200":
+        '200':
           description: Login berhasil.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
-        "422":
+                $ref: '#/components/schemas/LoginResponse'
+        '422':
           description: Kredensial salah atau request tidak lolos validasi.
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/MessageResponse"
-                  - $ref: "#/components/schemas/ValidationErrorResponse"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                - $ref: '#/components/schemas/MessageResponse'
+                - $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/auth/logout:
     post:
-      tags: [Authentication]
+      tags:
+      - Authentication
       summary: Logout
       security: []
       responses:
-        "200":
+        '200':
           description: Logout berhasil.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MessageResponse"
+                $ref: '#/components/schemas/MessageResponse'
               example:
                 message: Logout berhasil.
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/auth/me:
     get:
-      tags: [Authentication]
+      tags:
+      - Authentication
       summary: Get current user
       responses:
-        "200":
+        '200':
           description: Profil user terautentikasi beserta role untuk otorisasi frontend.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CurrentUserResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-
+                $ref: '#/components/schemas/CurrentUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
   /api/v1/auth/google/redirect:
     get:
-      tags: [Authentication]
+      tags:
+      - Authentication
       summary: Google OAuth redirect
       security: []
       responses:
-        "302":
+        '302':
           description: Redirect ke halaman autentikasi Google.
           headers:
             Location:
@@ -98,30 +102,30 @@ paths:
               schema:
                 type: string
                 format: uri
-
   /api/v1/auth/google/callback:
     get:
-      tags: [Authentication]
+      tags:
+      - Authentication
       summary: Google OAuth callback
       security: []
       parameters:
-        - name: code
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: state
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: error
-          in: query
-          required: false
-          schema:
-            type: string
+      - name: code
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: error
+        in: query
+        required: false
+        schema:
+          type: string
       responses:
-        "302":
+        '302':
           description: Redirect ke `/auth/callback` pada frontend setelah autentikasi berhasil.
           headers:
             Location:
@@ -129,414 +133,1173 @@ paths:
               schema:
                 type: string
                 format: uri
-
   /api/v1/courses:
     get:
-      tags: [Student Courses]
+      tags:
+      - Student Courses
       summary: Get published courses
       security: []
-      description: |
-        Mengambil daftar course yang dipublikasikan untuk student.
-        
+      description: 'Mengambil daftar course yang dipublikasikan untuk student.
+
+
         Endpoint mendukung pencarian pada `name` dan `description`, sorting,
+
         serta pagination berbasis `page` dan `limit`.
+
+        '
       parameters:
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-        - name: search
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 255
-          description: Pencarian berdasarkan nama course atau deskripsi.
-        - name: sort_by
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [name, minimum_score, created_at, updated_at]
-            default: created_at
-          description: Kolom yang digunakan untuk mengurutkan data.
-        - name: sort_direction
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: desc
-          description: Arah pengurutan data.
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 255
+        description: Pencarian berdasarkan nama course atau deskripsi.
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - name
+          - minimum_score
+          - created_at
+          - updated_at
+          default: created_at
+        description: Kolom yang digunakan untuk mengurutkan data.
+      - name: sort_direction
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+        description: Arah pengurutan data.
       responses:
-        "200":
+        '200':
           description: Daftar course berhasil diambil.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StudentCourseListResponse"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                $ref: '#/components/schemas/StudentCourseListResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/courses/{course_uuid}:
     get:
-      tags: [Student Courses]
+      tags:
+      - Student Courses
       summary: Get course detail
       parameters:
-        - $ref: "#/components/parameters/CourseUuid"
+      - $ref: '#/components/parameters/CourseUuid'
       responses:
-        "200":
+        '200':
           description: Detail course berhasil diambil.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StudentCourseDetailResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/CourseNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                $ref: '#/components/schemas/StudentCourseDetailResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CourseNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/courses/{course_uuid}/progress:
     get:
-      tags: [Student Courses]
+      tags:
+      - Student Courses
       summary: Get course progress
       parameters:
-        - $ref: "#/components/parameters/CourseUuid"
+      - $ref: '#/components/parameters/CourseUuid'
       responses:
-        "200":
+        '200':
           description: Progress course berhasil diambil.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CourseProgressResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/CourseNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                $ref: '#/components/schemas/CourseProgressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CourseNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/lessons/{lesson_uuid}:
     get:
-      tags: [Student Lessons]
+      tags:
+      - Student Lessons
       summary: Get lesson detail
       parameters:
-        - $ref: "#/components/parameters/LessonUuid"
+      - $ref: '#/components/parameters/LessonUuid'
       responses:
-        "200":
+        '200':
           description: Detail lesson berhasil diambil.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StudentLessonResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/LessonLocked"
-        "404":
-          $ref: "#/components/responses/LessonNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                $ref: '#/components/schemas/StudentLessonResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/LessonLocked'
+        '404':
+          $ref: '#/components/responses/LessonNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/lessons/{lesson_uuid}/progress:
     get:
-      tags: [Student Lessons]
+      tags:
+      - Student Lessons
       summary: Get lesson progress
       parameters:
-        - $ref: "#/components/parameters/LessonUuid"
+      - $ref: '#/components/parameters/LessonUuid'
       responses:
-        "200":
+        '200':
           description: Progress lesson berhasil diambil.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserProgressResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/LessonNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
+                $ref: '#/components/schemas/UserProgressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/LessonNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
     post:
-      tags: [Student Lessons]
+      tags:
+      - Student Lessons
       summary: Submit progress heartbeat
       parameters:
-        - $ref: "#/components/parameters/LessonUuid"
+      - $ref: '#/components/parameters/LessonUuid'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProgressHeartbeatRequest"
+              $ref: '#/components/schemas/ProgressHeartbeatRequest'
       responses:
-        "200":
+        '200':
           description: Progress lesson berhasil disimpan.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserProgressResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/LessonNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-   /api/v1/courses/{course_uuid}/quiz/access:
-     get:
-       tags: [Student Quiz]
-       summary: Check quiz access permission
-       parameters:
-         - $ref: "#/components/parameters/CourseUuid"
-       responses:
-         "200":
-           description: Access check berhasil diproses.
-           content:
-             application/json:
-               schema:
-                 allOf:
-                   - $ref: "#/components/schemas/SuccessResponse"
-                   - type: object
-                     properties:
-                       data:
-                         type: object
-                         properties:
-                           course_uuid:
-                             type: string
-                             format: uuid
-                           quiz_uuid:
-                             type: string
-                             format: uuid
-                           can_access:
-                             type: boolean
-                           required_lessons:
-                             type: integer
-                             minimum: 0
-                           completed_required_lessons:
-                             type: integer
-                             minimum: 0
-                           reason:
-                             type: string
-                             nullable: true
-                         required:
-                           - course_uuid
-                           - quiz_uuid
-                           - can_access
-                           - required_lessons
-                           - completed_required_lessons
-                           - reason
-         "401":
-           $ref: "#/components/responses/Unauthenticated"
-         "403":
-           $ref: "#/components/responses/Forbidden"
-         "404":
-           $ref: "#/components/responses/QuizNotFound"
-         "500":
-           $ref: "#/components/responses/ServerError"
-
-   /api/v1/courses/{course_uuid}/quiz:
-     get:
-       tags: [Student Quiz]
-       summary: Get course quiz
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      responses:
-        "200":
-          description: Quiz berhasil diambil.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/StudentQuiz"
-        "403":
-          $ref: "#/components/responses/QuizLocked"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "404":
-          $ref: "#/components/responses/QuizNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/quizzes/{quiz_uuid}/attempts:
-    post:
-      tags: [Student Quiz]
-      summary: Create quiz attempt
-      parameters:
-        - $ref: "#/components/parameters/QuizUuid"
-      responses:
-        "201":
-          description: Quiz attempt berhasil dibuat.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/QuizAttempt"
-        "409":
-          $ref: "#/components/responses/ActiveAttemptExists"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/quiz-attempts/{attempt_uuid}:
+                $ref: '#/components/schemas/UserProgressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/LessonNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/courses/{course_uuid}:
     get:
-      tags: [Student Quiz]
-      summary: Get quiz attempt
+      tags:
+      - Admin Courses
+      summary: Get admin course detail
+      description: Mengambil detail course admin beserta jumlah dan daftar lesson berdasarkan UUID course.
       parameters:
-        - $ref: "#/components/parameters/AttemptUuid"
+      - $ref: '#/components/parameters/CourseUuid'
       responses:
-        "200":
-          description: Quiz attempt berhasil diambil.
+        '200':
+          description: Detail course admin berhasil diambil.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/QuizAttemptWithAnswers"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizAttemptNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminCourseDetail'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AdminCourseNotFound'
+        '500':
+          $ref: '#/components/responses/AdminCourseOperationFailed'
+    patch:
+      tags:
+      - Admin Courses
+      summary: Update course
+      description: 'Memperbarui sebagian data course. Field yang dikirim harus valid,
 
-  /api/v1/quiz-attempts/{attempt_uuid}/submit:
-    post:
-      tags: [Student Quiz]
-      summary: Submit quiz attempt
+        sedangkan field yang tidak dikirim tidak berubah.
+
+        '
       parameters:
-        - $ref: "#/components/parameters/AttemptUuid"
+      - $ref: '#/components/parameters/CourseUuid'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SubmitQuizAttemptRequest"
+              $ref: '#/components/schemas/UpdateCourseRequest'
       responses:
-        "200":
-          description: Quiz berhasil disubmit.
+        '200':
+          description: Course berhasil diperbarui.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/QuizSubmitResult"
-        "409":
-          $ref: "#/components/responses/AttemptAlreadySubmitted"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizAttemptNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/certificates:
-    get:
-      tags: [Student Certificates]
-      summary: Get user certificates
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminCourse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AdminCourseNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/AdminCourseOperationFailed'
+    delete:
+      tags:
+      - Admin Courses
+      summary: Delete course
+      description: Menghapus course berdasarkan UUID. Response sukses tidak mengembalikan data course.
       parameters:
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
+      - $ref: '#/components/parameters/CourseUuid'
       responses:
-        "200":
+        '200':
+          description: Course berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteCourseResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AdminCourseNotFound'
+        '500':
+          $ref: '#/components/responses/AdminCourseOperationFailed'
+  /api/v1/admin/courses/{course_uuid}/lessons:
+    get:
+      tags:
+      - Admin Lessons
+      summary: Get course lessons
+      parameters:
+      - $ref: '#/components/parameters/CourseUuid'
+      responses:
+        '200':
+          description: Daftar lesson berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminLesson'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AdminCourseNotFound'
+        '500':
+          $ref: '#/components/responses/AdminLessonOperationFailed'
+    post:
+      tags:
+      - Admin Lessons
+      summary: Create lesson
+      parameters:
+      - $ref: '#/components/parameters/CourseUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLessonRequest'
+      responses:
+        '201':
+          description: Lesson berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminLesson'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/AdminForbidden'
+        '404':
+          $ref: '#/components/responses/AdminCourseNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/AdminLessonOperationFailed'
+  /api/v1/admin/courses/{courseId}/lessons/reorder:
+    patch:
+      tags:
+      - Admin Lessons
+      summary: Reorder course lessons
+      parameters:
+      - $ref: '#/components/parameters/CourseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderLessonsRequest'
+      responses:
+        '200':
+          description: Lesson berhasil diurutkan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSuccessResponse'
+              example:
+                success: true
+                message: Lesson berhasil diurutkan.
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/AdminForbidden'
+        '404':
+          $ref: '#/components/responses/AdminLessonNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/AdminLessonOperationFailed'
+  /api/v1/admin/lessons/{lesson_uuid}:
+    get:
+      tags:
+      - Admin Lessons
+      summary: Get lesson detail
+      parameters:
+      - $ref: '#/components/parameters/LessonUuid'
+      responses:
+        '200':
+          description: Detail lesson berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminLesson'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/AdminLessonNotFound'
+        '500':
+          $ref: '#/components/responses/AdminLessonOperationFailed'
+    patch:
+      tags:
+      - Admin Lessons
+      summary: Update lesson
+      parameters:
+      - $ref: '#/components/parameters/LessonUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLessonRequest'
+      responses:
+        '200':
+          description: Lesson berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminLesson'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/AdminForbidden'
+        '404':
+          $ref: '#/components/responses/AdminLessonNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/AdminLessonOperationFailed'
+    delete:
+      tags:
+      - Admin Lessons
+      summary: Delete lesson
+      parameters:
+      - $ref: '#/components/parameters/LessonUuid'
+      responses:
+        '200':
+          description: Lesson berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSuccessResponse'
+              example:
+                success: true
+                message: Lesson berhasil dihapus.
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/AdminForbidden'
+        '404':
+          $ref: '#/components/responses/AdminLessonNotFound'
+        '500':
+          $ref: '#/components/responses/AdminLessonOperationFailed'
+  /api/v1/admin/lessons/{lesson_uuid}/video:
+    put:
+      tags:
+      - Admin Lessons
+      summary: Create or update lesson video
+      parameters:
+      - $ref: '#/components/parameters/LessonUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertLessonVideoRequest'
+      responses:
+        '200':
+          description: Video lesson berhasil disimpan.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/LessonVideo'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/AdminForbidden'
+        '404':
+          $ref: '#/components/responses/AdminLessonNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/AdminLessonVideoOperationFailed'
+    delete:
+      tags:
+      - Admin Lessons
+      summary: Delete lesson video metadata
+      parameters:
+      - $ref: '#/components/parameters/LessonUuid'
+      responses:
+        '200':
+          description: Metadata video lesson berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSuccessResponse'
+              example:
+                success: true
+                message: Metadata video lesson berhasil dihapus.
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/AdminForbidden'
+        '404':
+          $ref: '#/components/responses/AdminLessonNotFound'
+        '500':
+          $ref: '#/components/responses/AdminLessonVideoOperationFailed'
+  /api/v1/admin/courses/{course_uuid}/quiz:
+    get:
+      tags:
+      - Admin Quiz
+      summary: Get course final quiz configuration
+      parameters:
+      - $ref: '#/components/parameters/CourseUuid'
+      responses:
+        '200':
+          description: Konfigurasi quiz berhasil diambil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuizResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizOrCourseNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+      - Admin Quiz
+      summary: Create course final quiz
+      parameters:
+      - $ref: '#/components/parameters/CourseUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertQuizRequest'
+      responses:
+        '201':
+          description: Quiz berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuizResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CourseNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/quizzes/{quiz_uuid}:
+    patch:
+      tags:
+      - Admin Quiz
+      summary: Update quiz configuration
+      parameters:
+      - $ref: '#/components/parameters/QuizUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertQuizRequest'
+      responses:
+        '200':
+          description: Quiz berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuizResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+      - Admin Quiz
+      summary: Deactivate quiz
+      parameters:
+      - $ref: '#/components/parameters/QuizUuid'
+      responses:
+        '200':
+          description: Quiz berhasil dinonaktifkan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/quizzes/{quiz_uuid}/questions:
+    get:
+      tags:
+      - Admin Quiz
+      summary: Get quiz questions
+      parameters:
+      - $ref: '#/components/parameters/QuizUuid'
+      responses:
+        '200':
+          description: Daftar pertanyaan quiz berhasil diambil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuestionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+      - Admin Quiz
+      summary: Create one or more quiz questions
+      parameters:
+      - $ref: '#/components/parameters/QuizUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuizQuestionsRequest'
+      responses:
+        '201':
+          description: Pertanyaan quiz berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuestionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/quizzes/{quiz_uuid}/questions/reorder:
+    patch:
+      tags:
+      - Admin Quiz
+      summary: Reorder quiz questions
+      parameters:
+      - $ref: '#/components/parameters/QuizUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderQuizQuestionsRequest'
+      responses:
+        '200':
+          description: Pertanyaan quiz berhasil diurutkan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuestionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizOrQuestionNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/quiz-questions/{question_uuid}:
+    patch:
+      tags:
+      - Admin Quiz
+      summary: Update quiz question
+      parameters:
+      - $ref: '#/components/parameters/QuestionUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuizQuestionRequest'
+      responses:
+        '200':
+          description: Pertanyaan quiz berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuestionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuestionNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+      - Admin Quiz
+      summary: Delete quiz question
+      parameters:
+      - $ref: '#/components/parameters/QuestionUuid'
+      responses:
+        '200':
+          description: Pertanyaan quiz berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleSuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuestionNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/students:
+    get:
+      tags:
+      - Admin Students
+      summary: Get paginated students
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
+      - name: search
+        in: query
+        schema:
+          type: string
+          maxLength: 255
+      - name: email_verified
+        in: query
+        schema:
+          type: boolean
+      - name: sort_by
+        in: query
+        schema:
+          type: string
+          enum:
+          - full_name
+          - email
+          - last_login_at
+          - created_at
+          - updated_at
+          default: created_at
+      - name: sort_direction
+        in: query
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      responses:
+        '200':
+          description: Daftar student berhasil diambil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStudentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/students/{student_uuid}:
+    get:
+      tags:
+      - Admin Students
+      summary: Get student detail and learning summary
+      parameters:
+      - $ref: '#/components/parameters/StudentUuid'
+      responses:
+        '200':
+          description: Detail student berhasil diambil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStudentDetailResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/StudentNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/students/{student_uuid}/progress:
+    get:
+      tags:
+      - Admin Students
+      summary: Get student progress grouped by course
+      parameters:
+      - $ref: '#/components/parameters/StudentUuid'
+      responses:
+        '200':
+          description: Progress student berhasil diambil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStudentProgressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/StudentNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/students/{student_uuid}/certificates:
+    get:
+      tags:
+      - Admin Students
+      summary: Get a student's certificates
+      parameters:
+      - $ref: '#/components/parameters/StudentUuid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Daftar sertifikat student berhasil diambil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStudentCertificateListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/StudentNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/certificates:
+    get:
+      tags:
+      - Admin Certificates
+      summary: Get certificates
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
           description: Daftar sertifikat berhasil diambil.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/CertificateSummary"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                - $ref: '#/components/schemas/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminCertificateSummary'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/admin/certificates/{certificate_uuid}/revoke:
+    patch:
+      tags:
+      - Admin Certificates
+      summary: Revoke certificate
+      parameters:
+      - $ref: '#/components/parameters/CertificateUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeCertificateRequest'
+      responses:
+        '200':
+          description: Sertifikat berhasil dicabut.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/RevokedCertificate'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CertificateNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/courses/{course_uuid}/quiz/access:
+    get:
+      tags:
+      - Student Quiz
+      summary: Check quiz access permission
+      parameters:
+      - $ref: '#/components/parameters/CourseUuid'
+      responses:
+        '200':
+          description: Access check berhasil diproses.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        course_uuid:
+                          type: string
+                          format: uuid
+                        quiz_uuid:
+                          type: string
+                          format: uuid
+                        can_access:
+                          type: boolean
+                        required_lessons:
+                          type: integer
+                          minimum: 0
+                        completed_required_lessons:
+                          type: integer
+                          minimum: 0
+                        reason:
+                          type: string
+                          nullable: true
+                      required:
+                      - course_uuid
+                      - quiz_uuid
+                      - can_access
+                      - required_lessons
+                      - completed_required_lessons
+                      - reason
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/courses/{course_uuid}/quiz:
+    get:
+      tags:
+      - Student Quiz
+      summary: Get course quiz
+      parameters:
+      - $ref: '#/components/parameters/CourseUuid'
+      responses:
+        '200':
+          description: Quiz berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/StudentQuiz'
+        '403':
+          $ref: '#/components/responses/QuizLocked'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/quizzes/{quiz_uuid}/attempts:
+    post:
+      tags:
+      - Student Quiz
+      summary: Create quiz attempt
+      parameters:
+      - $ref: '#/components/parameters/QuizUuid'
+      responses:
+        '201':
+          description: Quiz attempt berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/QuizAttempt'
+        '409':
+          $ref: '#/components/responses/ActiveAttemptExists'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/quiz-attempts/{attempt_uuid}:
+    get:
+      tags:
+      - Student Quiz
+      summary: Get quiz attempt
+      parameters:
+      - $ref: '#/components/parameters/AttemptUuid'
+      responses:
+        '200':
+          description: Quiz attempt berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/QuizAttemptWithAnswers'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizAttemptNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/quiz-attempts/{attempt_uuid}/submit:
+    post:
+      tags:
+      - Student Quiz
+      summary: Submit quiz attempt
+      parameters:
+      - $ref: '#/components/parameters/AttemptUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitQuizAttemptRequest'
+      responses:
+        '200':
+          description: Quiz berhasil disubmit.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/QuizSubmitResult'
+        '409':
+          $ref: '#/components/responses/AttemptAlreadySubmitted'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/QuizAttemptNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/certificates:
+    get:
+      tags:
+      - Student Certificates
+      summary: Get user certificates
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Daftar sertifikat berhasil diambil.
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/CertificateSummary'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/certificates/{certificate_uuid}:
     get:
-      tags: [Student Certificates]
+      tags:
+      - Student Certificates
       summary: Get certificate detail
       parameters:
-        - $ref: "#/components/parameters/CertificateUuid"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
+      - $ref: '#/components/parameters/CertificateUuid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
       responses:
-        "200":
+        '200':
           description: Detail sertifikat berhasil diambil.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/CertificateDetail"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/CertificateNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/CertificateDetail'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CertificateNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/certificates/{certificate_uuid}/download:
     get:
-      tags: [Student Certificates]
+      tags:
+      - Student Certificates
       summary: Download certificate PDF
       parameters:
-        - $ref: "#/components/parameters/CertificateUuid"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
+      - $ref: '#/components/parameters/CertificateUuid'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
       responses:
-        "200":
+        '200':
           description: Binary PDF certificate.
           headers:
             Content-Disposition:
@@ -548,121 +1311,132 @@ paths:
               schema:
                 type: string
                 format: binary
-        "404":
-          $ref: "#/components/responses/CertificateFileNotFound"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+        '404':
+          $ref: '#/components/responses/CertificateFileNotFound'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /verify/{certificate_number}:
     get:
-      tags: [Public Verification]
+      tags:
+      - Public Verification
       summary: Verification page
       security: []
       parameters:
-        - $ref: "#/components/parameters/CertificateNumber"
+      - $ref: '#/components/parameters/CertificateNumber'
       responses:
-        "200":
+        '200':
           description: Halaman web publik hasil verifikasi sertifikat.
           content:
             text/html:
               schema:
                 type: string
-        "404":
+        '404':
           description: Halaman HTML sertifikat tidak ditemukan.
           content:
             text/html:
               schema:
                 type: string
-
   /api/v1/public/certificates/{certificate_number}:
     get:
-      tags: [Public Verification]
+      tags:
+      - Public Verification
       summary: Verify certificate API
       security: []
       parameters:
-        - $ref: "#/components/parameters/CertificateNumber"
+      - $ref: '#/components/parameters/CertificateNumber'
       responses:
-        "200":
+        '200':
           description: Sertifikat valid atau revoked.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/PublicCertificateVerification"
-        "404":
-          $ref: "#/components/responses/CertificateNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PublicCertificateVerification'
+        '404':
+          $ref: '#/components/responses/CertificateNotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/v1/admin/courses:
     get:
-      tags: [Admin Courses]
+      tags:
+      - Admin Courses
       summary: Get admin courses
-      description: |
-        Mengambil daftar course untuk admin.
+      description: 'Mengambil daftar course untuk admin.
+
 
         Endpoint mendukung pencarian pada `course_name` dan `description`, sorting,
+
         serta pagination berbasis `page` dan `limit`.
+
+        '
       parameters:
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/AdminCourseLimit"
-        - name: search
-          in: query
-          required: false
-          schema:
-            type: string
-            maxLength: 255
-          description: Pencarian berdasarkan nama course atau deskripsi.
-        - name: sort_by
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [course_name, minimum_score, status, created_at, updated_at]
-            default: created_at
-          description: Kolom yang digunakan untuk mengurutkan data.
-        - name: sort_direction
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: desc
-          description: Arah pengurutan data.
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/AdminCourseLimit'
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 255
+        description: Pencarian berdasarkan nama course atau deskripsi.
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - course_name
+          - minimum_score
+          - status
+          - created_at
+          - updated_at
+          default: created_at
+        description: Kolom yang digunakan untuk mengurutkan data.
+      - name: sort_direction
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+        description: Arah pengurutan data.
       responses:
-        "200":
+        '200':
           description: Daftar course admin berhasil diambil.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/AdminCourse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/AdminCourseOperationFailed"
+                - $ref: '#/components/schemas/PaginatedResponse'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/AdminCourse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/AdminCourseOperationFailed'
     post:
-      tags: [Admin Courses]
+      tags:
+      - Admin Courses
       summary: Create course
       description: Membuat course baru untuk katalog pembelajaran.
       requestBody:
@@ -670,758 +1444,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateCourseRequest"
+              $ref: '#/components/schemas/CreateCourseRequest'
       responses:
-        "201":
+        '201':
           description: Course berhasil dibuat.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AdminCourse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/AdminCourseOperationFailed"
-
-  /api/v1/admin/courses/{course_uuid}:
-    get:
-      tags: [Admin Courses]
-      summary: Get admin course detail
-      description: Mengambil detail course admin beserta jumlah dan daftar lesson berdasarkan UUID course.
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      responses:
-        "200":
-          description: Detail course admin berhasil diambil.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AdminCourseDetail"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/AdminCourseNotFound"
-        "500":
-          $ref: "#/components/responses/AdminCourseOperationFailed"
-    patch:
-      tags: [Admin Courses]
-      summary: Update course
-      description: |
-        Memperbarui sebagian data course. Field yang dikirim harus valid,
-        sedangkan field yang tidak dikirim tidak berubah.
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateCourseRequest"
-      responses:
-        "200":
-          description: Course berhasil diperbarui.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AdminCourse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/AdminCourseNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/AdminCourseOperationFailed"
-    delete:
-      tags: [Admin Courses]
-      summary: Delete course
-      description: Menghapus course berdasarkan UUID. Response sukses tidak mengembalikan data course.
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      responses:
-        "200":
-          description: Course berhasil dihapus.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeleteCourseResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/AdminCourseNotFound"
-        "500":
-          $ref: "#/components/responses/AdminCourseOperationFailed"
-
-  /api/v1/admin/courses/{course_uuid}/lessons:
-    get:
-      tags: [Admin Lessons]
-      summary: Get course lessons
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      responses:
-        "200":
-          description: Daftar lesson berhasil diambil.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/AdminLesson"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/AdminCourseNotFound"
-        "500":
-          $ref: "#/components/responses/AdminLessonOperationFailed"
-    post:
-      tags: [Admin Lessons]
-      summary: Create lesson
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateLessonRequest"
-      responses:
-        "201":
-          description: Lesson berhasil dibuat.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AdminLesson"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/AdminForbidden"
-        "404":
-          $ref: "#/components/responses/AdminCourseNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/AdminLessonOperationFailed"
-
-  /api/v1/admin/courses/{courseId}/lessons/reorder:
-    patch:
-      tags: [Admin Lessons]
-      summary: Reorder course lessons
-      parameters:
-        - $ref: "#/components/parameters/CourseId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ReorderLessonsRequest"
-      responses:
-        "200":
-          description: Lesson berhasil diurutkan.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleSuccessResponse"
-              example:
-                success: true
-                message: Lesson berhasil diurutkan.
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/AdminForbidden"
-        "404":
-          $ref: "#/components/responses/AdminLessonNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/AdminLessonOperationFailed"
-
-  /api/v1/admin/lessons/{lesson_uuid}:
-    get:
-      tags: [Admin Lessons]
-      summary: Get lesson detail
-      parameters:
-        - $ref: "#/components/parameters/LessonUuid"
-      responses:
-        "200":
-          description: Detail lesson berhasil diambil.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AdminLesson"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/AdminLessonNotFound"
-        "500":
-          $ref: "#/components/responses/AdminLessonOperationFailed"
-    patch:
-      tags: [Admin Lessons]
-      summary: Update lesson
-      parameters:
-        - $ref: "#/components/parameters/LessonUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateLessonRequest"
-      responses:
-        "200":
-          description: Lesson berhasil diperbarui.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/AdminLesson"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/AdminForbidden"
-        "404":
-          $ref: "#/components/responses/AdminLessonNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/AdminLessonOperationFailed"
-    delete:
-      tags: [Admin Lessons]
-      summary: Delete lesson
-      parameters:
-        - $ref: "#/components/parameters/LessonUuid"
-      responses:
-        "200":
-          description: Lesson berhasil dihapus.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleSuccessResponse"
-              example:
-                success: true
-                message: Lesson berhasil dihapus.
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/AdminForbidden"
-        "404":
-          $ref: "#/components/responses/AdminLessonNotFound"
-        "500":
-          $ref: "#/components/responses/AdminLessonOperationFailed"
-
-  /api/v1/admin/lessons/{lesson_uuid}/video:
-    put:
-      tags: [Admin Lessons]
-      summary: Create or update lesson video
-      parameters:
-        - $ref: "#/components/parameters/LessonUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpsertLessonVideoRequest"
-      responses:
-        "200":
-          description: Video lesson berhasil disimpan.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/LessonVideo"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/AdminForbidden"
-        "404":
-          $ref: "#/components/responses/AdminLessonNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/AdminLessonVideoOperationFailed"
-    delete:
-      tags: [Admin Lessons]
-      summary: Delete lesson video metadata
-      parameters:
-        - $ref: "#/components/parameters/LessonUuid"
-      responses:
-        "200":
-          description: Metadata video lesson berhasil dihapus.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleSuccessResponse"
-              example:
-                success: true
-                message: Metadata video lesson berhasil dihapus.
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/AdminForbidden"
-        "404":
-          $ref: "#/components/responses/AdminLessonNotFound"
-        "500":
-          $ref: "#/components/responses/AdminLessonVideoOperationFailed"
-
-  /api/v1/admin/courses/{course_uuid}/quiz:
-    get:
-      tags: [Admin Quiz]
-      summary: Get course final quiz configuration
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      responses:
-        "200":
-          description: Konfigurasi quiz berhasil diambil.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminQuizResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizOrCourseNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-    post:
-      tags: [Admin Quiz]
-      summary: Create course final quiz
-      parameters:
-        - $ref: "#/components/parameters/CourseUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpsertQuizRequest"
-      responses:
-        "201":
-          description: Quiz berhasil dibuat.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminQuizResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/CourseNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/quizzes/{quiz_uuid}:
-    patch:
-      tags: [Admin Quiz]
-      summary: Update quiz configuration
-      parameters:
-        - $ref: "#/components/parameters/QuizUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpsertQuizRequest"
-      responses:
-        "200":
-          description: Quiz berhasil diperbarui.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminQuizResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-    delete:
-      tags: [Admin Quiz]
-      summary: Deactivate quiz
-      parameters:
-        - $ref: "#/components/parameters/QuizUuid"
-      responses:
-        "200":
-          description: Quiz berhasil dinonaktifkan.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleSuccessResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/quizzes/{quiz_uuid}/questions:
-    get:
-      tags: [Admin Quiz]
-      summary: Get quiz questions
-      parameters:
-        - $ref: "#/components/parameters/QuizUuid"
-      responses:
-        "200":
-          description: Daftar pertanyaan quiz berhasil diambil.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminQuestionListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-    post:
-      tags: [Admin Quiz]
-      summary: Create one or more quiz questions
-      parameters:
-        - $ref: "#/components/parameters/QuizUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateQuizQuestionsRequest"
-      responses:
-        "201":
-          description: Pertanyaan quiz berhasil dibuat.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminQuestionListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/quizzes/{quiz_uuid}/questions/reorder:
-    patch:
-      tags: [Admin Quiz]
-      summary: Reorder quiz questions
-      parameters:
-        - $ref: "#/components/parameters/QuizUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ReorderQuizQuestionsRequest"
-      responses:
-        "200":
-          description: Pertanyaan quiz berhasil diurutkan.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminQuestionListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuizOrQuestionNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/quiz-questions/{question_uuid}:
-    patch:
-      tags: [Admin Quiz]
-      summary: Update quiz question
-      parameters:
-        - $ref: "#/components/parameters/QuestionUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateQuizQuestionRequest"
-      responses:
-        "200":
-          description: Pertanyaan quiz berhasil diperbarui.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminQuestionResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuestionNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-    delete:
-      tags: [Admin Quiz]
-      summary: Delete quiz question
-      parameters:
-        - $ref: "#/components/parameters/QuestionUuid"
-      responses:
-        "200":
-          description: Pertanyaan quiz berhasil dihapus.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleSuccessResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/QuestionNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/students:
-    get:
-      tags: [Admin Students]
-      summary: Get paginated students
-      parameters:
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-        - name: search
-          in: query
-          schema:
-            type: string
-            maxLength: 255
-        - name: email_verified
-          in: query
-          schema:
-            type: boolean
-        - name: sort_by
-          in: query
-          schema:
-            type: string
-            enum: [full_name, email, last_login_at, created_at, updated_at]
-            default: created_at
-        - name: sort_direction
-          in: query
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: desc
-      responses:
-        "200":
-          description: Daftar student berhasil diambil.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminStudentListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/students/{student_uuid}:
-    get:
-      tags: [Admin Students]
-      summary: Get student detail and learning summary
-      parameters:
-        - $ref: "#/components/parameters/StudentUuid"
-      responses:
-        "200":
-          description: Detail student berhasil diambil.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminStudentDetailResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/StudentNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/students/{student_uuid}/progress:
-    get:
-      tags: [Admin Students]
-      summary: Get student progress grouped by course
-      parameters:
-        - $ref: "#/components/parameters/StudentUuid"
-      responses:
-        "200":
-          description: Progress student berhasil diambil.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminStudentProgressResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/StudentNotFound"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/students/{student_uuid}/certificates:
-    get:
-      tags: [Admin Students]
-      summary: Get a student's certificates
-      parameters:
-        - $ref: "#/components/parameters/StudentUuid"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-      responses:
-        "200":
-          description: Daftar sertifikat student berhasil diambil.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminStudentCertificateListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/StudentNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/certificates:
-    get:
-      tags: [Admin Certificates]
-      summary: Get certificates
-      parameters:
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-      responses:
-        "200":
-          description: Daftar sertifikat berhasil diambil.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/AdminCertificateSummary"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
-  /api/v1/admin/certificates/{certificate_uuid}/revoke:
-    patch:
-      tags: [Admin Certificates]
-      summary: Revoke certificate
-      parameters:
-        - $ref: "#/components/parameters/CertificateUuid"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RevokeCertificateRequest"
-      responses:
-        "200":
-          description: Sertifikat berhasil dicabut.
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/RevokedCertificate"
-        "401":
-          $ref: "#/components/responses/Unauthenticated"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/CertificateNotFound"
-        "422":
-          $ref: "#/components/responses/ValidationError"
-        "500":
-          $ref: "#/components/responses/ServerError"
-
+                - $ref: '#/components/schemas/SuccessResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AdminCourse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/AdminCourseOperationFailed'
 components:
   securitySchemes:
     bearerAuth:
@@ -1434,7 +1477,6 @@ components:
       in: cookie
       name: laravel_session
       description: Session cookie untuk SPA stateful Laravel Sanctum.
-
   parameters:
     Page:
       name: page
@@ -1527,14 +1569,13 @@ components:
       schema:
         type: string
         format: uuid
-
   responses:
     Unauthenticated:
       description: User belum terautentikasi.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/MessageResponse"
+            $ref: '#/components/schemas/MessageResponse'
           example:
             message: Unauthenticated.
     Forbidden:
@@ -1542,7 +1583,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: User tidak memiliki izin.
@@ -1551,7 +1592,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Email atau password tidak valid.
@@ -1563,18 +1604,18 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ValidationErrorResponse"
+            $ref: '#/components/schemas/ValidationErrorResponse'
           example:
             message: The email field is required.
             errors:
               email:
-                - The email field is required.
+              - The email field is required.
     CourseNotFound:
       description: Course tidak ditemukan.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Course tidak ditemukan.
@@ -1583,7 +1624,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Course tidak ditemukan.
@@ -1592,7 +1633,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           examples:
             listFailed:
               summary: Gagal mengambil daftar course
@@ -1619,7 +1660,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: User tidak memiliki izin.
@@ -1628,7 +1669,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: The given data was invalid.
@@ -1637,7 +1678,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Lesson tidak ditemukan.
@@ -1646,7 +1687,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           examples:
             listFailed:
               summary: Gagal mengambil daftar lesson
@@ -1683,7 +1724,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           examples:
             saveFailed:
               summary: Gagal menyimpan metadata video lesson
@@ -1700,7 +1741,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Lesson tidak ditemukan.
@@ -1709,7 +1750,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Lesson masih terkunci.
@@ -1718,7 +1759,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Quiz belum dapat diakses.
@@ -1731,7 +1772,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Masih terdapat quiz attempt yang aktif.
@@ -1744,7 +1785,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Quiz attempt sudah pernah disubmit.
@@ -1756,7 +1797,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Sertifikat tidak ditemukan.
@@ -1765,7 +1806,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Sertifikat tidak ditemukan.
@@ -1774,7 +1815,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Sertifikat sudah dicabut sebelumnya.
@@ -1786,7 +1827,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Position lesson sudah digunakan pada course ini.
@@ -1799,7 +1840,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Lesson tidak dapat dihapus karena sudah memiliki data progress.
@@ -1807,13 +1848,13 @@ components:
               code: LESSON_HAS_DEPENDENCIES
               details:
                 dependencies:
-                  - user_progress
+                - user_progress
     InvalidProgressHeartbeat:
       description: Data heartbeat tidak valid.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Data heartbeat tidak valid.
@@ -1821,13 +1862,13 @@ components:
               code: INVALID_PROGRESS_HEARTBEAT
               details:
                 current_position_seconds:
-                  - Posisi video tidak boleh melebihi durasi video.
+                - Posisi video tidak boleh melebihi durasi video.
     ProgressRateLimited:
       description: Heartbeat dikirim terlalu sering.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Heartbeat dikirim terlalu sering.
@@ -1840,7 +1881,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             message: Video YouTube tidak valid atau tidak dapat diakses.
@@ -1848,13 +1889,13 @@ components:
               code: INVALID_YOUTUBE_VIDEO
               details:
                 youtube_video_id:
-                  - Video tidak ditemukan, bersifat private, atau tidak dapat di-embed.
+                - Video tidak ditemukan, bersifat private, atau tidak dapat di-embed.
     ServerError:
       description: Operasi gagal diproses oleh server.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Terjadi kesalahan pada server.
@@ -1863,7 +1904,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Quiz tidak ditemukan.
@@ -1872,7 +1913,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Quiz attempt tidak ditemukan.
@@ -1881,13 +1922,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
     QuestionNotFound:
       description: Pertanyaan quiz tidak ditemukan.
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Pertanyaan quiz tidak ditemukan.
@@ -1896,7 +1937,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Quiz atau pertanyaan quiz tidak ditemukan.
@@ -1905,15 +1946,17 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/SimpleErrorResponse"
+            $ref: '#/components/schemas/SimpleErrorResponse'
           example:
             success: false
             message: Student tidak ditemukan.
-
   schemas:
     SuccessResponse:
       type: object
-      required: [success, message, data]
+      required:
+      - success
+      - message
+      - data
       properties:
         success:
           type: boolean
@@ -1924,24 +1967,28 @@ components:
         data: {}
     PaginatedResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          required: [meta]
-          properties:
-            data:
-              type: array
-              items: {}
-            meta:
-              $ref: "#/components/schemas/PaginationMeta"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        required:
+        - meta
+        properties:
+          data:
+            type: array
+            items: {}
+          meta:
+            $ref: '#/components/schemas/PaginationMeta'
     MessageResponse:
       type: object
-      required: [message]
+      required:
+      - message
       properties:
         message:
           type: string
     ValidationErrorResponse:
       type: object
-      required: [message, errors]
+      required:
+      - message
+      - errors
       properties:
         message:
           type: string
@@ -1953,7 +2000,10 @@ components:
               type: string
     ErrorResponse:
       type: object
-      required: [success, message, error]
+      required:
+      - success
+      - message
+      - error
       properties:
         success:
           type: boolean
@@ -1962,7 +2012,9 @@ components:
           type: string
         error:
           type: object
-          required: [code, details]
+          required:
+          - code
+          - details
           properties:
             code:
               type: string
@@ -1971,7 +2023,9 @@ components:
               additionalProperties: true
     SimpleErrorResponse:
       type: object
-      required: [success, message]
+      required:
+      - success
+      - message
       properties:
         success:
           type: boolean
@@ -1981,7 +2035,9 @@ components:
           example: Course tidak ditemukan.
     SimpleSuccessResponse:
       type: object
-      required: [success, message]
+      required:
+      - success
+      - message
       properties:
         success:
           type: boolean
@@ -1991,7 +2047,11 @@ components:
           example: Request berhasil diproses.
     PaginationMeta:
       type: object
-      required: [current_page, per_page, total, last_page]
+      required:
+      - current_page
+      - per_page
+      - total
+      - last_page
       properties:
         current_page:
           type: integer
@@ -2007,7 +2067,11 @@ components:
           example: 7
     PaginationLinks:
       type: object
-      required: [first, last, prev, next]
+      required:
+      - first
+      - last
+      - prev
+      - next
       properties:
         first:
           type: string
@@ -2021,10 +2085,11 @@ components:
         next:
           type: string
           nullable: true
-
     LoginRequest:
       type: object
-      required: [email, password]
+      required:
+      - email
+      - password
       properties:
         email:
           type: string
@@ -2037,18 +2102,23 @@ components:
           example: secret123
     LoginResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              type: object
-              required: [user]
-              properties:
-                user:
-                  $ref: "#/components/schemas/User"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            type: object
+            required:
+            - user
+            properties:
+              user:
+                $ref: '#/components/schemas/User'
     User:
       type: object
-      required: [id, email, full_name, role_id]
+      required:
+      - id
+      - email
+      - full_name
+      - role_id
       properties:
         id:
           type: string
@@ -2063,7 +2133,7 @@ components:
         phone:
           type: string
           nullable: true
-          example: "081234567890"
+          example: 081234567890
         full_name:
           type: string
           example: Student HISSA
@@ -2071,21 +2141,25 @@ components:
           type: string
           format: date
           nullable: true
-          example: "2002-04-10"
+          example: '2002-04-10'
         avatar_url:
           type: string
           format: uri
           nullable: true
         role:
           type: object
-          required: [id, name]
+          required:
+          - id
+          - name
           properties:
             id:
               type: string
               format: uuid
             name:
               type: string
-              enum: [admin, student]
+              enum:
+              - admin
+              - student
         role_id:
           type: string
           format: uuid
@@ -2105,7 +2179,11 @@ components:
           format: date-time
     CurrentUser:
       type: object
-      required: [email, full_name, avatar_url, role]
+      required:
+      - email
+      - full_name
+      - avatar_url
+      - role
       properties:
         email:
           type: string
@@ -2118,25 +2196,38 @@ components:
           nullable: true
         role:
           type: string
-          enum: [admin, student, user]
+          enum:
+          - admin
+          - student
+          - user
     CurrentUserResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          required: [data]
-          properties:
-            data:
-              $ref: "#/components/schemas/CurrentUser"
-
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        required:
+        - data
+        properties:
+          data:
+            $ref: '#/components/schemas/CurrentUser'
     CourseStatus:
       type: string
-      enum: [draft, published, archived]
+      enum:
+      - draft
+      - published
+      - archived
     ProgressStatus:
       type: string
-      enum: [not_started, in_progress, completed]
+      enum:
+      - not_started
+      - in_progress
+      - completed
     CourseProgress:
       type: object
-      required: [completed_lessons, required_lessons, percentage, status]
+      required:
+      - completed_lessons
+      - required_lessons
+      - percentage
+      - status
       properties:
         completed_lessons:
           type: integer
@@ -2146,10 +2237,18 @@ components:
           type: number
           format: float
         status:
-          $ref: "#/components/schemas/ProgressStatus"
+          $ref: '#/components/schemas/ProgressStatus'
     StudentCourseSummary:
       type: object
-      required: [id, name, description, minimum_score, status, total_lessons, completed_lessons, progress_percentage]
+      required:
+      - id
+      - name
+      - description
+      - minimum_score
+      - status
+      - total_lessons
+      - completed_lessons
+      - progress_percentage
       properties:
         id:
           type: string
@@ -2176,33 +2275,38 @@ components:
           maximum: 100
     StudentCourseDetail:
       allOf:
-        - $ref: "#/components/schemas/StudentCourseSummary"
-        - type: object
-          required: [lessons]
-          properties:
-            lessons:
-              type: array
-              items:
-                $ref: "#/components/schemas/StudentCourseLesson"
+      - $ref: '#/components/schemas/StudentCourseSummary'
+      - type: object
+        required:
+        - lessons
+        properties:
+          lessons:
+            type: array
+            items:
+              $ref: '#/components/schemas/StudentCourseLesson'
     StudentCourseListResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: "#/components/schemas/StudentCourseSummary"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/StudentCourseSummary'
     StudentCourseDetailResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/StudentCourseDetail"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/StudentCourseDetail'
     CourseProgressData:
       type: object
-      required: [course_id, total_lessons, completed_lessons, progress_percentage]
+      required:
+      - course_id
+      - total_lessons
+      - completed_lessons
+      - progress_percentage
       properties:
         course_id:
           type: string
@@ -2217,14 +2321,20 @@ components:
           maximum: 100
     CourseProgressResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/CourseProgressData"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/CourseProgressData'
     CourseSummary:
       type: object
-      required: [uuid, name, description, minimum_score, status, progress]
+      required:
+      - uuid
+      - name
+      - description
+      - minimum_score
+      - status
+      - progress
       properties:
         uuid:
           type: string
@@ -2239,32 +2349,41 @@ components:
           minimum: 0
           maximum: 100
         status:
-          $ref: "#/components/schemas/CourseStatus"
+          $ref: '#/components/schemas/CourseStatus'
         progress:
-          $ref: "#/components/schemas/CourseProgress"
+          $ref: '#/components/schemas/CourseProgress'
     CourseDetail:
       allOf:
-        - $ref: "#/components/schemas/CourseSummary"
-        - type: object
-          required: [lessons, quiz]
-          properties:
-            lessons:
-              type: array
-              items:
-                $ref: "#/components/schemas/CourseLesson"
-            quiz:
-              type: object
-              required: [available]
-              properties:
-                available:
-                  type: boolean
-                reason:
-                  type: string
-                  nullable: true
-                  example: REQUIRED_LESSONS_NOT_COMPLETED
+      - $ref: '#/components/schemas/CourseSummary'
+      - type: object
+        required:
+        - lessons
+        - quiz
+        properties:
+          lessons:
+            type: array
+            items:
+              $ref: '#/components/schemas/CourseLesson'
+          quiz:
+            type: object
+            required:
+            - available
+            properties:
+              available:
+                type: boolean
+              reason:
+                type: string
+                nullable: true
+                example: REQUIRED_LESSONS_NOT_COMPLETED
     CourseLesson:
       type: object
-      required: [uuid, title, position, is_required, state, is_locked]
+      required:
+      - uuid
+      - title
+      - position
+      - is_required
+      - state
+      - is_locked
       properties:
         uuid:
           type: string
@@ -2277,27 +2396,38 @@ components:
           type: boolean
         state:
           type: string
-          enum: [locked, available, in_progress, completed]
+          enum:
+          - locked
+          - available
+          - in_progress
+          - completed
         is_locked:
           type: boolean
     CourseProgressDetail:
       allOf:
-        - $ref: "#/components/schemas/CourseProgress"
-        - type: object
-          required: [course_uuid, quiz_unlocked, lessons]
-          properties:
-            course_uuid:
-              type: string
-              format: uuid
-            quiz_unlocked:
-              type: boolean
-            lessons:
-              type: array
-              items:
-                $ref: "#/components/schemas/CourseLessonProgress"
+      - $ref: '#/components/schemas/CourseProgress'
+      - type: object
+        required:
+        - course_uuid
+        - quiz_unlocked
+        - lessons
+        properties:
+          course_uuid:
+            type: string
+            format: uuid
+          quiz_unlocked:
+            type: boolean
+          lessons:
+            type: array
+            items:
+              $ref: '#/components/schemas/CourseLessonProgress'
     CourseLessonProgress:
       type: object
-      required: [lesson_uuid, position, status, percentage]
+      required:
+      - lesson_uuid
+      - position
+      - status
+      - percentage
       properties:
         lesson_uuid:
           type: string
@@ -2305,7 +2435,7 @@ components:
         position:
           type: integer
         status:
-          $ref: "#/components/schemas/ProgressStatus"
+          $ref: '#/components/schemas/ProgressStatus'
         percentage:
           type: number
           format: float
@@ -2313,16 +2443,24 @@ components:
           type: string
           format: date-time
           nullable: true
-
     LessonDetail:
       type: object
-      required: [uuid, course, title, position, is_required, state, video, progress, navigation]
+      required:
+      - uuid
+      - course
+      - title
+      - position
+      - is_required
+      - state
+      - video
+      - progress
+      - navigation
       properties:
         uuid:
           type: string
           format: uuid
         course:
-          $ref: "#/components/schemas/EmbeddedCourse"
+          $ref: '#/components/schemas/EmbeddedCourse'
         title:
           type: string
         position:
@@ -2331,10 +2469,16 @@ components:
           type: boolean
         state:
           type: string
-          enum: [locked, available, in_progress, completed]
+          enum:
+          - locked
+          - available
+          - in_progress
+          - completed
         video:
           type: object
-          required: [youtube_video_id, duration_seconds]
+          required:
+          - youtube_video_id
+          - duration_seconds
           properties:
             youtube_video_id:
               type: string
@@ -2343,10 +2487,13 @@ components:
               type: integer
               example: 600
         progress:
-          $ref: "#/components/schemas/LessonProgress"
+          $ref: '#/components/schemas/LessonProgress'
         navigation:
           type: object
-          required: [previous_lesson_uuid, next_lesson_uuid, can_continue]
+          required:
+          - previous_lesson_uuid
+          - next_lesson_uuid
+          - can_continue
           properties:
             previous_lesson_uuid:
               type: string
@@ -2360,7 +2507,14 @@ components:
               type: boolean
     LessonProgress:
       type: object
-      required: [lesson_uuid, last_position_seconds, total_watched_seconds, duration_seconds, percentage, status, can_continue]
+      required:
+      - lesson_uuid
+      - last_position_seconds
+      - total_watched_seconds
+      - duration_seconds
+      - percentage
+      - status
+      - can_continue
       properties:
         lesson_uuid:
           type: string
@@ -2375,7 +2529,7 @@ components:
           type: number
           format: float
         status:
-          $ref: "#/components/schemas/ProgressStatus"
+          $ref: '#/components/schemas/ProgressStatus'
         completed_at:
           type: string
           format: date-time
@@ -2384,7 +2538,9 @@ components:
           type: boolean
     ProgressHeartbeatRequest:
       type: object
-      required: [last_position_seconds, watched_seconds]
+      required:
+      - last_position_seconds
+      - watched_seconds
       additionalProperties: false
       properties:
         last_position_seconds:
@@ -2397,7 +2553,11 @@ components:
           example: 15
     UserProgress:
       type: object
-      required: [last_position_seconds, total_watched_seconds, status, completed_at]
+      required:
+      - last_position_seconds
+      - total_watched_seconds
+      - status
+      - completed_at
       properties:
         id:
           type: string
@@ -2413,21 +2573,32 @@ components:
           minimum: 0
         status:
           type: string
-          enum: [not_started, in_progress, completed]
+          enum:
+          - not_started
+          - in_progress
+          - completed
         completed_at:
           type: string
           format: date-time
           nullable: true
     UserProgressResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/UserProgress"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/UserProgress'
     StudentLesson:
       type: object
-      required: [id, course_id, title, position, is_required, is_locked, video, progress]
+      required:
+      - id
+      - course_id
+      - title
+      - position
+      - is_required
+      - is_locked
+      - video
+      - progress
       properties:
         id:
           type: string
@@ -2446,12 +2617,19 @@ components:
         video:
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/LessonVideo"
+          - $ref: '#/components/schemas/LessonVideo'
+          type: object
         progress:
-          $ref: "#/components/schemas/UserProgress"
+          $ref: '#/components/schemas/UserProgress'
     StudentCourseLesson:
       type: object
-      required: [id, course_id, title, position, is_required, is_locked]
+      required:
+      - id
+      - course_id
+      - title
+      - position
+      - is_required
+      - is_locked
       properties:
         id:
           type: string
@@ -2469,29 +2647,34 @@ components:
           type: boolean
     StudentLessonResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/StudentLesson"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/StudentLesson'
     LessonProgressUpdate:
       allOf:
-        - $ref: "#/components/schemas/LessonProgress"
-        - type: object
-          properties:
-            next_lesson:
-              type: object
-              nullable: true
-              properties:
-                uuid:
-                  type: string
-                  format: uuid
-                is_unlocked:
-                  type: boolean
-
+      - $ref: '#/components/schemas/LessonProgress'
+      - type: object
+        properties:
+          next_lesson:
+            type: object
+            nullable: true
+            properties:
+              uuid:
+                type: string
+                format: uuid
+              is_unlocked:
+                type: boolean
     StudentQuiz:
       type: object
-      required: [uuid, name, is_active, minimum_score, total_questions, attempt_policy]
+      required:
+      - uuid
+      - name
+      - is_active
+      - minimum_score
+      - total_questions
+      - attempt_policy
       properties:
         uuid:
           type: string
@@ -2506,7 +2689,10 @@ components:
           type: integer
         attempt_policy:
           type: object
-          required: [maximum_attempts, attempts_used, attempts_remaining]
+          required:
+          - maximum_attempts
+          - attempts_used
+          - attempts_remaining
           properties:
             maximum_attempts:
               type: integer
@@ -2518,16 +2704,27 @@ components:
               nullable: true
     QuizAttempt:
       type: object
-      required: [uuid, quiz, status, score, started_at, submitted_at, questions]
+      required:
+      - uuid
+      - quiz
+      - status
+      - score
+      - started_at
+      - submitted_at
+      - questions
       properties:
         uuid:
           type: string
           format: uuid
         quiz:
-          $ref: "#/components/schemas/EmbeddedQuiz"
+          $ref: '#/components/schemas/EmbeddedQuiz'
         status:
           type: string
-          enum: [in_progress, submitted, passed, failed]
+          enum:
+          - in_progress
+          - submitted
+          - passed
+          - failed
         score:
           type: number
           nullable: true
@@ -2541,18 +2738,24 @@ components:
         questions:
           type: array
           items:
-            $ref: "#/components/schemas/QuizQuestionForStudent"
+            $ref: '#/components/schemas/QuizQuestionForStudent'
     QuizAttemptWithAnswers:
       allOf:
-        - $ref: "#/components/schemas/QuizAttempt"
-        - type: object
-          properties:
-            score:
-              type: number
-              nullable: true
+      - $ref: '#/components/schemas/QuizAttempt'
+      - type: object
+        properties:
+          score:
+            type: number
+            nullable: true
     QuizQuestionForStudent:
       type: object
-      required: [uuid, question_text, points, position, selected_option_uuid, options]
+      required:
+      - uuid
+      - question_text
+      - points
+      - position
+      - selected_option_uuid
+      - options
       properties:
         uuid:
           type: string
@@ -2570,10 +2773,13 @@ components:
         options:
           type: array
           items:
-            $ref: "#/components/schemas/QuizOptionForStudent"
+            $ref: '#/components/schemas/QuizOptionForStudent'
     QuizOptionForStudent:
       type: object
-      required: [uuid, option_text, position]
+      required:
+      - uuid
+      - option_text
+      - position
       properties:
         uuid:
           type: string
@@ -2584,7 +2790,8 @@ components:
           type: integer
     SubmitQuizAttemptRequest:
       type: object
-      required: [answers]
+      required:
+      - answers
       additionalProperties: false
       properties:
         answers:
@@ -2592,7 +2799,9 @@ components:
           minItems: 1
           items:
             type: object
-            required: [question_uuid, selected_option_uuid]
+            required:
+            - question_uuid
+            - selected_option_uuid
             properties:
               question_uuid:
                 type: string
@@ -2602,7 +2811,15 @@ components:
                 format: uuid
     QuizSubmitResult:
       type: object
-      required: [attempt_uuid, score, minimum_score, status, started_at, submitted_at, result, certificate]
+      required:
+      - attempt_uuid
+      - score
+      - minimum_score
+      - status
+      - started_at
+      - submitted_at
+      - result
+      - certificate
       properties:
         attempt_uuid:
           type: string
@@ -2613,7 +2830,9 @@ components:
           type: integer
         status:
           type: string
-          enum: [passed, failed]
+          enum:
+          - passed
+          - failed
         started_at:
           type: string
           format: date-time
@@ -2622,7 +2841,10 @@ components:
           format: date-time
         result:
           type: object
-          required: [correct_answers, incorrect_answers, total_questions]
+          required:
+          - correct_answers
+          - incorrect_answers
+          - total_questions
           properties:
             correct_answers:
               type: integer
@@ -2633,14 +2855,21 @@ components:
         certificate:
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/CertificateIssued"
-
+          - $ref: '#/components/schemas/CertificateIssued'
+          type: object
     CertificateStatus:
       type: string
-      enum: [valid, revoked]
+      enum:
+      - valid
+      - revoked
     CertificateSummary:
       type: object
-      required: [uuid, certificate_number, course, issued_at, status]
+      required:
+      - uuid
+      - certificate_number
+      - course
+      - issued_at
+      - status
       properties:
         uuid:
           type: string
@@ -2648,28 +2877,35 @@ components:
         certificate_number:
           type: string
         course:
-          $ref: "#/components/schemas/EmbeddedCourse"
+          $ref: '#/components/schemas/EmbeddedCourse'
         issued_at:
           type: string
           format: date-time
         status:
-          $ref: "#/components/schemas/CertificateStatus"
+          $ref: '#/components/schemas/CertificateStatus'
     CertificateDetail:
       allOf:
-        - $ref: "#/components/schemas/CertificateSummary"
-        - type: object
-          required: [participant_name, verification_url, download_url]
-          properties:
-            participant_name:
-              type: string
-            verification_url:
-              type: string
-              format: uri
-            download_url:
-              type: string
+      - $ref: '#/components/schemas/CertificateSummary'
+      - type: object
+        required:
+        - participant_name
+        - verification_url
+        - download_url
+        properties:
+          participant_name:
+            type: string
+          verification_url:
+            type: string
+            format: uri
+          download_url:
+            type: string
     CertificateIssued:
       type: object
-      required: [uuid, certificate_number, status, issued_at]
+      required:
+      - uuid
+      - certificate_number
+      - status
+      - issued_at
       properties:
         uuid:
           type: string
@@ -2677,18 +2913,25 @@ components:
         certificate_number:
           type: string
         status:
-          $ref: "#/components/schemas/CertificateStatus"
+          $ref: '#/components/schemas/CertificateStatus'
         issued_at:
           type: string
           format: date-time
     PublicCertificateVerification:
       type: object
-      required: [certificate_number, status, issued_at, revoked_at, participant_name, course, verification_url]
+      required:
+      - certificate_number
+      - status
+      - issued_at
+      - revoked_at
+      - participant_name
+      - course
+      - verification_url
       properties:
         certificate_number:
           type: string
         status:
-          $ref: "#/components/schemas/CertificateStatus"
+          $ref: '#/components/schemas/CertificateStatus'
         participant_name:
           type: string
         issued_at:
@@ -2701,17 +2944,22 @@ components:
           nullable: true
         course:
           type: object
-          required: [name]
+          required:
+          - name
           properties:
             name:
               type: string
         verification_url:
           type: string
           format: uri
-
     AdminCourse:
       type: object
-      required: [id, name, description, minimum_score, status]
+      required:
+      - id
+      - name
+      - description
+      - minimum_score
+      - status
       properties:
         id:
           type: string
@@ -2735,22 +2983,28 @@ components:
           example: published
     AdminCourseDetail:
       allOf:
-        - $ref: "#/components/schemas/AdminCourse"
-        - type: object
-          required: [total_lessons, lessons]
-          properties:
-            total_lessons:
-              type: integer
-              minimum: 0
-              example: 2
-            lessons:
-              type: array
-              description: Daftar lesson yang diurutkan berdasarkan position secara ascending.
-              items:
-                $ref: "#/components/schemas/AdminLesson"
+      - $ref: '#/components/schemas/AdminCourse'
+      - type: object
+        required:
+        - total_lessons
+        - lessons
+        properties:
+          total_lessons:
+            type: integer
+            minimum: 0
+            example: 2
+          lessons:
+            type: array
+            description: Daftar lesson yang diurutkan berdasarkan position secara ascending.
+            items:
+              $ref: '#/components/schemas/AdminLesson'
     CreateCourseRequest:
       type: object
-      required: [course_name, description, minimum_score, status]
+      required:
+      - course_name
+      - description
+      - minimum_score
+      - status
       additionalProperties: false
       properties:
         course_name:
@@ -2795,7 +3049,9 @@ components:
           example: archived
     DeleteCourseResponse:
       type: object
-      required: [success, message]
+      required:
+      - success
+      - message
       properties:
         success:
           type: boolean
@@ -2805,7 +3061,11 @@ components:
           example: Course berhasil dihapus.
     CreateLessonRequest:
       type: object
-      required: [title, youtube_video_id, position, is_required]
+      required:
+      - title
+      - youtube_video_id
+      - position
+      - is_required
       additionalProperties: false
       properties:
         title:
@@ -2813,7 +3073,7 @@ components:
           maxLength: 255
         youtube_video_id:
           type: string
-          pattern: "^[A-Za-z0-9_-]{6,20}$"
+          pattern: ^[A-Za-z0-9_-]{6,20}$
           example: dQw4w9WgXcQ
         position:
           type: integer
@@ -2837,7 +3097,8 @@ components:
           type: boolean
     ReorderLessonsRequest:
       type: object
-      required: [lessons]
+      required:
+      - lessons
       additionalProperties: false
       properties:
         lessons:
@@ -2845,7 +3106,9 @@ components:
           minItems: 1
           items:
             type: object
-            required: [id, position]
+            required:
+            - id
+            - position
             additionalProperties: false
             properties:
               id:
@@ -2856,7 +3119,12 @@ components:
                 minimum: 1
     AdminLesson:
       type: object
-      required: [id, course_id, title, position, is_required]
+      required:
+      - id
+      - course_id
+      - title
+      - position
+      - is_required
       properties:
         id:
           type: string
@@ -2873,19 +3141,25 @@ components:
         video:
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/LessonVideo"
+          - $ref: '#/components/schemas/LessonVideo'
+          type: object
     UpsertLessonVideoRequest:
       type: object
-      required: [youtube_video_id]
+      required:
+      - youtube_video_id
       additionalProperties: false
       properties:
         youtube_video_id:
           type: string
-          pattern: "^[A-Za-z0-9_-]{6,20}$"
+          pattern: ^[A-Za-z0-9_-]{6,20}$
           example: dQw4w9WgXcQ
     LessonVideo:
       type: object
-      required: [id, lesson_id, youtube_video_id, video_url]
+      required:
+      - id
+      - lesson_id
+      - youtube_video_id
+      - video_url
       properties:
         id:
           type: string
@@ -2923,7 +3197,9 @@ components:
           nullable: true
     UpsertQuizRequest:
       type: object
-      required: [quiz_name, is_active]
+      required:
+      - quiz_name
+      - is_active
       additionalProperties: false
       properties:
         quiz_name:
@@ -2933,7 +3209,11 @@ components:
           type: boolean
     AdminQuiz:
       type: object
-      required: [id, course_id, quiz_name, is_active]
+      required:
+      - id
+      - course_id
+      - quiz_name
+      - is_active
       properties:
         id:
           type: string
@@ -2947,24 +3227,28 @@ components:
           type: boolean
     AdminQuizResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/AdminQuiz"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/AdminQuiz'
     CreateQuizQuestionsRequest:
       type: object
-      required: [questions]
+      required:
+      - questions
       additionalProperties: false
       properties:
         questions:
           type: array
           minItems: 1
           items:
-            $ref: "#/components/schemas/CreateQuizQuestionRequest"
+            $ref: '#/components/schemas/CreateQuizQuestionRequest'
     CreateQuizQuestionRequest:
       type: object
-      required: [question, position, answers]
+      required:
+      - question
+      - position
+      - answers
       additionalProperties: false
       properties:
         quizz_id:
@@ -2986,10 +3270,11 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: "#/components/schemas/AdminQuizAnswerRequest"
+            $ref: '#/components/schemas/AdminQuizAnswerRequest'
     ReorderQuizQuestionsRequest:
       type: object
-      required: [questions]
+      required:
+      - questions
       additionalProperties: false
       properties:
         questions:
@@ -2997,7 +3282,9 @@ components:
           minItems: 1
           items:
             type: object
-            required: [id, position]
+            required:
+            - id
+            - position
             additionalProperties: false
             properties:
               id:
@@ -3008,7 +3295,11 @@ components:
                 minimum: 1
     UpdateQuizQuestionRequest:
       type: object
-      required: [question, points, position, answers]
+      required:
+      - question
+      - points
+      - position
+      - answers
       additionalProperties: false
       properties:
         question:
@@ -3024,10 +3315,12 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: "#/components/schemas/AdminQuizAnswerRequest"
+            $ref: '#/components/schemas/AdminQuizAnswerRequest'
     AdminQuizAnswerRequest:
       type: object
-      required: [answer, is_correct]
+      required:
+      - answer
+      - is_correct
       additionalProperties: false
       properties:
         answer:
@@ -3037,7 +3330,14 @@ components:
           type: boolean
     AdminQuizQuestion:
       type: object
-      required: [id, quizz_id, question, points, position, image_url, answers]
+      required:
+      - id
+      - quizz_id
+      - question
+      - points
+      - position
+      - image_url
+      - answers
       properties:
         id:
           type: string
@@ -3057,10 +3357,13 @@ components:
         answers:
           type: array
           items:
-            $ref: "#/components/schemas/AdminQuizAnswer"
+            $ref: '#/components/schemas/AdminQuizAnswer'
     AdminQuizAnswer:
       type: object
-      required: [id, answer, is_correct]
+      required:
+      - id
+      - answer
+      - is_correct
       properties:
         id:
           type: string
@@ -3071,23 +3374,32 @@ components:
           type: boolean
     AdminQuestionListResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: "#/components/schemas/AdminQuizQuestion"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/AdminQuizQuestion'
     AdminQuestionResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/AdminQuizQuestion"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/AdminQuizQuestion'
     AdminCertificateSummary:
       type: object
-      required: [id, certificate_number, issued_at, status, pdf_path, revoked_reason, revoked_at, student, course]
+      required:
+      - id
+      - certificate_number
+      - issued_at
+      - status
+      - pdf_path
+      - revoked_reason
+      - revoked_at
+      - student
+      - course
       properties:
         id:
           type: string
@@ -3099,7 +3411,7 @@ components:
           format: date-time
           nullable: true
         status:
-          $ref: "#/components/schemas/CertificateStatus"
+          $ref: '#/components/schemas/CertificateStatus'
         pdf_path:
           type: string
           nullable: true
@@ -3112,7 +3424,10 @@ components:
           nullable: true
         student:
           type: object
-          required: [id, full_name, email]
+          required:
+          - id
+          - full_name
+          - email
           properties:
             id:
               type: string
@@ -3127,7 +3442,10 @@ components:
               nullable: true
         course:
           type: object
-          required: [id, name, status]
+          required:
+          - id
+          - name
+          - status
           properties:
             id:
               type: string
@@ -3141,7 +3459,8 @@ components:
               nullable: true
     RevokeCertificateRequest:
       type: object
-      required: [reason]
+      required:
+      - reason
       additionalProperties: false
       properties:
         reason:
@@ -3149,11 +3468,12 @@ components:
           maxLength: 1000
           example: Sertifikat diterbitkan berdasarkan data yang tidak valid.
     RevokedCertificate:
-      $ref: "#/components/schemas/AdminCertificateSummary"
-
+      $ref: '#/components/schemas/AdminCertificateSummary'
     StudentRole:
       type: object
-      required: [id, name]
+      required:
+      - id
+      - name
       properties:
         id:
           type: string
@@ -3164,7 +3484,16 @@ components:
           nullable: true
     AdminStudentSummary:
       type: object
-      required: [id, full_name, email, phone, birth_date, avatar_url, last_login_at, email_verified_at, role]
+      required:
+      - id
+      - full_name
+      - email
+      - phone
+      - birth_date
+      - avatar_url
+      - last_login_at
+      - email_verified_at
+      - role
       properties:
         id:
           type: string
@@ -3194,10 +3523,15 @@ components:
           format: date-time
           nullable: true
         role:
-          $ref: "#/components/schemas/StudentRole"
+          $ref: '#/components/schemas/StudentRole'
     LearningSummary:
       type: object
-      required: [total_progress_records, completed_lessons, in_progress_lessons, total_watched_seconds, total_certificates]
+      required:
+      - total_progress_records
+      - completed_lessons
+      - in_progress_lessons
+      - total_watched_seconds
+      - total_certificates
       properties:
         total_progress_records:
           type: integer
@@ -3211,31 +3545,37 @@ components:
           type: integer
     AdminStudentDetail:
       allOf:
-        - $ref: "#/components/schemas/AdminStudentSummary"
-        - type: object
-          required: [learning_summary]
-          properties:
-            learning_summary:
-              $ref: "#/components/schemas/LearningSummary"
+      - $ref: '#/components/schemas/AdminStudentSummary'
+      - type: object
+        required:
+        - learning_summary
+        properties:
+          learning_summary:
+            $ref: '#/components/schemas/LearningSummary'
     AdminStudentListResponse:
       allOf:
-        - $ref: "#/components/schemas/PaginatedResponse"
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: "#/components/schemas/AdminStudentSummary"
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/AdminStudentSummary'
     AdminStudentDetailResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/AdminStudentDetail"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            $ref: '#/components/schemas/AdminStudentDetail'
     AdminStudentLessonProgress:
       type: object
-      required: [id, title, position, is_required, progress]
+      required:
+      - id
+      - title
+      - position
+      - is_required
+      - progress
       properties:
         id:
           type: string
@@ -3248,11 +3588,18 @@ components:
           type: boolean
         progress:
           type: object
-          required: [status, last_position_seconds, total_watched_seconds, completed_at]
+          required:
+          - status
+          - last_position_seconds
+          - total_watched_seconds
+          - completed_at
           properties:
             status:
               type: string
-              enum: [not_started, in_progress, completed]
+              enum:
+              - not_started
+              - in_progress
+              - completed
             last_position_seconds:
               type: integer
             total_watched_seconds:
@@ -3263,11 +3610,17 @@ components:
               nullable: true
     AdminStudentCourseProgress:
       type: object
-      required: [course, summary, lessons]
+      required:
+      - course
+      - summary
+      - lessons
       properties:
         course:
           type: object
-          required: [id, name, status]
+          required:
+          - id
+          - name
+          - status
           properties:
             id:
               type: string
@@ -3278,7 +3631,10 @@ components:
               type: string
         summary:
           type: object
-          required: [total_lessons, completed_lessons, progress_percentage]
+          required:
+          - total_lessons
+          - completed_lessons
+          - progress_percentage
           properties:
             total_lessons:
               type: integer
@@ -3291,19 +3647,25 @@ components:
         lessons:
           type: array
           items:
-            $ref: "#/components/schemas/AdminStudentLessonProgress"
+            $ref: '#/components/schemas/AdminStudentLessonProgress'
     AdminStudentProgressResponse:
       allOf:
-        - $ref: "#/components/schemas/SuccessResponse"
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: "#/components/schemas/AdminStudentCourseProgress"
+      - $ref: '#/components/schemas/SuccessResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/AdminStudentCourseProgress'
     AdminStudentCertificate:
       type: object
-      required: [id, certificate_number, issued_at, status, pdf_path, course]
+      required:
+      - id
+      - certificate_number
+      - issued_at
+      - status
+      - pdf_path
+      - course
       properties:
         id:
           type: string
@@ -3315,13 +3677,16 @@ components:
           format: date-time
           nullable: true
         status:
-          $ref: "#/components/schemas/CertificateStatus"
+          $ref: '#/components/schemas/CertificateStatus'
         pdf_path:
           type: string
           nullable: true
         course:
           type: object
-          required: [id, name, status]
+          required:
+          - id
+          - name
+          - status
           properties:
             id:
               type: string
@@ -3335,17 +3700,18 @@ components:
               nullable: true
     AdminStudentCertificateListResponse:
       allOf:
-        - $ref: "#/components/schemas/PaginatedResponse"
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: "#/components/schemas/AdminStudentCertificate"
-
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/AdminStudentCertificate'
     EmbeddedCourse:
       type: object
-      required: [uuid, name]
+      required:
+      - uuid
+      - name
       properties:
         uuid:
           type: string
@@ -3354,14 +3720,15 @@ components:
           type: string
     EmbeddedQuiz:
       type: object
-      required: [uuid, name]
+      required:
+      - uuid
+      - name
       properties:
         uuid:
           type: string
           format: uuid
         name:
           type: string
-
 security:
-  - bearerAuth: []
-  - sanctumCookie: []
+- bearerAuth: []
+- sanctumCookie: []
