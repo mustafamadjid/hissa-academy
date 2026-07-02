@@ -41,6 +41,12 @@ export const routes: RouteRecordRaw[] = [
     meta: studentRouteMeta,
   },
   {
+    path: "/courses/:courseId/quiz",
+    name: "student-course-quiz",
+    component: () => import("@/features/quiz/pages/StudentQuizPage.vue"),
+    meta: studentRouteMeta,
+  },
+  {
     path: "/profile",
     name: "user-profile",
     component: () => import("@/features/profile/pages/ProfilePage.vue"),

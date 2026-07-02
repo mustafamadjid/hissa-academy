@@ -8,6 +8,8 @@ import {
   LoaderCircle,
   Play,
   ShieldCheck,
+  ClipboardCheck,
+  LockKeyhole,
 } from "@lucide/vue";
 import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -29,6 +31,11 @@ const firstAvailableLesson = computed(() =>
     .slice()
     .sort((left, right) => left.position - right.position)
     .find((lesson) => !lesson.is_locked),
+);
+const quizUnlocked = computed(() =>
+  Boolean(course.value?.lessons.filter((lesson) => lesson.is_required).every(
+    (lesson) => lesson.progress?.status === "completed",
+  )),
 );
 
 async function startCourse(): Promise<void> {
@@ -204,7 +211,20 @@ onMounted(() => void fetchCourse(courseId.value, authStore.isAuthenticated));
             <CourseCurriculum
               :lessons="course.lessons"
               :authenticated="authStore.isAuthenticated"
+              :course-id="course.id"
+              :quiz-unlocked="quizUnlocked"
             />
+            <section v-if="authStore.isAuthenticated" class="rounded-2xl border border-primary-green/15 bg-white p-6 shadow-sm">
+              <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <div class="grid size-12 shrink-0 place-items-center rounded-xl bg-primary-green/10">
+                  <ClipboardCheck v-if="quizUnlocked" class="size-6 text-primary-green" />
+                  <LockKeyhole v-else class="size-6 text-neutral-medium" />
+                </div>
+                <div class="flex-1"><h2 class="font-bold">Quiz akhir course</h2><p class="mt-1 text-sm text-neutral-medium">{{ quizUnlocked ? "Semua lesson wajib selesai. Quiz siap dikerjakan." : "Selesaikan semua lesson wajib untuk membuka quiz." }}</p></div>
+                <RouterLink v-if="quizUnlocked" :to="{ name: 'student-course-quiz', params: { courseId: course.id } }" class="rounded-xl bg-primary-dark-green px-5 py-3 text-center text-sm font-bold text-white">Buka Quiz</RouterLink>
+                <span v-else class="rounded-xl bg-surface-dim px-5 py-3 text-center text-sm font-semibold text-neutral-medium">Terkunci</span>
+              </div>
+            </section>
           </div>
 
           <aside

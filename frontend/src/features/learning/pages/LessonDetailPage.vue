@@ -18,6 +18,11 @@ const { progressError, setLesson, recordWatch, flush } = useLessonProgress();
 const orderedLessons = computed(() =>
   [...(course.value?.lessons ?? [])].sort((left, right) => left.position - right.position),
 );
+const quizUnlocked = computed(() =>
+  orderedLessons.value
+    .filter((item) => item.is_required)
+    .every((item) => item.progress?.status === "completed"),
+);
 
 watch(lessonId, (id) => void fetchLesson(id), { immediate: true });
 watch(lesson, (currentLesson) => {
@@ -70,7 +75,12 @@ watch(lesson, (currentLesson) => {
                 </div>
               </div>
             </div>
-            <LessonPlaylist :lessons="orderedLessons" :active-lesson-id="lesson.id" />
+            <LessonPlaylist
+              :lessons="orderedLessons"
+              :active-lesson-id="lesson.id"
+              :course-id="course.id"
+              :quiz-unlocked="quizUnlocked"
+            />
           </div>
         </section>
 

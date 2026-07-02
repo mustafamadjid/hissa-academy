@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { CheckCircle2, Circle, LockKeyhole, PlayCircle } from "@lucide/vue";
+import { CheckCircle2, Circle, ClipboardCheck, LockKeyhole, PlayCircle } from "@lucide/vue";
 import type { StudentCourseLessonDto } from "../types/course-catalog.types";
 
 defineProps<{
   lessons: readonly StudentCourseLessonDto[];
   authenticated: boolean;
+  courseId: string;
+  quizUnlocked: boolean;
 }>();
 </script>
 
@@ -73,6 +75,30 @@ defineProps<{
             >{{ lesson.position }}. {{ lesson.title }}</span
           >
           <span class="text-xs">Selesaikan lesson sebelumnya</span>
+        </div>
+      </li>
+      <li v-if="lessons.length > 0" class="border-t border-neutral-low">
+        <RouterLink
+          v-if="quizUnlocked"
+          :to="{ name: 'student-course-quiz', params: { courseId } }"
+          class="flex w-full items-center gap-4 bg-primary-green/5 px-5 py-4 text-left transition hover:bg-primary-green/10 focus-visible:outline-2 focus-visible:outline-primary-green"
+        >
+          <ClipboardCheck class="size-5 shrink-0 text-primary-green" />
+          <span class="min-w-0 flex-1 text-sm font-bold text-neutral-high"
+            >{{ lessons.length + 1 }}. Quiz Akhir Course</span
+          >
+          <span class="text-xs font-semibold text-primary-green">Kerjakan</span>
+        </RouterLink>
+        <div
+          v-else
+          class="flex items-center gap-4 bg-surface-dim/70 px-5 py-4 text-neutral-medium"
+          aria-disabled="true"
+        >
+          <LockKeyhole class="size-5 shrink-0" />
+          <span class="min-w-0 flex-1 text-sm font-bold"
+            >{{ lessons.length + 1 }}. Quiz Akhir Course</span
+          >
+          <span class="text-xs">Selesaikan semua lesson wajib</span>
         </div>
       </li>
       <li
