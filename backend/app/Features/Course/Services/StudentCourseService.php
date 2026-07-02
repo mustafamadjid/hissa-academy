@@ -9,6 +9,7 @@ use App\Features\Course\Models\Course;
 use App\Features\User\Enums\UserRole;
 use App\Features\User\Models\User;
 use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
+use App\Features\UserProgress\Enums\LessonProgressStatus;
 use App\Helper\EnsureStudentForService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -78,7 +79,7 @@ final class StudentCourseService
             $lessons = $course->lessons;
             $progressByLesson = $this->progressByLesson($actor->id, $lessons->pluck('id')->all());
             $completedRequiredLessonIds = $progressByLesson
-                ->filter(fn ($progress): bool => $progress->status === 'completed')
+                ->filter(fn ($progress): bool => $progress->status === LessonProgressStatus::COMPLETED->value)
                 ->keys()
                 ->all();
 
@@ -90,8 +91,6 @@ final class StudentCourseService
                     'position' => $lesson->position,
                     'is_required' => $lesson->is_required,
                     'is_locked' => $this->isLessonLocked($lesson, $lessons, $completedRequiredLessonIds),
-                    'video' => $lesson->video,
-                    'progress' => $progressByLesson->get($lesson->id),
                 ])
                 ->values()
                 ->all();

@@ -2,7 +2,6 @@
 
 namespace App\Features\Course\Http\Resources;
 
-use App\Features\Lesson\Http\Resources\StudentLessonResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,7 +25,7 @@ final class StudentCourseResource extends JsonResource
             'progress_percentage' => $course['progress_percentage'],
             'lessons' => $this->when(
                 array_key_exists('lessons', $course),
-                fn () => StudentLessonResource::collection(collect($course['lessons'])),
+                fn () => StudentCourseLessonResource::collection(collect($course['lessons'] ?? [])),
             ),
         ];
     }

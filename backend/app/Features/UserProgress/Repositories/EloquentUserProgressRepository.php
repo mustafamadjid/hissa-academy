@@ -17,6 +17,7 @@ final class EloquentUserProgressRepository implements UserProgressRepositoryCont
             ->keyBy('lesson_id');
     }
 
+
     public function findForUserLesson(string $userId, string $lessonId): ?UserProgress
     {
         return UserProgress::query()

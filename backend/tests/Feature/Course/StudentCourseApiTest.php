@@ -105,7 +105,8 @@ it('returns course detail with ordered lesson lock status and progress', functio
         ->assertJsonPath('data.id', $course->id)
         ->assertJsonPath('data.lessons.0.id', $firstLesson->id)
         ->assertJsonPath('data.lessons.0.is_locked', false)
-        ->assertJsonPath('data.lessons.0.progress.status', 'completed')
+        ->assertJsonMissingPath('data.lessons.0.video')
+        ->assertJsonMissingPath('data.lessons.0.progress')
         ->assertJsonPath('data.lessons.1.id', $secondLesson->id)
         ->assertJsonPath('data.lessons.1.is_locked', false)
         ->assertJsonPath('data.progress_percentage', 50);
