@@ -2131,7 +2131,7 @@ components:
             lessons:
               type: array
               items:
-                $ref: "#/components/schemas/StudentLesson"
+                $ref: "#/components/schemas/StudentCourseLesson"
     StudentCourseListResponse:
       allOf:
         - $ref: "#/components/schemas/SuccessResponse"
@@ -2397,6 +2397,24 @@ components:
             - $ref: "#/components/schemas/LessonVideo"
         progress:
           $ref: "#/components/schemas/UserProgress"
+    StudentCourseLesson:
+      type: object
+      required: [id, course_id, title, position, is_required, is_locked]
+      properties:
+        id:
+          type: string
+          format: uuid
+        course_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        position:
+          type: integer
+        is_required:
+          type: boolean
+        is_locked:
+          type: boolean
     StudentLessonResponse:
       allOf:
         - $ref: "#/components/schemas/SuccessResponse"

@@ -17,7 +17,9 @@ function toggleMobileMenu(): void {
 const authStore = useAuthStore();
 const { isAuthenticated, user } = storeToRefs(authStore);
 const hasAvatarError = ref(false);
-const userInitial = computed(() => user.value?.full_name.trim().charAt(0).toUpperCase() || "U");
+const userInitial = computed(
+  () => user.value?.full_name.trim().charAt(0).toUpperCase() || "U",
+);
 
 function closeMobileMenu(): void {
   isMobileMenuOpen.value = false;
@@ -34,7 +36,7 @@ function closeMobileMenu(): void {
     >
       <!-- Logo -->
       <RouterLink
-        :to="{ name: 'guest-home' }"
+        :to="{ name: 'landing' }"
         class="flex shrink-0 items-center"
         aria-label="HISSA Academy - Beranda"
         @click="closeMobileMenu"
@@ -99,7 +101,9 @@ function closeMobileMenu(): void {
               class="size-full object-cover"
               @error="hasAvatarError = true"
             />
-            <span v-else-if="user?.full_name" aria-hidden="true">{{ userInitial }}</span>
+            <span v-else-if="user?.full_name" aria-hidden="true">{{
+              userInitial
+            }}</span>
             <UserRound v-else class="size-5" aria-hidden="true" />
           </RouterLink>
         </div>
@@ -177,7 +181,9 @@ function closeMobileMenu(): void {
             class="mt-3 flex w-full items-center gap-3 rounded-xl border border-neutral-low px-4 py-3 text-sm font-semibold text-neutral-high transition-colors hover:bg-surface-dim"
             @click="closeMobileMenu"
           >
-            <span class="flex size-9 items-center justify-center overflow-hidden rounded-full bg-primary-dark-green text-xs font-bold text-white">
+            <span
+              class="flex size-9 items-center justify-center overflow-hidden rounded-full bg-primary-dark-green text-xs font-bold text-white"
+            >
               <img
                 v-if="user?.avatar_url && !hasAvatarError"
                 :src="user.avatar_url"

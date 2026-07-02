@@ -6,7 +6,6 @@ defineProps<{
   lessons: readonly StudentCourseLessonDto[];
   authenticated: boolean;
 }>();
-
 </script>
 
 <template>
@@ -48,7 +47,10 @@ defineProps<{
       >
         <RouterLink
           v-if="!lesson.is_locked"
-          :to="{ name: 'student-lesson-detail', params: { lessonId: lesson.id } }"
+          :to="{
+            name: 'student-lesson-detail',
+            params: { lessonId: lesson.id },
+          }"
           class="flex w-full items-center gap-4 px-5 py-4 text-left transition hover:bg-primary-green/5 focus-visible:outline-2 focus-visible:outline-primary-green disabled:cursor-not-allowed disabled:opacity-60"
         >
           <CheckCircle2
@@ -59,9 +61,7 @@ defineProps<{
           <span class="min-w-0 flex-1 text-sm font-medium text-neutral-high"
             >{{ lesson.position }}. {{ lesson.title }}</span
           >
-          <span class="text-xs font-semibold text-primary-green">{{
-            lesson.video ? "Putar" : "Video belum tersedia"
-          }}</span>
+          <span class="text-xs font-semibold text-primary-green">Putar</span>
         </RouterLink>
         <div
           v-else
