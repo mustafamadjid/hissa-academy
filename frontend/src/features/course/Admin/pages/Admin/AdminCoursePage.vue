@@ -19,7 +19,7 @@ import { useAdminCourses } from "../../composables/useAdminCourses";
 import type {
   CourseDto,
   CourseFormValues,
-} from "../../../types/course.types.ts";
+} from "@/features/course/Admin/types/course.types.ts";
 
 const {
   courses,

@@ -31,11 +31,29 @@ export interface StudentLessonDetailDto {
   is_required: boolean;
   is_locked: boolean;
   video: LessonVideoDto | null;
-  progress: LessonProgressDto;
+  progress: LessonProgressDto | null;
 }
 
 export interface GetStudentLessonResponse {
   success: boolean;
   message: string;
   data: StudentLessonDetailDto;
+}
+
+export interface LearningCourseDetailDto {
+  id: string;
+  name: string;
+  description: string;
+  minimum_score: number;
+  status: string;
+  total_lessons: number;
+  completed_lessons: number;
+  progress_percentage: number;
+  lessons: StudentLessonDetailDto[];
+}
+
+export interface GetLearningCourseDetailResponse {
+  success: boolean;
+  message: string;
+  data: LearningCourseDetailDto;
 }

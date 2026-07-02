@@ -1,16 +1,16 @@
-export type UserRole = 'admin' | 'student'
-
-export interface AuthRole {
-  id: number
-  name: UserRole
-  guard_name: string
-}
+export type UserRole = 'admin' | 'student' | 'user'
 
 export interface AuthUser {
-  id: number
-  name: string
   email: string
-  role: AuthRole
+  full_name: string
+  avatar_url: string | null
+  role: UserRole
+}
+
+export interface GetCurrentUserResponse {
+  success: true
+  message: string
+  data: AuthUser
 }
 
 export interface LoginCredentials {

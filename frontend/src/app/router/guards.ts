@@ -21,14 +21,14 @@ export function registerRouterGuards(router: Router): void {
     }
 
     if (to.meta.guestOnly && authStore.isAuthenticated) {
-      return authStore.user?.role.name === "admin"
+      return authStore.user?.role === "admin"
         ? { name: "admin-courses" }
         : { name: "landing" };
     }
 
     if (
       to.meta.roles?.length &&
-      (!authStore.user || !to.meta.roles.includes(authStore.user.role.name))
+      (!authStore.user || !to.meta.roles.includes(authStore.user.role))
     ) {
       return { name: "forbidden" };
     }

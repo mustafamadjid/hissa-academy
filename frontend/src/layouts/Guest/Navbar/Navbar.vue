@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Menu, X } from "@lucide/vue";
+import { computed, ref } from "vue";
+import { Menu, UserRound, X } from "@lucide/vue";
 
 import { guestMenu } from "../navbar-menu";
 import logo from "@/assets/images/logo.webp";
@@ -15,7 +15,9 @@ function toggleMobileMenu(): void {
 }
 
 const authStore = useAuthStore();
-const { isAuthenticated } = storeToRefs(authStore);
+const { isAuthenticated, user } = storeToRefs(authStore);
+const hasAvatarError = ref(false);
+const userInitial = computed(() => user.value?.full_name.trim().charAt(0).toUpperCase() || "U");
 
 function closeMobileMenu(): void {
   isMobileMenuOpen.value = false;
@@ -78,13 +80,29 @@ function closeMobileMenu(): void {
         >
           Mulai Belajar
         </RouterLink>
-        <RouterLink
-          v-else
-          :to="{ name: 'guest-courses' }"
-          class="inline-flex items-center justify-center rounded-full bg-primary-dark-green px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-green hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark-green"
-        >
-          Lihat Course Anda
-        </RouterLink>
+        <div v-else class="flex items-center gap-3">
+          <RouterLink
+            :to="{ name: 'guest-courses' }"
+            class="text-sm font-semibold text-primary-dark-green transition-colors hover:text-primary-green"
+          >
+            Course Saya
+          </RouterLink>
+          <RouterLink
+            :to="{ name: 'user-profile' }"
+            class="flex size-11 items-center justify-center overflow-hidden rounded-full border-2 border-primary-dark-green bg-surface-dim text-sm font-bold text-primary-dark-green shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-dark-green"
+            aria-label="Buka profil pengguna"
+          >
+            <img
+              v-if="user?.avatar_url && !hasAvatarError"
+              :src="user.avatar_url"
+              :alt="`Avatar ${user.full_name}`"
+              class="size-full object-cover"
+              @error="hasAvatarError = true"
+            />
+            <span v-else-if="user?.full_name" aria-hidden="true">{{ userInitial }}</span>
+            <UserRound v-else class="size-5" aria-hidden="true" />
+          </RouterLink>
+        </div>
       </div>
 
       <!-- Mobile Menu Button -->
@@ -151,6 +169,25 @@ function closeMobileMenu(): void {
             @click="closeMobileMenu"
           >
             Lihat Course Anda
+          </RouterLink>
+
+          <RouterLink
+            v-if="isAuthenticated"
+            :to="{ name: 'user-profile' }"
+            class="mt-3 flex w-full items-center gap-3 rounded-xl border border-neutral-low px-4 py-3 text-sm font-semibold text-neutral-high transition-colors hover:bg-surface-dim"
+            @click="closeMobileMenu"
+          >
+            <span class="flex size-9 items-center justify-center overflow-hidden rounded-full bg-primary-dark-green text-xs font-bold text-white">
+              <img
+                v-if="user?.avatar_url && !hasAvatarError"
+                :src="user.avatar_url"
+                alt=""
+                class="size-full object-cover"
+                @error="hasAvatarError = true"
+              />
+              <span v-else>{{ userInitial }}</span>
+            </span>
+            Profil Saya
           </RouterLink>
         </div>
       </div>

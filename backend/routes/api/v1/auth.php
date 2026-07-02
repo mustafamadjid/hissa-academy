@@ -2,6 +2,7 @@
 
 use App\Features\Auth\Http\Controllers\GoogleAuthController;
 use App\Features\Auth\Http\Controllers\UserAuthController;
+use App\Features\User\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -11,6 +12,7 @@ Route::prefix('auth')->group(function (): void {
         ->middleware('throttle:login');
 
     Route::post('/logout', [UserAuthController::class, 'destroy'])
+        ->middleware(['auth:sanctum', 'throttle:api'])
         ->name('auth.logout');
 
     Route::middleware('web')
@@ -23,7 +25,7 @@ Route::prefix('auth')->group(function (): void {
                 ->name('auth.google.callback');
         });
 
-    Route::get('/me', [UserAuthController::class, 'me'])
+    Route::get('/me', [UserProfileController::class, 'show'])
         ->middleware(['auth:sanctum', 'throttle:api'])
         ->name('auth.me');
 });

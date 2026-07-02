@@ -68,9 +68,9 @@ export function useGoogleAuthCallback() {
         return;
       }
 
-      if (authStore.user.role.name !== "student") {
+      if (authStore.user.role !== "student") {
         await router.replace(
-          authStore.user.role.name === "admin"
+          authStore.user.role === "admin"
             ? { name: "admin-courses" }
             : { name: "forbidden" },
         );

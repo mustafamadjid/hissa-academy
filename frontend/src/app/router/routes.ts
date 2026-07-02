@@ -32,12 +32,18 @@ export const routes: RouteRecordRaw[] = [
   {
     path: "/courses/:courseId",
     name: "course-detail",
-    component: () => import("@/features/guest/pages/CourseDetailPage.vue"),
+    component: () => import("@/features/course/Student/pages/CourseDetailPage.vue"),
   },
   {
     path: "/lessons/:lessonId",
     name: "student-lesson-detail",
     component: () => import("@/features/learning/pages/LessonDetailPage.vue"),
+    meta: studentRouteMeta,
+  },
+  {
+    path: "/profile",
+    name: "user-profile",
+    component: () => import("@/features/profile/pages/ProfilePage.vue"),
     meta: studentRouteMeta,
   },
   {
@@ -87,21 +93,21 @@ export const routes: RouteRecordRaw[] = [
     path: "/admin/courses",
     name: "admin-courses",
     component: () =>
-      import("@/features/course/pages/Admin/AdminCoursePage.vue"),
+      import("@/features/course/Admin/pages/Admin/AdminCoursePage.vue"),
     meta: adminRouteMeta,
   },
   {
     path: "/admin/courses/:courseId",
     name: "admin-course-detail",
     component: () =>
-      import("@/features/course/pages/Admin/AdminCourseDetailPage.vue"),
+      import("@/features/course/Admin/pages/Admin/AdminCourseDetailPage.vue"),
     meta: adminRouteMeta,
   },
   {
     path: "/admin/courses/:courseId/lessons",
     name: "admin-course-lessons",
     component: () =>
-      import("@/features/course/pages/Admin/AdminCourseLessonsPage.vue"),
+      import("@/features/course/Admin/pages/Admin/AdminCourseLessonsPage.vue"),
     meta: adminRouteMeta,
   },
   {

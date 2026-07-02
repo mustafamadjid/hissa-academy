@@ -20,7 +20,7 @@ import type {
   AdminLessonDto,
   CreateLessonFormValues,
   LessonFormValues,
-} from "../../../types/course.types.ts";
+} from "@/features/course/Admin/types/course.types.ts";
 
 const route = useRoute();
 const courseId = computed(() =>

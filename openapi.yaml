@@ -76,11 +76,11 @@ paths:
       summary: Get current user
       responses:
         "200":
-          description: User terautentikasi beserta role, tanpa response envelope.
+          description: Profil user terautentikasi beserta role untuk otorisasi frontend.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CurrentUser"
+                $ref: "#/components/schemas/CurrentUserResponse"
         "401":
           $ref: "#/components/responses/Unauthenticated"
 
@@ -2052,10 +2052,29 @@ components:
           type: string
           format: date-time
     CurrentUser:
+      type: object
+      required: [email, full_name, avatar_url, role]
+      properties:
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          type: string
+          enum: [admin, student, user]
+    CurrentUserResponse:
       allOf:
-        - $ref: "#/components/schemas/User"
+        - $ref: "#/components/schemas/SuccessResponse"
         - type: object
-          required: [role]
+          required: [data]
+          properties:
+            data:
+              $ref: "#/components/schemas/CurrentUser"
 
     CourseStatus:
       type: string

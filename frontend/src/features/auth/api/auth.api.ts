@@ -1,7 +1,11 @@
 import { axiosInstance } from "@/shared/api/axios";
 import { httpClient } from "@/shared/api/http-client";
 
-import type { AuthUser, LoginCredentials } from "../types/auth";
+import type {
+  AuthUser,
+  GetCurrentUserResponse,
+  LoginCredentials,
+} from "../types/auth";
 
 function getBackendOrigin(): string {
   const baseUrl = axiosInstance.defaults.baseURL;
@@ -11,6 +15,10 @@ function getBackendOrigin(): string {
   }
 
   return new URL(baseUrl, window.location.origin).origin;
+}
+
+async function ensureCsrfCookie(): Promise<void> {
+  await httpClient.get<void>(`${getBackendOrigin()}/sanctum/csrf-cookie`);
 }
 
 export function getGoogleRedirectUrl(): string {
@@ -27,11 +35,13 @@ export function getGoogleRedirectUrl(): string {
 }
 
 export async function getCurrentUser(): Promise<AuthUser> {
-  return httpClient.get<AuthUser>("/auth/me");
+  const response = await httpClient.get<GetCurrentUserResponse>("/auth/me");
+
+  return response.data;
 }
 
 export async function login(credentials: LoginCredentials): Promise<AuthUser> {
-  await httpClient.get<void>(`${getBackendOrigin()}/sanctum/csrf-cookie`);
+  await ensureCsrfCookie();
 
   await httpClient.post("/auth/login", credentials);
 
@@ -39,5 +49,6 @@ export async function login(credentials: LoginCredentials): Promise<AuthUser> {
 }
 
 export async function logout(): Promise<void> {
+  await ensureCsrfCookie();
   await httpClient.post("/auth/logout");
 }

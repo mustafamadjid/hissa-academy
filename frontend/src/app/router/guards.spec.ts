@@ -10,17 +10,16 @@ vi.mock('@/features/auth/stores/auth.store', () => ({
 }))
 
 const adminUser: AuthUser = {
-  id: 1,
-  name: 'Admin',
   email: 'admin@example.com',
-  role: { id: 1, name: 'admin', guard_name: 'web' },
+  full_name: 'Admin',
+  avatar_url: null,
+  role: 'admin',
 }
 
 const studentUser: AuthUser = {
   ...adminUser,
-  id: 2,
-  name: 'Student',
-  role: { id: 2, name: 'student', guard_name: 'web' },
+  full_name: 'Student',
+  role: 'student',
 }
 
 const testRoutes: RouteRecordRaw[] = [

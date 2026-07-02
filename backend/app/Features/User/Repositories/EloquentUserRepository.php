@@ -11,4 +11,12 @@ final class EloquentUserRepository implements UserRepositoryContract
     {
         return User::where('email', $email)->first();
     }
+
+    public function findProfileById(string $userId): ?User
+    {
+        return User::query()
+            ->select(['id', 'email', 'full_name', 'avatar_url', 'role_id'])
+            ->with('role:id,name')
+            ->find($userId);
+    }
 }

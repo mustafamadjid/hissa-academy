@@ -13,14 +13,10 @@ vi.mock('../api/auth.api', () => ({
 }))
 
 const authenticatedUser: AuthUser = {
-  id: 1,
-  name: 'John Doe',
   email: 'john@example.com',
-  role: {
-    id: 2,
-    name: 'student',
-    guard_name: 'web',
-  },
+  full_name: 'John Doe',
+  avatar_url: 'https://example.com/avatar.png',
+  role: 'student',
 }
 
 describe('auth store', () => {
@@ -83,5 +79,18 @@ describe('auth store', () => {
     expect(store.user).toBeNull()
     expect(store.sessionError).toBe('Tidak dapat terhubung ke server.')
     expect(store.initialized).toBe(true)
+  })
+
+  it('clears the authenticated user after logout', async () => {
+    vi.mocked(authApi.getCurrentUser).mockResolvedValue(authenticatedUser)
+    vi.mocked(authApi.logout).mockResolvedValue()
+    const store = useAuthStore()
+    await store.restoreSession()
+
+    await store.signOut()
+
+    expect(authApi.logout).toHaveBeenCalledOnce()
+    expect(store.user).toBeNull()
+    expect(store.isAuthenticated).toBe(false)
   })
 })

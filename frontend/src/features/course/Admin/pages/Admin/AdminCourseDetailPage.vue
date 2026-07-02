@@ -8,7 +8,7 @@ import CourseDetailHero from "../../components/CourseDetailHero.vue";
 import CourseFormModal from "../../components/CourseFormModal.vue";
 import CourseLessonList from "../../components/CourseLessonList.vue";
 import { useAdminCourseDetail } from "../../composables/useAdminCourseDetail";
-import type { CourseFormValues } from "../../../types/course.types.ts";
+import type { CourseFormValues } from "@/features/course/Admin/types/course.types.ts";
 
 const route = useRoute();
 const router = useRouter();

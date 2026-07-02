@@ -1,6 +1,6 @@
 <?php
 
-use App\Features\Auth\Http\Controllers\UserAuthController;
+use App\Features\User\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 it('routes user login requests to validation instead of returning not found', function () {
@@ -12,5 +12,9 @@ it('routes user login requests to validation instead of returning not found', fu
 it('routes authenticated user profile requests to the auth controller', function () {
     $route = Route::getRoutes()->getByName('api.v1.auth.me');
 
-    expect($route?->getActionName())->toBe(UserAuthController::class.'@me');
+    expect($route?->getActionName())->toBe(UserProfileController::class.'@show');
+});
+
+it('protects logout requests with Sanctum authentication', function () {
+    $this->postJson('/api/v1/auth/logout')->assertUnauthorized();
 });

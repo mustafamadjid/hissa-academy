@@ -45,9 +45,11 @@ it('returns the same invalid credential response when the email does not exist',
         ->assertJsonPath('message', 'Email atau password salah.');
 });
 
-it('returns the authenticated Sanctum user with role data', function () {
+it('returns only the authenticated user profile fields', function () {
     $user = User::factory()->create([
         'email' => 'student@example.com',
+        'full_name' => 'Student Example',
+        'avatar_url' => 'https://example.com/avatar.png',
     ]);
 
     Sanctum::actingAs($user);
@@ -55,15 +57,17 @@ it('returns the authenticated Sanctum user with role data', function () {
     $response = $this->getJson('/api/v1/auth/me');
 
     $response->assertOk()
-        ->assertJsonPath('email', 'student@example.com')
-        ->assertJsonStructure([
-            'id',
-            'email',
-            'role' => [
-                'id',
-                'name',
-            ],
-        ])
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('message', 'Profil user berhasil diambil.')
+        ->assertJsonPath('data.email', 'student@example.com')
+        ->assertJsonPath('data.full_name', 'Student Example')
+        ->assertJsonPath('data.avatar_url', 'https://example.com/avatar.png')
+        ->assertJsonPath('data.role', 'user')
+        ->assertJsonCount(4, 'data')
         ->assertJsonMissingPath('password')
         ->assertJsonMissingPath('remember_token');
+});
+
+it('rejects unauthenticated user profile requests', function () {
+    $this->getJson('/api/v1/auth/me')->assertUnauthorized();
 });

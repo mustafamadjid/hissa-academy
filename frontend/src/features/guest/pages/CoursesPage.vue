@@ -21,7 +21,7 @@ import { ref } from "vue";
 import heroImage from "@/assets/images/landing-page/landing-3.png";
 import GuestLayout from "@/layouts/Guest/GuestLayout.vue";
 
-import CourseCatalogCard from "../components/CourseCatalogCard.vue";
+import CourseCatalogCard from "@/features/course/Student/components/CourseCatalogCard.vue";
 import { useCourseCatalog } from "../../course/Student/composables/useCourseCatalog.ts";
 
 const {
