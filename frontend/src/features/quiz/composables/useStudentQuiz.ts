@@ -1,6 +1,16 @@
 import { computed, readonly, ref } from "vue";
-import { createStudentQuizAttempt, getStudentCourseQuiz, submitStudentQuizAttempt } from "../api/student-quiz.api";
-import type { QuizSubmitResultDto, StudentQuizAttemptDto, StudentQuizDto } from "../types/student-quiz.types";
+import {
+  createStudentQuizAttempt,
+  getStudentCourseQuiz,
+  getStudentQuizAccess,
+  submitStudentQuizAttempt,
+} from "../api/student-quiz.api";
+import type {
+  QuizAccessReason,
+  QuizSubmitResultDto,
+  StudentQuizAttemptDto,
+  StudentQuizDto,
+} from "../types/student-quiz.types";
 
 export function useStudentQuiz() {
   const quiz = ref<StudentQuizDto | null>(null);
@@ -11,6 +21,7 @@ export function useStudentQuiz() {
   const isSubmitting = ref(false);
   const error = ref<string | null>(null);
   const isLocked = ref(false);
+  const lockReason = ref<QuizAccessReason>(null);
   const allAnswered = computed(() =>
     Boolean(attempt.value?.questions.length) &&
     attempt.value!.questions.every((question) => Boolean(answers.value[question.uuid])),
@@ -20,10 +31,22 @@ export function useStudentQuiz() {
     isLoading.value = true;
     error.value = null;
     isLocked.value = false;
+    lockReason.value = null;
+    quiz.value = null;
     attempt.value = null;
     result.value = null;
     answers.value = {};
     try {
+      const access = (await getStudentQuizAccess(courseId)).data;
+
+      if (!access.can_access || access.quizPassed) {
+        isLocked.value = true;
+        lockReason.value = access.quizPassed
+          ? "QUIZ_ALREADY_PASSED"
+          : access.reason;
+        return;
+      }
+
       quiz.value = (await getStudentCourseQuiz(courseId)).data;
     } catch (caught: unknown) {
       error.value = caught instanceof Error ? caught.message : "Quiz gagal dimuat.";
@@ -71,5 +94,20 @@ export function useStudentQuiz() {
     }
   }
 
-  return { quiz: readonly(quiz), attempt: readonly(attempt), result: readonly(result), answers: readonly(answers), isLoading: readonly(isLoading), isSubmitting: readonly(isSubmitting), error: readonly(error), isLocked: readonly(isLocked), allAnswered, loadQuiz, startAttempt, selectAnswer, submitAttempt };
+  return {
+    quiz: readonly(quiz),
+    attempt: readonly(attempt),
+    result: readonly(result),
+    answers: readonly(answers),
+    isLoading: readonly(isLoading),
+    isSubmitting: readonly(isSubmitting),
+    error: readonly(error),
+    isLocked: readonly(isLocked),
+    lockReason: readonly(lockReason),
+    allAnswered,
+    loadQuiz,
+    startAttempt,
+    selectAnswer,
+    submitAttempt,
+  };
 }

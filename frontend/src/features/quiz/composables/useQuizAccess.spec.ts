@@ -18,6 +18,7 @@ describe("useQuizAccess", () => {
         course_uuid: "course-id",
         quiz_uuid: "quiz-id",
         can_access: false,
+        quizPassed: false,
         required_lessons: 2,
         completed_required_lessons: 1,
         reason: "REQUIRED_LESSONS_NOT_COMPLETED",
@@ -29,6 +30,7 @@ describe("useQuizAccess", () => {
 
     expect(getStudentQuizAccess).toHaveBeenCalledWith("course-id");
     expect(quizAccess.value?.can_access).toBe(false);
+    expect(quizAccess.value?.quizPassed).toBe(false);
     expect(quizAccess.value?.completed_required_lessons).toBe(1);
     expect(quizAccessError.value).toBeNull();
   });

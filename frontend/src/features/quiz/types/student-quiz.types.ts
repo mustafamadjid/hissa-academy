@@ -8,10 +8,16 @@ export interface QuizAccessDto {
   course_uuid: string;
   quiz_uuid: string;
   can_access: boolean;
+  quizPassed: boolean;
   required_lessons: number;
   completed_required_lessons: number;
-  reason: "REQUIRED_LESSONS_NOT_COMPLETED" | null;
+  reason: QuizAccessReason;
 }
+
+export type QuizAccessReason =
+  | "REQUIRED_LESSONS_NOT_COMPLETED"
+  | "QUIZ_ALREADY_PASSED"
+  | null;
 
 export interface StudentQuizDto {
   uuid: string;

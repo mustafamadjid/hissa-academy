@@ -53,6 +53,23 @@ const shouldShowCertificateButton = computed(
     quizAccess.value.required_lessons ===
       quizAccess.value.completed_required_lessons,
 );
+const canOpenQuiz = computed(
+  () =>
+    quizAccess.value?.can_access === true &&
+    quizAccess.value.quizPassed === false,
+);
+const quizAccessMessage = computed(() => {
+  if (isQuizAccessLoading.value) return "Memeriksa akses quiz...";
+  if (quizAccessError.value) return quizAccessError.value;
+  if (quizAccess.value?.quizPassed) {
+    return "Anda sudah lulus quiz akhir course ini.";
+  }
+  if (canOpenQuiz.value) {
+    return "Semua lesson wajib selesai. Quiz siap dikerjakan.";
+  }
+
+  return "Selesaikan semua lesson wajib untuk membuka quiz.";
+});
 
 watch(shouldShowCertificateButton, (shouldShow) => {
   if (shouldShow) {
@@ -240,18 +257,19 @@ onMounted(() => {
               :lessons="course.lessons"
               :authenticated="authStore.isAuthenticated"
               :course-id="course.id"
-              :quiz-unlocked="quizAccess?.can_access ?? null"
+              :quiz-unlocked="quizAccess ? canOpenQuiz : null"
             />
             <section v-if="authStore.isAuthenticated" class="rounded-2xl border border-primary-green/15 bg-white p-6 shadow-sm">
               <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
                 <div class="grid size-12 shrink-0 place-items-center rounded-xl bg-primary-green/10">
                   <LoaderCircle v-if="isQuizAccessLoading" class="size-6 animate-spin text-primary-green" />
-                  <ClipboardCheck v-else-if="quizAccess?.can_access" class="size-6 text-primary-green" />
+                  <CheckCircle2 v-else-if="quizAccess?.quizPassed" class="size-6 text-primary-green" />
+                  <ClipboardCheck v-else-if="canOpenQuiz" class="size-6 text-primary-green" />
                   <LockKeyhole v-else class="size-6 text-neutral-medium" />
                 </div>
-                <div class="flex-1"><h2 class="font-bold">Quiz akhir course</h2><p class="mt-1 text-sm text-neutral-medium">{{ isQuizAccessLoading ? "Memeriksa akses quiz..." : quizAccessError ? quizAccessError : quizAccess?.can_access ? "Semua lesson wajib selesai. Quiz siap dikerjakan." : "Selesaikan semua lesson wajib untuk membuka quiz." }}</p></div>
-                <RouterLink v-if="quizAccess?.can_access" :to="{ name: 'student-course-quiz', params: { courseId: course.id } }" class="rounded-xl bg-primary-dark-green px-5 py-3 text-center text-sm font-bold text-white">Buka Quiz</RouterLink>
-                <span v-else class="rounded-xl bg-surface-dim px-5 py-3 text-center text-sm font-semibold text-neutral-medium">{{ isQuizAccessLoading ? "Memeriksa..." : quizAccessError ? "Tidak tersedia" : "Terkunci" }}</span>
+                <div class="flex-1"><h2 class="font-bold">Quiz akhir course</h2><p class="mt-1 text-sm text-neutral-medium">{{ quizAccessMessage }}</p></div>
+                <RouterLink v-if="canOpenQuiz" :to="{ name: 'student-course-quiz', params: { courseId: course.id } }" class="rounded-xl bg-primary-dark-green px-5 py-3 text-center text-sm font-bold text-white">Buka Quiz</RouterLink>
+                <span v-else class="rounded-xl bg-surface-dim px-5 py-3 text-center text-sm font-semibold text-neutral-medium">{{ isQuizAccessLoading ? "Memeriksa..." : quizAccessError ? "Tidak tersedia" : quizAccess?.quizPassed ? "Sudah Lulus" : "Terkunci" }}</span>
               </div>
             </section>
             <section

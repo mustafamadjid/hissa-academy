@@ -27,6 +27,7 @@ const {
   isSubmitting,
   error,
   isLocked,
+  lockReason,
   allAnswered,
   loadQuiz,
   startAttempt,
@@ -88,12 +89,18 @@ watch(courseId, (id) => void loadQuiz(id), { immediate: true });
               <LockKeyhole class="size-8 text-orange-600" />
             </div>
             <h1 class="mt-6 text-2xl font-bold text-slate-900">
-              Quiz Belum Terbuka
+              {{
+                lockReason === "QUIZ_ALREADY_PASSED"
+                  ? "Quiz Sudah Diselesaikan"
+                  : "Quiz Belum Terbuka"
+              }}
             </h1>
             <p class="mx-auto mt-3 max-w-md text-slate-500">
               {{
                 error ??
-                "Selesaikan semua materi video dan tugas sebelum dapat mengakses evaluasi akhir ini."
+                (lockReason === "QUIZ_ALREADY_PASSED"
+                  ? "Anda sudah lulus quiz akhir course ini. Quiz tidak dapat dikerjakan kembali."
+                  : "Selesaikan semua lesson wajib sebelum dapat mengakses evaluasi akhir ini.")
               }}
             </p>
             <RouterLink
