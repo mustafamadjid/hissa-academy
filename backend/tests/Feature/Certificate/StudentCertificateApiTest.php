@@ -57,12 +57,12 @@ it('returns certificate detail only for the owner', function () {
         ->assertJsonPath('data.uuid', $certificate->id)
         ->assertJsonPath('data.participant_name', 'Alya Student')
         ->assertJsonPath('data.course.name', 'Laravel Basics')
-        ->assertJsonPath('data.download_url', "/api/v1/certificates/{$certificate->id}/download")
+        ->assertJsonPath('data.download_url', url("/api/v1/certificates/{$certificate->id}/file"))
         ->assertJsonMissingPath('data.pdf_path');
 });
 
 it('streams a certificate pdf from private storage for the owner', function () {
-    Storage::fake('local');
+    Storage::fake('private');
 
     $student = studentCertificateUser('Alya Student');
     $this->actingAs($student);
@@ -70,9 +70,9 @@ it('streams a certificate pdf from private storage for the owner', function () {
         'user_id' => $student->id,
         'certificate_number' => 'HISSA-2026-DOWNLOAD',
         'status' => 'issued',
-        'pdf_path' => 'certificates/HISSA-2026-DOWNLOAD.pdf',
+        'pdf_path' => 'certificates/11111111-1111-4111-8111-111111111111.pdf',
     ]);
-    Storage::disk('local')->put($certificate->pdf_path, '%PDF-1.4 test certificate');
+    Storage::disk('private')->put($certificate->pdf_path, '%PDF-1.4 test certificate');
 
     $response = $this->get("/api/v1/certificates/{$certificate->id}/download");
 

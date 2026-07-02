@@ -1,14 +1,17 @@
 <?php
 
+use App\Features\Certificate\Models\Certificate;
 use App\Features\Course\Models\Course;
 use App\Features\Lesson\Models\Lesson;
 use App\Features\Quizz\Models\Answer;
 use App\Features\Quizz\Models\Question;
+use App\Features\Quizz\Models\QuizAttempt;
 use App\Features\Quizz\Models\Quizz;
 use App\Features\User\Models\Role;
 use App\Features\User\Models\User;
 use App\Features\UserProgress\Models\UserProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -17,9 +20,13 @@ it('reports quiz access from completion of required lessons only', function () {
     $this->actingAs($student);
 
     $course = Course::factory()->create(['status' => 'active']);
-    $completedLesson = Lesson::factory()->create(['course_id' => $course->id, 'is_required' => true]);
-    Lesson::factory()->create(['course_id' => $course->id, 'is_required' => true]);
-    Lesson::factory()->create(['course_id' => $course->id, 'is_required' => false]);
+    $completedLesson = Lesson::factory()->create([
+        'course_id' => $course->id,
+        'is_required' => true,
+        'position' => 1,
+    ]);
+    Lesson::factory()->create(['course_id' => $course->id, 'is_required' => true, 'position' => 2]);
+    Lesson::factory()->create(['course_id' => $course->id, 'is_required' => false, 'position' => 3]);
     UserProgress::factory()->create([
         'user_id' => $student->id,
         'lesson_id' => $completedLesson->id,
@@ -35,6 +42,7 @@ it('reports quiz access from completion of required lessons only', function () {
         ->assertJsonPath('data.course_uuid', $course->id)
         ->assertJsonPath('data.quiz_uuid', $quiz->id)
         ->assertJsonPath('data.can_access', false)
+        ->assertJsonPath('data.quizPassed', false)
         ->assertJsonPath('data.required_lessons', 2)
         ->assertJsonPath('data.completed_required_lessons', 1)
         ->assertJsonPath('data.reason', 'REQUIRED_LESSONS_NOT_COMPLETED');
@@ -49,9 +57,30 @@ it('allows quiz access when every required lesson is completed', function () {
     $this->getJson("/api/v1/courses/{$quiz->course_id}/quiz/access")
         ->assertOk()
         ->assertJsonPath('data.can_access', true)
+        ->assertJsonPath('data.quizPassed', false)
         ->assertJsonPath('data.required_lessons', 1)
         ->assertJsonPath('data.completed_required_lessons', 1)
         ->assertJsonPath('data.reason', null);
+});
+
+it('denies quiz access when the student has passed a quiz in the course', function () {
+    $student = studentQuizUser();
+    $this->actingAs($student);
+
+    [$quiz] = studentQuizReadyQuiz($student);
+    QuizAttempt::factory()->create([
+        'user_id' => $student->id,
+        'quizz_id' => $quiz->id,
+        'status' => 'passed',
+        'score' => 100,
+        'submitted_at' => now(),
+    ]);
+
+    $this->getJson("/api/v1/courses/{$quiz->course_id}/quiz/access")
+        ->assertOk()
+        ->assertJsonPath('data.can_access', false)
+        ->assertJsonPath('data.quizPassed', true)
+        ->assertJsonPath('data.reason', 'QUIZ_ALREADY_PASSED');
 });
 
 it('validates the course uuid used to check quiz access', function () {
@@ -173,6 +202,7 @@ it('never exposes quiz questions after required lesson access becomes locked', f
 });
 
 it('submits a passing attempt and issues a certificate', function () {
+    Storage::fake('private');
     $student = studentQuizUser();
     $this->actingAs($student);
     $this->travelTo(now()->startOfSecond());
@@ -198,13 +228,21 @@ it('submits a passing attempt and issues a certificate', function () {
         ->assertJsonPath('data.status', 'passed')
         ->assertJsonPath('data.result.correct_answers', 1)
         ->assertJsonPath('data.result.incorrect_answers', 0)
-        ->assertJsonPath('data.certificate.status', 'issued');
+        ->assertJsonPath('data.certificate.status', 'issued')
+        ->assertJsonPath(
+            'data.certificate.file_url',
+            url('/api/v1/certificates/'.$response->json('data.certificate.uuid').'/file'),
+        );
 
     $this->assertDatabaseHas('certificates', [
         'user_id' => $student->id,
         'course_id' => $quiz->course_id,
         'status' => 'issued',
     ]);
+
+    $certificate = Certificate::query()->where('user_id', $student->id)->firstOrFail();
+    Storage::disk('private')->assertExists($certificate->pdf_path);
+    expect(Storage::disk('private')->get($certificate->pdf_path))->toStartWith('%PDF-');
 });
 
 it('submits a failing attempt without issuing a certificate and rejects resubmission', function () {
@@ -249,6 +287,37 @@ it('submits a failing attempt without issuing a certificate and rejects resubmis
     ])->assertStatus(409)
         ->assertJsonPath('success', false)
         ->assertJsonPath('error.code', 'ATTEMPT_ALREADY_SUBMITTED');
+});
+
+it('rejects submit when the student has already passed a quiz in the course', function () {
+    $student = studentQuizUser();
+    $this->actingAs($student);
+
+    [$quiz, $question, $correctAnswer] = studentQuizReadyQuiz($student);
+    $attempt = QuizAttempt::factory()->create([
+        'user_id' => $student->id,
+        'quizz_id' => $quiz->id,
+        'status' => 'in_progress',
+    ]);
+    QuizAttempt::factory()->create([
+        'user_id' => $student->id,
+        'quizz_id' => $quiz->id,
+        'status' => 'passed',
+        'score' => 100,
+        'submitted_at' => now(),
+    ]);
+
+    $this->postJson("/api/v1/quiz-attempts/{$attempt->id}/submit", [
+        'answers' => [[
+            'question_uuid' => $question->id,
+            'selected_option_uuid' => $correctAnswer->id,
+        ]],
+    ])->assertStatus(409)
+        ->assertJsonPath('success', false)
+        ->assertJsonPath('message', 'Quiz pada course ini sudah dinyatakan lulus.')
+        ->assertJsonPath('error.code', 'QUIZ_ALREADY_PASSED');
+
+    expect($attempt->refresh()->status)->toBe('in_progress');
 });
 
 function studentQuizUser(): User

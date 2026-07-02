@@ -11,10 +11,11 @@ import {
   ClipboardCheck,
   LockKeyhole,
 } from "@lucide/vue";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { useAuthStore } from "@/features/auth/stores/auth.store";
+import { useCourseCertificate } from "@/features/certificate/composables/useCourseCertificate";
 import { useQuizAccess } from "@/features/quiz/composables/useQuizAccess";
 import GuestLayout from "@/layouts/Guest/GuestLayout.vue";
 
@@ -31,6 +32,12 @@ const {
   quizAccessError,
   fetchQuizAccess,
 } = useQuizAccess();
+const {
+  certificate,
+  isCertificateLoading,
+  certificateError,
+  fetchCourseCertificate,
+} = useCourseCertificate();
 
 const courseId = computed(() => String(route.params.courseId));
 const firstAvailableLesson = computed(() =>
@@ -39,6 +46,19 @@ const firstAvailableLesson = computed(() =>
     .sort((left, right) => left.position - right.position)
     .find((lesson) => !lesson.is_locked),
 );
+const shouldShowCertificateButton = computed(
+  () =>
+    authStore.isAuthenticated &&
+    quizAccess.value !== null &&
+    quizAccess.value.required_lessons ===
+      quizAccess.value.completed_required_lessons,
+);
+
+watch(shouldShowCertificateButton, (shouldShow) => {
+  if (shouldShow) {
+    void fetchCourseCertificate(courseId.value);
+  }
+});
 
 async function startCourse(): Promise<void> {
   if (!authStore.isAuthenticated) {
@@ -232,6 +252,51 @@ onMounted(() => {
                 <div class="flex-1"><h2 class="font-bold">Quiz akhir course</h2><p class="mt-1 text-sm text-neutral-medium">{{ isQuizAccessLoading ? "Memeriksa akses quiz..." : quizAccessError ? quizAccessError : quizAccess?.can_access ? "Semua lesson wajib selesai. Quiz siap dikerjakan." : "Selesaikan semua lesson wajib untuk membuka quiz." }}</p></div>
                 <RouterLink v-if="quizAccess?.can_access" :to="{ name: 'student-course-quiz', params: { courseId: course.id } }" class="rounded-xl bg-primary-dark-green px-5 py-3 text-center text-sm font-bold text-white">Buka Quiz</RouterLink>
                 <span v-else class="rounded-xl bg-surface-dim px-5 py-3 text-center text-sm font-semibold text-neutral-medium">{{ isQuizAccessLoading ? "Memeriksa..." : quizAccessError ? "Tidak tersedia" : "Terkunci" }}</span>
+              </div>
+            </section>
+            <section
+              v-if="shouldShowCertificateButton"
+              class="rounded-2xl border border-primary-green/15 bg-white p-6 shadow-sm"
+            >
+              <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <div class="grid size-12 shrink-0 place-items-center rounded-xl bg-lime-accent/30">
+                  <LoaderCircle
+                    v-if="isCertificateLoading"
+                    class="size-6 animate-spin text-primary-green"
+                  />
+                  <Award v-else class="size-6 text-primary-dark-green" />
+                </div>
+                <div class="flex-1">
+                  <h2 class="font-bold">Sertifikat course</h2>
+                  <p class="mt-1 text-sm text-neutral-medium">
+                    {{
+                      isCertificateLoading
+                        ? "Memeriksa sertifikat..."
+                        : certificateError
+                          ? certificateError
+                          : certificate
+                            ? "Sertifikat kelulusan Anda sudah tersedia."
+                            : "Lulus quiz dengan nilai minimum untuk membuka sertifikat."
+                    }}
+                  </p>
+                </div>
+                <a
+                  v-if="certificate"
+                  :href="certificate.download_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="rounded-xl bg-primary-dark-green px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-primary-green focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-green"
+                >
+                  Lihat Sertifikat
+                </a>
+                <button
+                  v-else
+                  type="button"
+                  disabled
+                  class="cursor-not-allowed rounded-xl bg-surface-dim px-5 py-3 text-center text-sm font-semibold text-neutral-medium opacity-70"
+                >
+                  Lihat Sertifikat
+                </button>
               </div>
             </section>
           </div>

@@ -27,10 +27,11 @@ final class StudentCertificateResource extends JsonResource
                 'name' => $this->course?->course_name,
             ],
             'issued_at' => $this->issued_at?->toISOString(),
+            'valid_until' => $this->issued_at?->copy()->addYears(3)->toISOString(),
             'status' => $this->status,
             'participant_name' => $this->when($this->withDetail, $this->user?->full_name),
             'verification_url' => $this->when($this->withDetail, url('/verify/'.$this->certificate_number)),
-            'download_url' => $this->when($this->withDetail, "/api/v1/certificates/{$this->id}/download"),
+            'download_url' => $this->when($this->withDetail, url("/api/v1/certificates/{$this->id}/file")),
         ], fn ($value): bool => ! $value instanceof \Illuminate\Http\Resources\MissingValue);
     }
 }

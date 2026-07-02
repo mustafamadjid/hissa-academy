@@ -69,11 +69,11 @@ final class StudentCertificateController
         try {
             $certificate = $certificateService->detail($certificate_uuid, $request->user());
 
-            if ($certificate === null || ! Storage::disk('local')->exists($certificate->pdf_path)) {
+            if ($certificate === null || ! Storage::disk('private')->exists($certificate->pdf_path)) {
                 return $this->notFound();
             }
 
-            return Storage::disk('local')->download(
+            return Storage::disk('private')->download(
                 $certificate->pdf_path,
                 $certificate->certificate_number.'.pdf',
                 ['Content-Type' => 'application/pdf'],

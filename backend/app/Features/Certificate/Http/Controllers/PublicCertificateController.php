@@ -8,6 +8,8 @@ use App\Features\Certificate\Services\PublicCertificateService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class PublicCertificateController
 {
@@ -50,6 +52,34 @@ final class PublicCertificateController
         }
 
         return $view;
+    }
+
+    public function file(
+        string $certificate_uuid,
+        PublicCertificateService $certificateService,
+    ): JsonResponse|StreamedResponse {
+        try {
+            $certificate = $certificateService->findFileByUuid($certificate_uuid);
+
+            if ($certificate === null || ! Storage::disk('private')->exists($certificate->pdf_path)) {
+                return $this->notFound();
+            }
+
+            return Storage::disk('private')->response(
+                $certificate->pdf_path,
+                'certificate.pdf',
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="certificate.pdf"',
+                    'X-Content-Type-Options' => 'nosniff',
+                    'Cache-Control' => 'private, no-store, max-age=0',
+                ],
+            );
+        } catch (CertificateOperationException $exception) {
+            report($exception);
+
+            return $this->serverError($exception->getMessage());
+        }
     }
 
     private function notFound(): JsonResponse

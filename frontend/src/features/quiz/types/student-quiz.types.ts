@@ -61,7 +61,14 @@ export interface QuizSubmitResultDto {
   started_at: string;
   submitted_at: string;
   result: { correct_answers: number; incorrect_answers: number; total_questions: number };
-  certificate: { uuid: string; certificate_number: string; status: string } | null;
+  certificate: {
+    uuid: string;
+    certificate_number: string;
+    status: "issued" | "revoked";
+    issued_at: string;
+    valid_until: string;
+    file_url: string;
+  } | null;
 }
 
 export interface StudentQuizResponse<T> {

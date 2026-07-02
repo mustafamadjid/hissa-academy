@@ -8,6 +8,7 @@ final readonly class QuizAccessData
         public string $courseUuid,
         public string $quizUuid,
         public bool $canAccess,
+        public bool $quizPassed,
         public int $requiredLessons,
         public int $completedRequiredLessons,
         public ?string $reason,

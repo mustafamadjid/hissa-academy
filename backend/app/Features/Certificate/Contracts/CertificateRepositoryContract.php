@@ -4,6 +4,8 @@ namespace App\Features\Certificate\Contracts;
 
 use App\Features\Certificate\DTOs\CertificateListData;
 use App\Features\Certificate\Models\Certificate;
+use App\Features\Course\Models\Course;
+use App\Features\User\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface CertificateRepositoryContract
@@ -17,6 +19,12 @@ interface CertificateRepositoryContract
     public function findByCertificateNumber(string $certificateNumber): ?Certificate;
 
     public function findForUser(string $certificateId, string $userId): ?Certificate;
+
+    public function findIssuedForUserAndCourse(string $userId, string $courseId): ?Certificate;
+
+    public function createIssued(User $user, Course $course): Certificate;
+
+    public function updatePdfPath(Certificate $certificate, string $pdfPath): Certificate;
 
     public function revoke(Certificate $certificate, string $reason): Certificate;
 }

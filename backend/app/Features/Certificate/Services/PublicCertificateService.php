@@ -27,4 +27,31 @@ final class PublicCertificateService
             throw new CertificateOperationException('Gagal mengambil status sertifikat.', $exception);
         }
     }
+
+    public function findFileByUuid(string $certificateUuid): ?Certificate
+    {
+        try {
+            $certificate = $this->certificateRepository->findById($certificateUuid);
+
+            if ($certificate === null || ! $this->isSafeDocumentPath($certificate->pdf_path)) {
+                return null;
+            }
+
+            return $certificate;
+        } catch (Throwable $exception) {
+            Log::error('Gagal mengakses file sertifikat.', [
+                'certificate_uuid' => $certificateUuid,
+                'exception' => $exception,
+            ]);
+
+            throw new CertificateOperationException('Gagal mengakses file sertifikat.', $exception);
+        }
+    }
+
+    private function isSafeDocumentPath(mixed $path): bool
+    {
+        return is_string($path)
+            && ! str_contains($path, "\0")
+            && preg_match('/\Acertificates\/[0-9a-f-]{36}\.pdf\z/i', $path) === 1;
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Features\Quizz\Services;
 
-use App\Features\Certificate\Models\Certificate;
+use App\Features\Certificate\Contracts\CertificateGeneratorContract;
 use App\Features\Quizz\Contracts\StudentQuizRepositoryContract;
 use App\Features\Quizz\DTOs\QuizAccessData;
 use App\Features\Quizz\DTOs\SubmitQuizAttemptData;
@@ -15,7 +15,6 @@ use App\Features\UserProgress\Contracts\UserProgressRepositoryContract;
 use App\Features\UserProgress\Enums\LessonProgressStatus;
 use App\Helper\EnsureStudentForService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 final class StudentQuizService
@@ -24,6 +23,7 @@ final class StudentQuizService
         private readonly StudentQuizRepositoryContract $quizRepository,
         private readonly UserProgressRepositoryContract $progressRepository,
         private readonly EnsureStudentForService $ensureStudent,
+        private readonly CertificateGeneratorContract $certificateGenerator,
     ) {}
 
     public function quizAccess(string $courseId, ?User $actor): ?QuizAccessData
@@ -37,17 +37,24 @@ final class StudentQuizService
                 return null;
             }
 
+            $quizPassed = $this->quizRepository->hasPassedCourseQuiz($actor->id, $courseId);
             $requiredLessonIds = $this->requiredLessonIds($quiz);
             $completedRequiredLessons = $this->completedRequiredLessonCount($actor, $requiredLessonIds);
-            $canAccess = $completedRequiredLessons === count($requiredLessonIds);
+            $requiredLessonsCompleted = $completedRequiredLessons === count($requiredLessonIds);
+            $canAccess = $requiredLessonsCompleted && ! $quizPassed;
 
             return new QuizAccessData(
                 courseUuid: $courseId,
                 quizUuid: $quiz->id,
                 canAccess: $canAccess,
+                quizPassed: $quizPassed,
                 requiredLessons: count($requiredLessonIds),
                 completedRequiredLessons: $completedRequiredLessons,
-                reason: $canAccess ? null : 'REQUIRED_LESSONS_NOT_COMPLETED',
+                reason: match (true) {
+                    $quizPassed => 'QUIZ_ALREADY_PASSED',
+                    ! $requiredLessonsCompleted => 'REQUIRED_LESSONS_NOT_COMPLETED',
+                    default => null,
+                },
             );
         } catch (Throwable $exception) {
             Log::error('Gagal mengecek akses quiz.', [
@@ -178,6 +185,14 @@ final class StudentQuizService
                 return null;
             }
 
+            if ($this->quizRepository->hasPassedCourseQuiz($actor->id, $attempt->quiz->course_id)) {
+                throw new StudentQuizOperationException(
+                    'Quiz pada course ini sudah dinyatakan lulus.',
+                    409,
+                    'QUIZ_ALREADY_PASSED',
+                );
+            }
+
             $this->ensureQuizUnlocked($attempt->quiz, $actor);
 
             if ($attempt->status !== 'in_progress') {
@@ -221,7 +236,9 @@ final class StudentQuizService
             $minimumScore = (int) $attempt->quiz->course->minimum_score;
             $status = $score >= $minimumScore ? 'passed' : 'failed';
             $submittedAttempt = $this->quizRepository->submitAttempt($attempt, $score, $status, $answerRows);
-            $certificate = $status === 'passed' ? $this->issueCertificate($actor, $submittedAttempt) : null;
+            $certificate = $status === 'passed'
+                ? $this->certificateGenerator->issue($actor, $submittedAttempt->quiz->course)
+                : null;
             $totalQuestions = $questions->count();
 
             return [
@@ -270,7 +287,7 @@ final class StudentQuizService
         return $quiz->course?->lessons?->pluck('id')->values()->all() ?? [];
     }
 
-    /** @param array<int, string> $requiredLessonIds */
+    /** @param  array<int, string>  $requiredLessonIds */
     private function completedRequiredLessonCount(User $actor, array $requiredLessonIds): int
     {
         if ($requiredLessonIds === []) {
@@ -281,28 +298,5 @@ final class StudentQuizService
             ->forUserLessons($actor->id, $requiredLessonIds)
             ->filter(fn ($progress): bool => $progress->status === LessonProgressStatus::COMPLETED->value)
             ->count();
-    }
-
-    private function issueCertificate(User $actor, QuizAttempt $attempt): Certificate
-    {
-        $course = $attempt->quiz->course;
-        $existingCertificate = $this->quizRepository->findIssuedCertificate($actor->id, $course->id);
-
-        if ($existingCertificate !== null) {
-            return $existingCertificate;
-        }
-
-        $certificate = $this->quizRepository->createCertificate(
-            $actor,
-            $course,
-            'certificates/'.strtolower($attempt->id).'.pdf',
-        );
-
-        Storage::disk('local')->put(
-            $certificate->pdf_path,
-            "%PDF-1.4\n% HISSA certificate {$certificate->certificate_number}\n",
-        );
-
-        return $certificate;
     }
 }

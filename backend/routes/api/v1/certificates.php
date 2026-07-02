@@ -14,6 +14,11 @@ Route::prefix('public/certificates')
             ->name('show');
     });
 
+Route::get('certificates/{certificate_uuid}/file', [PublicCertificateController::class, 'file'])
+    ->whereUuid('certificate_uuid')
+    ->middleware('throttle:api')
+    ->name('certificates.file');
+
 Route::prefix('certificates')
     ->name('certificates.')
     ->middleware(['auth:sanctum', 'role:' . UserRole::STUDENT->value, 'throttle:api'])

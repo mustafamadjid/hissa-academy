@@ -1084,6 +1084,9 @@ paths:
                           format: uuid
                         can_access:
                           type: boolean
+                        quizPassed:
+                          type: boolean
+                          description: True jika user sudah memiliki quiz berstatus passed pada course ini.
                         required_lessons:
                           type: integer
                           minimum: 0
@@ -1097,6 +1100,7 @@ paths:
                       - course_uuid
                       - quiz_uuid
                       - can_access
+                      - quizPassed
                       - required_lessons
                       - completed_required_lessons
                       - reason
@@ -1217,7 +1221,11 @@ paths:
                     data:
                       $ref: '#/components/schemas/QuizSubmitResult'
         '409':
-          $ref: '#/components/responses/AttemptAlreadySubmitted'
+          description: Attempt sudah disubmit atau user sudah lulus quiz pada course ini.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           $ref: '#/components/responses/Unauthenticated'
         '403':
@@ -1319,6 +1327,36 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/v1/certificates/{certificate_uuid}/file:
+    get:
+      tags:
+      - Public Verification
+      summary: Access certificate PDF by UUID
+      description: Mengirim PDF secara inline tanpa mengekspos path atau nama file internal.
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/CertificateUuid'
+      responses:
+        '200':
+          description: Binary PDF certificate.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: inline; filename="certificate.pdf"
+            X-Content-Type-Options:
+              schema:
+                type: string
+              example: nosniff
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/CertificateFileNotFound'
         '500':
           $ref: '#/components/responses/ServerError'
   /verify/{certificate_number}:
@@ -2860,7 +2898,7 @@ components:
     CertificateStatus:
       type: string
       enum:
-      - valid
+      - issued
       - revoked
     CertificateSummary:
       type: object
@@ -2869,6 +2907,7 @@ components:
       - certificate_number
       - course
       - issued_at
+      - valid_until
       - status
       properties:
         uuid:
@@ -2879,6 +2918,9 @@ components:
         course:
           $ref: '#/components/schemas/EmbeddedCourse'
         issued_at:
+          type: string
+          format: date-time
+        valid_until:
           type: string
           format: date-time
         status:
@@ -2906,6 +2948,8 @@ components:
       - certificate_number
       - status
       - issued_at
+      - valid_until
+      - file_url
       properties:
         uuid:
           type: string
@@ -2917,6 +2961,12 @@ components:
         issued_at:
           type: string
           format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        file_url:
+          type: string
+          format: uri
     PublicCertificateVerification:
       type: object
       required:

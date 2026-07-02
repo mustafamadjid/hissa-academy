@@ -17,6 +17,8 @@ final class CertificateIssuedResource extends JsonResource
             'certificate_number' => $this->certificate_number,
             'status' => $this->status,
             'issued_at' => $this->issued_at?->toISOString(),
+            'valid_until' => $this->issued_at?->copy()->addYears(3)->toISOString(),
+            'file_url' => url("/api/v1/certificates/{$this->id}/file"),
         ];
     }
 }

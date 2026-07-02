@@ -2,8 +2,6 @@
 
 namespace App\Features\Quizz\Repositories;
 
-use App\Features\Certificate\Models\Certificate;
-use App\Features\Course\Models\Course;
 use App\Features\Quizz\Contracts\StudentQuizRepositoryContract;
 use App\Features\Quizz\Models\Answer;
 use App\Features\Quizz\Models\QuizAttempt;
@@ -53,6 +51,18 @@ final class EloquentStudentQuizRepository implements StudentQuizRepositoryContra
             ->first();
     }
 
+    public function hasPassedCourseQuiz(string $userId, string $courseId): bool
+    {
+        return QuizAttempt::query()
+            ->where('user_id', $userId)
+            ->where('status', 'passed')
+            ->whereHas(
+                'quiz',
+                fn ($query) => $query->where('course_id', $courseId),
+            )
+            ->exists();
+    }
+
     public function createAttempt(User $user, Quizz $quiz): QuizAttempt
     {
         return QuizAttempt::query()
@@ -99,28 +109,5 @@ final class EloquentStudentQuizRepository implements StudentQuizRepositoryContra
 
             return $attempt->refresh()->load(['quiz.course', 'quiz.questions.answers', 'answers']);
         });
-    }
-
-    public function findIssuedCertificate(string $userId, string $courseId): ?Certificate
-    {
-        return Certificate::query()
-            ->with('course')
-            ->where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->where('status', 'issued')
-            ->first();
-    }
-
-    public function createCertificate(User $user, Course $course, string $pdfPath): Certificate
-    {
-        return Certificate::query()
-            ->create([
-                'user_id' => $user->id,
-                'course_id' => $course->id,
-                'issued_at' => now(),
-                'status' => 'issued',
-                'pdf_path' => $pdfPath,
-            ])
-            ->load('course');
     }
 }

@@ -2,8 +2,6 @@
 
 namespace App\Features\Quizz\Contracts;
 
-use App\Features\Certificate\Models\Certificate;
-use App\Features\Course\Models\Course;
 use App\Features\Quizz\Models\Answer;
 use App\Features\Quizz\Models\QuizAttempt;
 use App\Features\Quizz\Models\Quizz;
@@ -19,6 +17,8 @@ interface StudentQuizRepositoryContract
 
     public function findActiveAttempt(string $userId, string $quizId): ?QuizAttempt;
 
+    public function hasPassedCourseQuiz(string $userId, string $courseId): bool;
+
     public function createAttempt(User $user, Quizz $quiz): QuizAttempt;
 
     public function findAttemptForUser(string $attemptId, string $userId): ?QuizAttempt;
@@ -29,8 +29,4 @@ interface StudentQuizRepositoryContract
      * @param  array<int, array{question_id: string, answer_option_id: string, is_correct: bool}>  $answers
      */
     public function submitAttempt(QuizAttempt $attempt, int $score, string $status, array $answers): QuizAttempt;
-
-    public function findIssuedCertificate(string $userId, string $courseId): ?Certificate;
-
-    public function createCertificate(User $user, Course $course, string $pdfPath): Certificate;
 }
